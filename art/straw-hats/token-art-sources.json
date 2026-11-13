@@ -1,0 +1,52 @@
+[
+  {
+    "card": "op_flower_hand",
+    "source": "exec-5b2de6a2-5f04-49e9-8644-2d4a1ab0d5b1.png",
+    "squarePrepared": true
+  },
+  {
+    "card": "op_flower_guard",
+    "source": "exec-5b2de6a2-5f04-49e9-8644-2d4a1ab0d5b1.png",
+    "squarePrepared": true
+  },
+  {
+    "card": "op_crewman",
+    "source": "10-Photo-10.jpg",
+    "squarePrepared": false
+  },
+  {
+    "card": "op_fleet_pirate",
+    "source": "3-Photo-3.jpg",
+    "squarePrepared": false
+  },
+  {
+    "card": "op_gear2",
+    "source": "4-Photo-4.jpg",
+    "squarePrepared": false
+  },
+  {
+    "card": "op_gear3",
+    "source": "5-Photo-5.jpg",
+    "squarePrepared": false
+  },
+  {
+    "card": "op_bounceman",
+    "source": "6-Photo-6.jpg",
+    "squarePrepared": false
+  },
+  {
+    "card": "op_snakeman",
+    "source": "7-Photo-7.jpg",
+    "squarePrepared": false
+  },
+  {
+    "card": "op_gear5",
+    "source": "8-Photo-8.jpg",
+    "squarePrepared": false
+  },
+  {
+    "card": "op_rubber_toy",
+    "source": "9-Photo-9.jpg",
+    "squarePrepared": false
+  }
+]
