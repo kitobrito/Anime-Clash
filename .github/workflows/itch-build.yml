@@ -1,0 +1,73 @@
+# Builds the itch.io upload on every change to main and publishes it on the "itch-latest" release:
+# https://github.com/kitobrito/Anime-Clash/releases/download/itch-latest/Anime-Clash-itch.zip
+# With the BUTLER_API_KEY secret set in
+# the repository's Settings, it also pushes the game to fadeawaytoday.itch.io/anime-clash (channel "html5").
+name: itch build
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: itch-push-html5
+  cancel-in-progress: false
+jobs:
+  zip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run the gameplay tests
+        run: npm test
+      - name: Build the itch.io zip
+        run: |
+          python3 tools/package-anime.py
+          n=$(unzip -Z1 dist/Anime-Clash-itch.zip | wc -l)
+          echo "Files in zip: $n"
+          if [ "$n" -gt 1000 ]; then echo "::error::itch.io allows at most 1000 files; this zip has $n"; exit 1; fi
+      - name: Publish to the itch-latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete itch-latest --yes --cleanup-tag || true
+          gh release create itch-latest dist/Anime-Clash-itch.zip \
+            --title "itch.io build (latest)" \
+            --notes "Ready to upload to itch.io (index.html at the top of the zip). Rebuilt automatically from main ($GITHUB_SHA)." \
+            --target "$GITHUB_SHA"
+      - name: Push to itch.io with butler (html5)
+        # Turns on once the repository has the BUTLER_API_KEY secret and ITCH_GAME variable;
+        # until then this step just says so and the build still succeeds.
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+          ITCH_GAME: ${{ vars.ITCH_GAME || 'fadeawaytoday/anime-clash' }}
+        run: |
+          if [ -z "$BUTLER_API_KEY" ] || [ -z "$ITCH_GAME" ]; then
+            echo "::notice::itch.io publishing is off: add the BUTLER_API_KEY secret and the ITCH_GAME variable to turn it on."
+            echo "itch.io publishing is off (BUTLER_API_KEY secret or ITCH_GAME variable missing), so nothing was pushed." > butler-report.txt
+            gh release upload itch-latest butler-report.txt --clobber
+            exit 0
+          fi
+          curl -sSL -o butler.zip https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default
+          unzip -q -o butler.zip -d butler-bin && chmod +x butler-bin/butler
+          mkdir -p itch-dir && unzip -q -o dist/Anime-Clash-itch.zip -d itch-dir
+          {
+            echo "target: $ITCH_GAME:html5"
+            for try in $(seq 1 25); do
+              rc=0; out=$(./butler-bin/butler push itch-dir "$ITCH_GAME:html5" --userversion "$(date -u +%Y.%m.%d)-${GITHUB_SHA::7}" 2>&1) || rc=$?
+              echo "$out"
+              if [ "$rc" = 0 ] || ! grep -q "still processing" <<<"$out"; then break; fi
+              echo "itch.io is still processing the previous build; trying again in 60 s ($try/25)"
+              sleep 60
+            done
+            echo "push exit code: $rc"
+            ./butler-bin/butler status "$ITCH_GAME" 2>&1 || true
+          } | tee butler-report.txt
+          gh release upload itch-latest butler-report.txt --clobber
+          grep -q "push exit code: 0" butler-report.txt
