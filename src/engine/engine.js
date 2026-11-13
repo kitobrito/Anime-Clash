@@ -1,0 +1,1407 @@
+import { activateGear, applyOnePieceAction, canGear, initOnePieceMinion, isLuffy, onePieceCanReact, onePieceHealBlocked, onePieceIncomingDamage, onePieceLegalActions, silenceRemovable } from './one-piece.js';
+import { checkRasengan } from './naruto.js';
+import { checkDeck } from '../cards/deck-check.js';
+// Game engine: state creation, the action API, and the step machine.
+//
+// Every player action is turned into a queue of serializable steps. run()
+// drains the queue until it is empty, the game ends, or a step pauses for a
+// player decision (a Quick Play reaction window or a Discover choice). Because
+// the paused queue is part of state, a game can be saved, cloned, or sent over
+// the network at any point, including mid-resolution.
+
+import {
+  addToHand, costOf, createHero, dealDamage, drawCards, effectiveAttack, emit, findCharacter,
+  hasKeyword, hooks, log, loseHealth, minionsInOrder, nameOf, opponentOf, pushFront, removeKeyword,
+  summonMinion, isBurning, manaFor, payMana, radiationOf,
+  isShark, huntsPrey, heal, heroOf, isDarkOrUndead,
+  sinkCircles, descentDepth, heroSpellCost, initDescent, maxHand,
+  traceFx, allKeywords, isOffTurn, payQuickPlay, quickPlayBudget, quickPlayCost,
+  tagsOf, usesCorpses,
+} from './core.js';
+import { EFFECT_OPS, addKeyword, applyBuff, canShift, chainLightning, checkCondition, dropHeroWeapon, burstShell, growShells, processBeyond, resolveEffect, surfaceMinion, takeHide, tickChestbursters, tickThawing } from './effects.js';
+import { factionHook } from './factions.js';
+import { allCards, getCard, hasCard, restoreCustomCards } from './registry.js';
+import { pickRandom, shuffle } from './rng.js';
+import { DEFAULT_QUICK_PLAY_WINDOWS, DEFAULT_RULES, NEGATIVE_KEYWORDS } from './rules.js';
+import { matchFilter, resolveSelector, targetCandidates } from './targeting.js';
+import { dispatchEvent, enterBattlefield, selfTriggerSteps } from './triggers.js';
+
+// ---- Setup ---------------------------------------------------------------
+
+// Hero Spells sit outside the 30-card decks: each picked faction contributes its own.
+// Ice Age: The Great Freeze comes at the end of every 4th turn of the Ice Age player.
+export const GREAT_FREEZE_EVERY = 4;
+function greatFreeze(state, p) {
+  const pl = state.players[p];
+  log(state, `❄ THE GREAT FREEZE! Everything without Thick Fur is Frozen.`);
+  for (const c of state.players.flatMap((x) => [x.hero, ...x.board])) {
+    if (c.health <= 0 || c.destroyed || hasKeyword(c, 'Thick Fur')) continue;
+    addKeyword(c, 'Frozen', false, state);
+  }
+  pl.greatFreeze.turns = 0;
+  emit(state, { type: 'greatFreeze', player: p });
+}
+
+// altHeroSpell: a Hero Spell that only replaces the usual one (The Great Chasm Beyond's The Chasm).
+export function heroSpellsFor(factions) {
+  return allCards().filter((c) => c.heroSpell && !c.altHeroSpell && factions.includes(c.faction));
+}
+
+// Passive Hero Spell query retained for inherited engine utilities.
+const passiveOnly = new Map();
+export function hasPassiveHeroSpell(faction) {
+  if (!passiveOnly.has(faction)) {
+    const own = heroSpellsFor([faction]);
+    passiveOnly.set(faction, own.length > 0 && own.every((c) => c.passive));
+  }
+  return passiveOnly.get(faction);
+}
+
+// players: [{ name, factions: [a, b], deck: [cardId, ...] }, ...]
+// The deck is the two factions' fixed decks combined (see cards/index.js buildDeck).
+export function createGame({ players, seed = Date.now(), rules = {} }) {
+  if (!Array.isArray(players) || players.length !== 2) throw new Error('A match needs two players.');
+  for (const cfg of players) {
+    const result = checkDeck({format:'single', factions:cfg.factions, deck:cfg.deck});
+    if (result.error) throw new Error(result.error);
+  }
+  const state = {
+    rules: { ...DEFAULT_RULES, ...rules },
+    rng: seed | 0,
+    nextUid: 1,
+    turn: 0,
+    activePlayer: 0,
+    players: [],
+    queue: [],
+    buffer: [],
+    pending: null,
+    gameOver: false,
+    winner: null,
+    log: [],
+  };
+  players.forEach((cfg, p) => {
+    // A card that has since been removed from the game (Meteorite) is dropped from an old deck.
+    const deckIds = cfg.deck.filter((id) => hasCard(id));
+    const heroSpells = heroSpellsFor(cfg.factions);
+    const pl = {
+      index: p, name: cfg.name ?? `Player ${p + 1}`, factions: [...cfg.factions],
+      hero: createHero(state, p),
+      mana: { current: 0, max: 0, bonusNextTurn: 0 }, turnsTaken: 0,
+      heroSpells: heroSpells.filter((c) => !c.passive).map((c) => ({ cardId: c.id, uses: 0 })),
+      passives: heroSpells.filter((c) => c.passive).map((c) => c.id),
+      // Ice Age: the Great Freeze comes every GREAT_FREEZE_EVERY of this player's turns.
+      greatFreeze: cfg.factions.includes('Ice Age') ? { turns: 0, every: GREAT_FREEZE_EVERY } : null,
+      extinction: cfg.factions.includes('Dinosaurs')
+        ? { turns: 0, nextAt: state.rules.extinctionEvery, mode: 'normal', shower: 0 } : null,
+      deck: deckIds.map((cardId) => ({ uid: state.nextUid++, cardId, owner: p })),
+      hand: [], traps: [], board: [], graveyard: [], fatigue: 0,
+      corpses: 0, deadZombies: [], zombieDeathsThisTurn: 0, // Zombies
+    };
+    if (cfg.factions.includes('Monster Hunter')) { pl.hero.dualWield = true; pl.hero.auraKeywords = []; }
+    shuffle(state, pl.deck);
+    state.players.push(pl);
+    // Bees: the game starts with The Living Hive on the board.
+    if (cfg.factions.includes('Bees')) {
+      const hive = summonMinion(state, p, 'the_hive', { silent: true });
+      if (hive) hive.sick = false;
+    }
+  });
+  // Demons: the Descent through the Circles of Hell starts at the surface.
+  initDescent(state);
+  drawCards(state, 0, state.rules.startingHandFirst);
+  drawCards(state, 1, state.rules.startingHandSecond);
+  if (state.rules.openingHandHelp) [0, 1].forEach((p) => ensureEarlyPlay(state, p));
+  state.buffer = [];
+  // The battlefield both players see: one realm picked at random from either player's realms. It
+  // comes from the seed (not the game's random stream), so the same match always shows the same board.
+  const realms = [...new Set(state.players.flatMap((pl) => pl.factions ?? []))];
+  if (realms.length) state.boardRealm = realms[Math.abs(Math.imul(seed | 0, 2654435761) >>> 7) % realms.length];
+  // Mulligan: Player 1, then Player 2, may swap opening cards before turn 1.
+  if (state.rules.mulligan) state.pending = { type: 'mulligan', player: 0 };
+  else beginGame(state);
+  run(state);
+  return state;
+}
+
+// Opening-hand help: a starting hand with no minion costing openingHandHelp or less
+// swaps its most expensive card for a random cheap minion from the deck, so nobody
+// starts with nothing to put on the board. Same rule for both players.
+function ensureEarlyPlay(state, p) {
+  const pl = state.players[p];
+  const cheap = (c) => { const card = getCard(c.cardId); return card.type === 'minion' && card.cost <= state.rules.openingHandHelp; };
+  if (!pl.hand.length || pl.hand.some(cheap)) return;
+  const incoming = pickRandom(state, pl.deck.filter(cheap));
+  if (!incoming) return;
+  const out = pl.hand.reduce((a, b) => (getCard(b.cardId).cost > getCard(a.cardId).cost ? b : a));
+  pl.hand[pl.hand.indexOf(out)] = incoming;
+  pl.deck[pl.deck.indexOf(incoming)] = out;
+  shuffle(state, pl.deck);
+}
+
+// After the mulligan: going second gets the Mana Potion (an extra card was already
+// dealt), then Player 1's first turn starts.
+function beginGame(state) {
+  state.queue.push({ kind: 'startTurn', player: 0 });
+  const potions = state.rules.secondPlayerPotions;
+  if (potions?.length > 1) {
+    // Going second: pick one potion (resolves before Player 1's first turn).
+    state.pending = {
+      type: 'choice', player: 1, prompt: 'Going second: choose a potion', resolve: 'effects', ctx: { controller: 1 },
+      options: potions.map((cardId) => ({ cardId, label: getCard(cardId).name, effects: [{ op: 'addToHand', cardId }] })),
+    };
+  } else if (state.rules.coinCardId) {
+    addToHand(state, 1, state.rules.coinCardId);
+  }
+}
+
+// Every subset of a hand, as sorted uid lists (a hand of 4 → 16 options).
+function subsets(uids) {
+  return uids.reduce((acc, uid) => [...acc, ...acc.map((s) => [...s, uid])], [[]]).map((s) => s.sort((a, b) => a - b));
+}
+
+// Replacements are drawn first, then the swapped cards are shuffled back,
+// so a swapped card can't come straight back.
+function mulligan(state, { player: p, replace }) {
+  const pl = state.players[p];
+  const out = pl.hand.filter((c) => replace.includes(c.uid));
+  pl.hand = pl.hand.filter((c) => !replace.includes(c.uid));
+  drawCards(state, p, out.length);
+  pl.deck.push(...out);
+  shuffle(state, pl.deck);
+  state.buffer = [];
+  log(state, `${pl.name} ${out.length ? `replaces ${out.length} card${out.length === 1 ? '' : 's'}` : 'keeps their hand'}.`);
+  state.pending = p === 0 ? { type: 'mulligan', player: 1 } : null;
+  if (!state.pending) beginGame(state);
+}
+
+// ---- Legal actions -------------------------------------------------------
+
+function canAttack(c, state) {
+  if (c.petrified?.length) return false;
+  if (c.devilFruit?.kind === 'hie' && c.fruitLastAttackOwnTurn === state.players[c.controller].turnsTaken - 1) return false;
+  if (c.kind === 'minion' && getCard(c.cardId).cantAttack) return false; // The Living Hive
+  if ((c.animeBlocks?.length ?? 0) > 0 || effectiveAttack(c) <= 0 || hasKeyword(c, 'Frozen') || c.cantAttackThisTurn || c.encased > 0) return false;
+  // attacksPerTurn: a minion that attacks more than once each turn by itself (the Three-Headed Necrohydra).
+  const perTurn = c.kind === 'minion'
+    ? (!c.textLost && getCard(c.cardId).attacksPerTurn) || (hasKeyword(c, 'Twin Strike') ? 2 : 1)
+    : (c.weapon?.attacksPerTurn ?? (hasKeyword(c, 'Twin Strike') || c.dualWieldStrikeUsed ? 2 : 1));
+  // The Hunt Master: extra Hero attacks each turn (auraBonusAttacks, from applyAuras).
+  if (c.attacksThisTurn >= perTurn + (c.bonusAttacks ?? 0) + (c.kind === 'hero' ? c.auraBonusAttacks ?? 0 : 0)) return false;
+  // Frenzy of the Pack: a Shark that just arrived may still attack Marked Prey.
+  if (c.kind === 'minion' && c.sick && !hasKeyword(c, 'Charge') && !hasKeyword(c, 'Rush') && !c.preyRush) return false;
+  return true;
+}
+
+export function attackTargets(state, p) {
+  const enemy = state.players[opponentOf(p)];
+  // A minion sealed in ice (Thawing) can't be attacked.
+  const visible = enemy.board.filter((m) => !hasKeyword(m, 'Stealth') && !(m.encased > 0));
+  const taunts = visible.filter((m) => hasKeyword(m, 'Taunt'));
+  if (taunts.length) return taunts.map((m) => m.uid);
+  // Hive Enforcer: while it's in play, the enemy Hive can't be attacked.
+  const guarded = enemy.board.some((m) => getCard(m.cardId).guardsHive && m.health > 0 && !m.destroyed);
+  // Fruit Ninjas (Kagehana): a Hero in Stealth can't be attacked either.
+  const heroes = hasKeyword(enemy.hero, 'Stealth') ? [] : [enemy.hero.uid];
+  return [...heroes, ...visible.filter((m) => !(guarded && getCard(m.cardId).isHive)).map((m) => m.uid)];
+}
+
+// Rush: on the turn it arrives, a minion may attack only minions.
+function defendersFor(state, c) {
+  let all = attackTargets(state, c.controller);
+  if (c.ignoreTauntTurn === state.turn || c.cardId === 'op_snakeman' && !c.textLost) {
+    const enemy = state.players[1 - c.controller];
+    all = [enemy.hero, ...enemy.board].filter(m => !hasKeyword(m, 'Stealth') && m.health > 0 && !m.destroyed).map(m => m.uid);
+  }
+  if (c.kind === 'hero') {
+    const weapon = c.weapon2 && c.attacksThisTurn % 2 === 1 ? c.weapon2 : c.weapon;
+    if (weapon?.heroOnly) all = all.filter((id) => findCharacter(state, id)?.kind === 'hero');
+  }
+  // Sharks: Marked Prey can't hide from a Shark (Blood in the Water): a Shark can attack it through
+  // Stealth and past Taunt (and its hits ignore the Prey's Evade, core.js dealDamage). Goblin Shark
+  // also sees every other Stealthed minion, but those still wait behind Taunt.
+  if (isShark(c)) {
+    const enemy = state.players[opponentOf(c.controller)];
+    const taunts = enemy.board.some((m) => hasKeyword(m, 'Taunt') && !hasKeyword(m, 'Stealth'));
+    const seesAll = getCard(c.cardId).seesStealth;
+    const hunting = huntsPrey(state, c.controller);
+    const prey = hunting ? enemy.board.filter((m) => m.prey && m.health > 0 && !m.destroyed && !(m.encased > 0)) : [];
+    const hidden = seesAll && !taunts ? enemy.board.filter((m) => hasKeyword(m, 'Stealth') && !(m.encased > 0)) : [];
+    all = [...new Set([...all, ...prey.map((m) => m.uid), ...hidden.map((m) => m.uid)])];
+  }
+  // Frenzy of the Pack: an arriving Shark may only attack Marked Prey.
+  if (c.kind === 'minion' && c.sick && c.preyRush && !hasKeyword(c, 'Charge') && !hasKeyword(c, 'Rush')) {
+    return all.filter((id) => findCharacter(state, id)?.prey);
+  }
+  // Feralized Survivor: can't attack Heroes.
+  if (c.kind === 'minion' && getCard(c.cardId).cantAttackHeroes) all = all.filter((id) => findCharacter(state, id).kind === 'minion');
+  if (c.kind === 'minion' && c.sick && !hasKeyword(c, 'Charge')) {
+    return all.filter((id) => findCharacter(state, id).kind === 'minion');
+  }
+  return all;
+}
+
+// type: 'play' | 'quickPlay' | 'heroSpell'; `id` is the hand uid (or Hero Spell card id).
+function playOptions(state, p, card, id, type) {
+  const base = { type, player: p, card: id };
+  if (!card.target) return [base];
+  const bySpell = card.type === 'spell'; // Elusive minions can't be chosen by enemy spells
+  const first = targetCandidates(state, card.target, p, null, bySpell);
+  if (!first.length) return card.type === 'minion' ? [base] : [];
+  const out = [];
+  for (const t of first) {
+    if (!card.target2) { out.push({ ...base, target: t }); continue; }
+    const second = targetCandidates(state, card.target2, p, t, bySpell);
+    // target2Optional: still playable with no second target (Sinkhole with no friendly minion).
+    if (!second.length && card.target2Optional) out.push({ ...base, target: t });
+    for (const t2 of second) out.push({ ...base, target: t, target2: t2 });
+  }
+  return out;
+}
+
+function hasRoom(state, p, card) {
+  const pl = state.players[p];
+  if (card.requiresCorpses && (pl.corpses ?? 0) < card.requiresCorpses) return false;
+  // playIf: a condition that must hold to play the card (Bees: "your Hive is in play").
+  if (card.playIf && !checkCondition(state, card.playIf, { controller: p })) return false;
+  if ((card.type === 'minion' || card.needsBoardSpace) && pl.board.length >= state.rules.maxBoardSize) return false;
+  if (card.type === 'trap' && pl.traps.length >= state.rules.maxTraps) return false;
+  return true;
+}
+
+function eligibleQuickPlays(state, p, windowName, windowCtx) {
+  const out = [];
+  for (const inst of state.players[p].hand) {
+    const card = getCard(inst.cardId);
+    const qp = card.quickPlay;
+    if (!qp || !(qp.windows ?? DEFAULT_QUICK_PLAY_WINDOWS).includes(windowName)) continue;
+    if (!onePieceCanReact(state, card, p, windowCtx?.event, windowName)) continue;
+    // Off-turn: left-over Mana plus next turn's (minus what is already borrowed), at the reflex discount.
+    const budget = quickPlayBudget(state, p);
+    const affordable = budget == null ? costOf(state, inst) <= manaFor(state.players[p], card) : quickPlayCost(state, inst) <= budget;
+    if (!affordable || !hasRoom(state, p, card)) continue;
+    if (!matchFilter(state, qp.filter, { controller: p, self: inst.uid, event: windowCtx?.event })) continue;
+    out.push(...playOptions(state, p, card, inst.uid, 'quickPlay'));
+  }
+  return out;
+}
+
+// Lycanthropes: what pressing Transform costs this player (1, less with Elder of the First Moon).
+export const TRANSFORM_COST = 1;
+export function transformCost(state, p) {
+  const off = state.players[p].board.filter((m) => !m.textLost && m.health > 0 && !m.destroyed).reduce((t, m) => t + (getCard(m.cardId).shiftDiscount ?? 0), 0);
+  return Math.max(0, TRANSFORM_COST - off);
+}
+
+export function getLegalActions(state) {
+  // Created cards (Hybrids, variants) are looked up from the global registry;
+  // make sure it holds *this* game's versions (AI search branches can create
+  // different cards under the same id).
+  restoreCustomCards(state);
+  if (state.gameOver) return [];
+  const pend = state.pending;
+  if (pend?.type === 'reaction') {
+    return [{ type: 'pass', player: pend.player }, ...eligibleQuickPlays(state, pend.player, pend.window, pend.ctx)];
+  }
+  if (pend?.type === 'choice') {
+    return pend.options.map((_, index) => ({ type: 'choose', player: pend.player, index }));
+  }
+  if (pend?.type === 'mulligan') {
+    return subsets(state.players[pend.player].hand.map((c) => c.uid)).map((replace) => ({ type: 'mulligan', player: pend.player, replace }));
+  }
+  const p = state.activePlayer;
+  const pl = state.players[p];
+  const actions = [{ type: 'endTurn', player: p }, ...onePieceLegalActions(state, p)];
+  for (const inst of pl.hand) {
+    const card = getCard(inst.cardId);
+    if (!card.reactionOnly && costOf(state, inst) <= manaFor(pl, card) && hasRoom(state, p, card)) actions.push(...playOptions(state, p, card, inst.uid, 'play'));
+  }
+  for (const hs of pl.heroSpells) {
+    const card = getCard(hs.cardId);
+    if (hs.uses < state.rules.heroSpellUsesPerTurn && !(hs.cooldown > 0) && heroSpellCost(state, card, pl) <= manaFor(pl, card) && hasRoom(state, p, card)) {
+      actions.push(...playOptions(state, p, card, hs.cardId, 'heroSpell'));
+    }
+  }
+  // Lycanthropes: Transform each of your Lycanthropes once per turn for Mana.
+  const shiftCost = transformCost(state, p);
+  for (const m of pl.board) {
+    if (canShift(m) && m.shiftedTurn !== state.turn && shiftCost <= manaFor(pl, getCard(m.cardId))) actions.push({ type: 'transform', player: p, minion: m.uid });
+  }
+  for (const c of [pl.hero, ...pl.board]) {
+    if (c.kind === 'hero') {
+      const weapon = c.weapon2 && c.attacksThisTurn % 2 === 1 ? c.weapon2 : c.weapon;
+      if (weapon?.cooldownUntilTurn > pl.turnsTaken) continue;
+    }
+    if (!canAttack(c, state)) continue;
+    for (const d of defendersFor(state, c)) actions.push({ type: 'attack', player: p, attacker: c.uid, defender: d });
+  }
+  return actions;
+}
+
+const KEY_FIELDS = ['type', 'player', 'card', 'target', 'target2', 'attacker', 'defender', 'index', 'minion'];
+const actionKey = (a) => [...KEY_FIELDS.map((k) => a[k] ?? ''), [...(a.replace ?? [])].sort((x, y) => x - y).join(',')].join('|');
+
+export function isLegal(state, action) {
+  const key = actionKey(action);
+  return getLegalActions(state).some((a) => actionKey(a) === key);
+}
+
+// For moves that arrive over the network: the matching legal action (built by the
+// engine, so no extra or malformed fields get through), or null if it isn't legal.
+// A minion's landing spot is the one extra allowed, as a small integer.
+export function legalMatch(state, action) {
+  if (!action || typeof action !== 'object') return null;
+  const key = actionKey(action);
+  const found = getLegalActions(state).find((a) => actionKey(a) === key);
+  if (!found) return null;
+  const pos = action.position;
+  return Number.isInteger(pos) && pos >= 0 && pos <= 10 ? { ...found, position: pos } : { ...found };
+}
+
+// ---- Applying actions ----------------------------------------------------
+
+export function applyAction(state, action) {
+  restoreCustomCards(state);
+  if (!isLegal(state, action)) throw new Error(`Illegal action: ${JSON.stringify(action)}`);
+  switch (action.type) {
+    case 'gearShift':
+    case 'lawSwap':
+      applyOnePieceAction(state, action);
+      break;
+    case 'endTurn':
+      state.queue.push({ kind: 'endTurn', player: action.player });
+      break;
+    case 'play':
+      playCard(state, action);
+      break;
+    case 'heroSpell':
+      castHeroSpell(state, action);
+      break;
+    case 'attack':
+      declareAttack(state, action);
+      break;
+    case 'transform':
+      transformAction(state, action);
+      break;
+    case 'pass':
+      state.pending = null;
+      break;
+    case 'quickPlay':
+      quickPlay(state, action);
+      break;
+    case 'choose':
+      resolveChoice(state, action);
+      break;
+    case 'mulligan':
+      mulligan(state, action);
+      break;
+  }
+  run(state);
+  return state;
+}
+
+function takeFromHand(state, p, uid) {
+  const pl = state.players[p];
+  const idx = pl.hand.findIndex((c) => c.uid === uid);
+  const [inst] = pl.hand.splice(idx, 1);
+  payMana(pl, getCard(inst.cardId), costOf(state, inst));
+  if (getCard(inst.cardId).upgrade) pl.upgradeDiscount = 0; // Chief Engineer's discount is used up
+  if ((getCard(inst.cardId).tribes ?? []).includes('Demon')) pl.demonDiscount = null; // Infernal Contract's is too
+  return { inst, card: getCard(inst.cardId) };
+}
+
+function spellSteps(card, ctx, event, p) {
+  return [
+    { kind: 'event', event },
+    // Acidic: Living Flask listens for spells that apply Corrosion.
+    ...(card.corrodes ? [{ kind: 'event', event: { type: 'corrosiveSpell', player: p, cardId: card.id } }] : []),
+    { kind: 'window', name: 'cardPlayed', priority: opponentOf(p), ctx: { event } },
+    ...card.effects.map((effect) => ({ kind: 'effect', effect, ctx })),
+    { kind: 'deaths' },
+  ];
+}
+
+
+// `position` (optional): where a minion lands on the board, 0 = far left.
+// It isn't part of legality: any slot is allowed and it's clamped to the board.
+function playCard(state, { player: p, card: uid, target, target2, position }) {
+  const pl = state.players[p];
+  const { inst, card } = takeFromHand(state, p, uid);
+  const chosen = target ?? null;
+  const chosen2 = target2 ?? null;
+  log(state, `${pl.name} plays ${card.type === 'trap' ? 'a Trap' : card.name}.`);
+  // Fruit Ninjas: Combo — this card counts as a Combo if you played another card earlier this turn.
+  if (pl.playedTurn !== state.turn) { pl.playedTurn = state.turn; pl.playedCount = 0; }
+  const combo = pl.playedCount > 0;
+  pl.playedCount += 1;
+
+  // Brood Architect: the first Egg you play each turn costs less.
+  if ((card.tribes ?? []).includes('Egg')) pl.eggPlayedTurn = state.turn;
+  if (card.type === 'minion') {
+    // The minion takes its board slot immediately; its abilities resolve
+    // after the opponent's reaction window.
+    const slot = Number.isInteger(position) ? Math.max(0, Math.min(position, pl.board.length)) : undefined;
+    const m = summonMinion(state, p, card.id, { silent: true, position: slot, fromHand: true });
+    if (!m) { pl.graveyard.push(inst); return; } // it couldn't enter play (a Queen who has already died)
+    // Void (Singularity): a Pulled minion that Collapsed keeps the keyword it was given.
+    for (const k of inst.bonusKeywords ?? []) addKeyword(m, k, false, state);
+    const event = { type: 'cardPlayed', source: m.uid, player: p, cardId: card.id, cardType: 'minion', target: chosen, pulled: !!inst.pulled };
+    const ctx = { self: m.uid, controller: p, chosen, chosen2, combo };
+    const steps = [
+      { kind: 'event', event },
+      { kind: 'window', name: 'cardPlayed', priority: opponentOf(p), ctx: { event } },
+    ];
+    steps.push({ kind: 'selfTrigger', uid: m.uid, on: 'battlecry', ctx });
+    if (state.rules.summonTriggersOnPlay) steps.push({ kind: 'selfTrigger', uid: m.uid, on: 'summon', ctx });
+    steps.push({ kind: 'event', event: { type: 'minionSummoned', source: m.uid, player: p } }, { kind: 'deaths' });
+    state.queue.push(...steps);
+  } else if (card.type === 'spell') {
+    // The Fourth Circle (Greed): casting a spell costs 1 Health (not a paid cost: it doesn't drive the Descent).
+    if (descentDepth(state) === 4) { log(state, '💰 Greed takes its due.'); loseHealth(state, pl.hero.uid, 1, { paid: false }); }
+    const event = { type: 'cardPlayed', source: inst.uid, player: p, cardId: card.id, cardType: 'spell', target: chosen, pulled: !!inst.pulled };
+    state.queue.push(...spellSteps(card, { self: inst.uid, controller: p, chosen, chosen2, cardId: card.id, combo }, event, p));
+    pl.graveyard.push(inst);
+  } else if (card.type === 'trap') {
+    pl.traps.push(inst);
+    // The event is public but reveals only that a Trap was set.
+    state.queue.push({ kind: 'event', event: { type: 'cardPlayed', source: inst.uid, player: p, cardType: 'trap', hidden: true, pulled: !!inst.pulled } });
+  }
+}
+
+function castHeroSpell(state, { player: p, card: cardId, target, target2 }) {
+  const pl = state.players[p];
+  const card = getCard(cardId);
+  const hs = pl.heroSpells.find((h) => h.cardId === cardId);
+  hs.uses += 1;
+  if (card.cooldown) hs.cooldown = card.cooldown;
+  const spent = heroSpellCost(state, card, pl);
+  payMana(pl, card, spent);
+  log(state, `${pl.name} casts Hero Spell ${card.name}.`);
+  const self = state.nextUid++;
+  const event = { type: 'cardPlayed', source: self, player: p, cardId, cardType: 'spell', heroSpell: true, target: target ?? null };
+  state.queue.push(...spellSteps(card, { self, controller: p, chosen: target ?? null, chosen2: target2 ?? null, cardId, spent }, event, p));
+}
+
+function quickPlay(state, { player: p, card: uid, target, target2 }) {
+  const pl = state.players[p];
+  const windowState = state.pending;
+  state.pending = null;
+  let inst, card, borrowed = 0;
+  if (isOffTurn(state, p)) {
+    // Paid from left-over Mana, then borrowed from next turn (core.js payQuickPlay), at the reflex discount.
+    const idx = pl.hand.findIndex((c) => c.uid === uid);
+    inst = pl.hand[idx];
+    card = getCard(inst.cardId);
+    const cost = quickPlayCost(state, inst);
+    pl.hand.splice(idx, 1);
+    borrowed = payQuickPlay(state, p, cost);
+  } else ({ inst, card } = takeFromHand(state, p, uid));
+  log(state, `${pl.name} responds with ${card.name} (Quick Play)!${borrowed ? ` (${borrowed} Mana borrowed from next turn)` : ''}`);
+  pl.graveyard.push(inst);
+  const ctx = { self: inst.uid, controller: p, chosen: target ?? null, chosen2: target2 ?? null, cardId: card.id, event: windowState.ctx?.event };
+  pushFront(state, [
+    { kind:'event', event:{type:'cardPlayed', source:inst.uid, player:p, cardId:card.id, cardType:'spell', quickPlay:true} },
+    ...(card.corrodes ? [{ kind: 'event', event: { type: 'corrosiveSpell', player: p, cardId: card.id } }] : []),
+    ...card.effects.map((effect) => ({ kind: 'effect', effect, ctx })),
+    { kind: 'deaths' },
+    // Priority passes back: the other player may answer the Quick Play.
+    { kind: 'window', name: windowState.window, priority: opponentOf(p), ctx: windowState.ctx },
+  ]);
+}
+
+function resolveChoice(state, { player: p, index }) {
+  const choice = state.pending;
+  state.pending = null;
+  const opt = choice.options[index];
+  if (choice.resolve === 'effects') {
+    log(state, `${state.players[p].name} chooses: ${opt.label}.`);
+    pushFront(state, [...opt.effects.map((effect) => ({ kind: 'effect', effect, ctx: choice.ctx })), { kind: 'deaths' }]);
+  }
+  if (choice.resolve === 'deckToHand') {
+    const pl = state.players[p];
+    const i = pl.deck.findIndex((c) => c.uid === opt.uid);
+    if (i >= 0) {
+      const [inst] = pl.deck.splice(i, 1);
+      if (choice.costMod) inst.costMod = (inst.costMod ?? 0) + choice.costMod; // Fusions: "it costs (N) less"
+      if (pl.hand.length < maxHand(state)) pl.hand.push(inst);
+      else pl.graveyard.push(inst);
+      log(state, `${pl.name} Discovers ${getCard(inst.cardId).name}.`);
+    }
+  }
+}
+
+// Sharks: extra damage when a Shark attacks. Blood in the Water gives +2 against Marked Prey
+// once per turn; Pack Hunters +1 each; Mako Sprinter doubles it; Goblin Shark +1 to wounded minions.
+function huntDamage(state, a, d, dmg) {
+  // Sky Piercer Drill Unit: extra damage when it attacks the enemy Hero.
+  if (a.kind === 'minion' && d.kind === 'hero') dmg += getCard(a.cardId).heroAttackBonus ?? 0;
+  // Monster Hunter prey-specific weapons are stronger only against their named faction.
+  if (a.kind === 'hero' && d.kind === 'minion') {
+    const weapon = a.weaponUsedSlot === 2 ? a.weapon2 : a.weapon;
+    const dc = getCard(d.cardId);
+    const hits = weapon?.prey ? dc?.faction === weapon.prey
+      : weapon?.preyTribe ? (d.tribes ?? dc?.tribes ?? []).includes(weapon.preyTribe)
+      : weapon?.preyTag ? tagsOf(d).includes(weapon.preyTag) : false;
+    // The Monster Codex: this turn the bonus works against every realm.
+    const codex = weapon?.preyBonus && state.players[a.controller].codexTurn === state.turn;
+    if (hits || codex) dmg += weapon.preyBonus ?? 0;
+  }
+  if (a.kind !== 'minion' || d.kind !== 'minion') return dmg;
+  const card = getCard(a.cardId);
+  if (d.prey && isShark(a)) {
+    const pl = state.players[a.controller];
+    if (huntsPrey(state, a.controller) && pl.preyBonusTurn !== state.turn) {
+      pl.preyBonusTurn = state.turn;
+      dmg += 2;
+      log(state, `🩸 Blood in the Water: +2 Attack against Prey.`);
+    }
+    dmg += pl.board.filter((m) => getCard(m.cardId).packBonus).length;
+    dmg += card.preyAttack ?? 0;
+    if (card.doubleVsPrey) dmg *= 2;
+  }
+  if (card.woundBonus && d.health < d.maxHealth) dmg += 1;
+  // Aliens (Hive Brood): extra Attack against an Implanted minion (Xeno Runner).
+  if (card.implantAttack && d.implanted != null) dmg += card.implantAttack;
+  // Frost Dragons: double damage against a Frozen minion (Rimescale Hatchling).
+  if (card.doubleVsFrozen && hasKeyword(d, 'Frozen')) dmg *= 2;
+  return dmg;
+}
+
+// Lycanthropes: the player pays to Transform one of their minions (once per minion per turn).
+function transformAction(state, { player: p, minion }) {
+  const pl = state.players[p];
+  const m = findCharacter(state, minion);
+  payMana(pl, getCard(m.cardId), transformCost(state, p));
+  m.shiftedTurn = state.turn;
+  state.queue.push({ kind: 'effect', effect: { op: 'shift', target: { uid: m.uid } }, ctx: { self: m.uid, controller: p } }, { kind: 'deaths' });
+}
+
+function declareAttack(state, { player: p, attacker, defender }) {
+  const a = findCharacter(state, attacker);
+  if (a.kind === 'hero' && a.attacksThisTurn === 0 && hasKeyword(a, 'Twin Strike')) a.dualWieldStrikeUsed = true;
+  a.attacksThisTurn += 1;
+  // Two weapons take turns: Weapon 1, then Weapon 2, then Weapon 1 again (extra attacks).
+  if (a.kind === 'hero') a.weaponUsedSlot = a.weapon2 && a.attacksThisTurn % 2 === 0 ? 2 : 1;
+  // Stealth lasts until the minion attacks. A Burrowed minion that attacks Surfaces first.
+  if (a.kind === 'minion' && a.burrowed) surfaceMinion(state, a);
+  if (hasKeyword(a, 'Stealth')) { removeKeyword(a, 'Stealth'); log(state, `👁 ${nameOf(state, a)} leaves Stealth.`); traceFx(state, { type: 'stealthLost', target: a.uid }); }
+  // Blind: the attack hits a random character, friend or foe.
+  let blind = false;
+  if (hasKeyword(a, 'Blind')) {
+    const all = state.players.flatMap((pl) => [pl.hero, ...pl.board]).filter((c) => c.uid !== attacker);
+    const aimed = defender;
+    defender = pickRandom(state, all).uid;
+    blind = true;
+    traceFx(state, { type: 'blind', source: attacker, aimed, target: defender });
+  }
+  const d = findCharacter(state, defender);
+  log(state, `${nameOf(state, a)} attacks ${nameOf(state, d)}${blind ? ' (Blind!)' : ''}.`);
+  const event = { type: 'attackDeclared', source: attacker, target: defender, player: p };
+  state.queue.push(
+    { kind: 'event', event },
+    { kind: 'window', name: 'attackDeclared', priority: opponentOf(p), ctx: { event } },
+    { kind: 'combat', attacker, defender, friendlyFire: blind },
+    { kind: 'deaths' },
+    { kind: 'event', event: { type: 'afterAttack', source: attacker, target: defender, player: p } },
+  );
+  // Witches (Spellbound): a Wand's runes fire before the hit (curses, inscribed spells) and after it.
+  if (a.kind === 'hero' && a.weapon?.wand && a.weapon.runes?.length) {
+    const rctx = { self: a.uid, controller: p, event: { target: defender, source: attacker } };
+    const at = state.queue.findIndex((s) => s.kind === 'combat' && s.attacker === attacker);
+    if (at >= 0) state.queue.splice(at, 0, { kind: 'effect', effect: { op: 'wandRunes', phase: 'before' }, ctx: rctx }, { kind: 'deaths' });
+    state.queue.push({ kind: 'effect', effect: { op: 'wandRunes', phase: 'after' }, ctx: rctx }, { kind: 'deaths' });
+  }
+  // Sun: after the Hero attacks with it, a shot of light hits the enemy Hero.
+  const usedWeapon = a.kind === 'hero' ? (a.weaponUsedSlot === 2 ? a.weapon2 : a.weapon) : null;
+  if (usedWeapon?.sunShot) state.queue.push({ kind: 'effect', effect: { op: 'damage', target: 'enemyHero', amount: usedWeapon.sunShot }, ctx: { self: a.uid, controller: p } }, { kind: 'deaths' });
+  // Robots (Arsenal Protocol): a Hero attacking with a Weapon wears it down by 1 Durability.
+  if (a.kind === 'hero' && (a.weaponUsedSlot === 2 ? a.weapon2 : a.weapon)) state.queue.push({ kind: 'effect', effect: { op: 'wearHeroWeapon', slot: a.weaponUsedSlot }, ctx: { self: a.uid, controller: p } });
+}
+
+// Acid Hide: `hide` touched `other` in a fight. A minion is Corroded by the hide's amount (1, or the
+// card's `acidHide`, e.g. Acid Hide 2); a Hero loses its Weapon, or 2 Armor if it has none.
+export const acidHideAmount = (m) => (m && !m.textLost ? getCard(m.cardId).acidHide : null) ?? 1;
+function acidHideTouch(state, hide, other) {
+  if (!hide || !other || hide.kind !== 'minion' || !hasKeyword(hide, 'Acid Hide')) return;
+  if (other.kind === 'minion') { if (other.health > 0 && !other.destroyed) resolveEffect(state, { op: 'corrode', target: { uid: other.uid }, amount: acidHideAmount(hide) }, { self: hide.uid, controller: hide.controller }); return; }
+  if (other.weapon) { log(state, `🧪 ${nameOf(state, hide)}'s Acid Hide melts ${other.weapon.name}!`); dropHeroWeapon(state, other, 'melts'); }
+  else if (other.armor > 0) { const n = Math.min(2, other.armor); other.armor -= n; log(state, `🧪 Acid Hide eats ${n} of ${nameOf(state, other)}'s Armor.`); }
+}
+
+// ---- Auras ---------------------------------------------------------------
+
+// Continuous effects ("Your other Vampire minions have +1 Health") are
+// recomputed after every step, so they turn on and off as minions come and go.
+function applyAuras(state) {
+  const bonus = new Map();
+  const bonusAtk = new Map();
+  const bonusKw = new Map();
+  for (const s of minionsInOrder(state)) {
+    // aura: one { target, attack?, health?, keywords?, if? } or a list of them (Swarm Commander).
+    if (s.textLost) continue; // Meltdown ate its card text
+    for (const aura of [].concat(getCard(s.cardId).aura ?? [])) {
+      const ctx = { self: s.uid, controller: s.controller };
+      if (aura.if && !checkCondition(state, aura.if, ctx)) continue;
+      for (const id of resolveSelector(state, aura.target, ctx)) {
+        if (aura.health) bonus.set(id, (bonus.get(id) ?? 0) + aura.health);
+        if (aura.attack) bonusAtk.set(id, (bonusAtk.get(id) ?? 0) + aura.attack);
+        // attackPerDepth: +N Attack for each circle the battle has sunk (Baphomet).
+        if (aura.attackPerDepth) bonusAtk.set(id, (bonusAtk.get(id) ?? 0) + aura.attackPerDepth * descentDepth(state));
+        // Witches (Spellbound): +1 Attack per N pages of its owner's Spellbook, up to a cap (Spellbook Sentinel).
+        if (aura.attackPerPages) bonusAtk.set(id, (bonusAtk.get(id) ?? 0) + Math.min(aura.attackPerPages.max ?? 99, Math.floor((state.players[s.controller].spellbook?.pages ?? 0) / aura.attackPerPages.per)));
+        if (aura.keywords) bonusKw.set(id, [...(bonusKw.get(id) ?? []), ...aura.keywords]);
+      }
+    }
+  }
+  // Keyword auras (Royal Bodyguard) are recomputed outright each step.
+  for (const m of minionsInOrder(state)) {
+    const kw = bonusKw.get(m.uid);
+    if (kw) m.auraKeywords = [...new Set(kw)];
+    else if (m.auraKeywords) delete m.auraKeywords;
+  }
+  // Radiation: every living irradiated character lowers the Health of every other
+  // non-irradiated character by its Radiation (stacking). Recomputed like any aura;
+  // when the reduction shrinks, the Health comes back. A character brought to 0 dies.
+  const sources = state.players.flatMap((pl) => [pl.hero, ...pl.board]).filter((c) => radiationOf(c) > 0 && c.health > 0 && !c.destroyed);
+  const totalRad = sources.reduce((s, c) => s + radiationOf(c), 0);
+  for (const c of state.players.flatMap((pl) => [pl.hero, ...pl.board])) {
+    const proof = c.radProofUntil != null; // The Irradiated Genius: ignores Radiation auras for now
+    const want = radiationOf(c) > 0 || proof ? 0 : totalRad;
+    const d = want - (c.radReduction ?? 0);
+    if (!d) continue;
+    c.radReduction = want;
+    c.maxHealth -= d;
+    c.health -= d;
+  }
+  // Attack auras (Graveyard Overseer) are recomputed outright each step.
+  // The Fifth Circle (Wrath): every minion has +1 Attack.
+  const wrath = descentDepth(state) === 5 ? 1 : 0;
+  for (const m of minionsInOrder(state)) m.auraAttack = (bonusAtk.get(m.uid) ?? 0) + wrath;
+  // Weaponsmith Unit: your Hero's Weapon has +1 Attack per such minion (only while it holds one).
+  for (const pl of state.players) {
+    const smiths = pl.board.filter((m) => getCard(m.cardId).heroWeaponAura && m.health > 0 && !m.destroyed).length;
+    const darkArts = pl.hero.weapon?.wand && pl.spellbook?.mastery === 'darkArts';
+    // Monster Hunter: Eclipse (Sun and Moon both held): +3 Attack, Lifesteal, no Durability lost.
+    const held = [pl.hero.weapon?.cardId, pl.hero.weapon2?.cardId];
+    pl.hero.eclipse = held.includes('sun_revolver') && held.includes('moon_revolver');
+    pl.hero.auraAttack = pl.hero.weapon ? smiths + (darkArts ? 2 : 0) + (pl.hero.eclipse ? 3 : 0) : 0;
+    // The Hunt Master: two extra Hero attacks each turn per Hunt Master.
+    pl.hero.auraBonusAttacks = pl.board.reduce((n, m) => n + (m.health > 0 && !m.destroyed && !m.textLost ? getCard(m.cardId).heroExtraAttacks ?? 0 : 0), 0);
+    // Witches: keywords a Weapon gives the Hero while it's held (The Witching Hour Broom: Twin Strike;
+    // the Twin Bolt enchantment; Dark Arts: Lifesteal on Wands). Dual-Wield's Twin Strike (two
+    // different weapons) is kept here too, or this recompute would wipe it.
+    const dualTwin = pl.hero.dualWield && pl.hero.weapon && pl.hero.weapon2 && pl.hero.weapon.cardId !== pl.hero.weapon2.cardId;
+    const wk = [...(pl.hero.weapon?.keywords ?? []), ...(pl.hero.weapon?.runes?.some((r) => r.id === 'twinBolt') ? ['Twin Strike'] : []), ...(darkArts ? ['Lifesteal'] : []),
+      ...(dualTwin ? ['Twin Strike'] : []), ...(pl.hero.eclipse ? ['Lifesteal'] : [])];
+    if (wk.length) pl.hero.auraKeywords = [...new Set(wk)];
+    else if (pl.hero.auraKeywords) delete pl.hero.auraKeywords;
+  }
+  for (const m of minionsInOrder(state)) {
+    const d = (bonus.get(m.uid) ?? 0) - m.auraHealth;
+    if (!d) continue;
+    m.auraHealth += d;
+    m.maxHealth += d;
+    m.health = d > 0 ? m.health + d : Math.min(m.health, m.maxHealth);
+  }
+}
+
+// ---- "Would die" Traps ------------------------------------------------------
+
+// The dying minion's opponent may hold a Trap on 'minionWouldDie'. If one
+// matches, it fires: the death is prevented and its effects resolve now.
+function interceptDeath(state, m) {
+  const p = opponentOf(m.controller);
+  const pl = state.players[p];
+  for (const trap of pl.traps) {
+    const card = getCard(trap.cardId);
+    if (card.trap?.on !== 'minionWouldDie') continue;
+    const ctx = { self: trap.uid, controller: p, event: { type: 'minionWouldDie', source: m.uid, player: m.controller }, cardId: trap.cardId };
+    if (!matchFilter(state, card.trap.filter, ctx)) continue;
+    pl.traps.splice(pl.traps.indexOf(trap), 1);
+    pl.graveyard.push(trap);
+    log(state, `Trap revealed: ${card.name}!`);
+    m.destroyed = false;
+    for (const effect of card.trap.effects) resolveEffect(state, effect, ctx);
+    emit(state, { type: 'trapTriggered', player: p, cardId: trap.cardId });
+    return m.health > 0 && !m.destroyed;
+  }
+  return false;
+}
+
+// ---- Extinction Cycle (Dinosaurs) ---------------------------------------
+
+// Meteor Shower: remove a player's Primal crystals and any unspent Primal Mana.
+function clearPrimal(pl) {
+  const m = pl.mana;
+  m.max = Math.min(m.max, m.base ?? m.max);
+  m.current = Math.max(0, Math.min(m.current - (m.primal ?? 0), m.max + (m.temp ?? 0)));
+  m.primal = 0;
+}
+
+function extinction(state, p) {
+  const pl = state.players[p];
+  const ext = pl.extinction;
+  if (ext.mode === 'meteorShower') {
+    // Instead: 1 random minion is destroyed at each of the next 3 turn-ends, and all of
+    // this player's Primal Mana is destroyed; none can be gained until the shower ends.
+    log(state, `☄ EXTINCTION! A Meteor Shower begins. ${pl.name}'s Primal Mana is destroyed.`);
+    ext.shower = 3;
+    clearPrimal(pl);
+  } else {
+    log(state, `☄ EXTINCTION! ${pl.name}'s Mana Crystals are destroyed.`);
+    // Rex, the Tyrant King survives Extinction.
+    const victims = (ext.mode === 'bothBoards' ? minionsInOrder(state) : pl.board).filter((m) => !getCard(m.cardId).survivesExtinction);
+    for (const m of victims) m.destroyed = true;
+    pl.mana.max = 0;
+    pl.mana.current = 0;
+    pl.mana.temp = 0;
+    pl.mana.base = 0;
+    pl.mana.primal = 0;
+  }
+  ext.turns = 0;
+  ext.nextAt = state.rules.extinctionEvery;
+  ext.mode = 'normal';
+}
+
+// ---- Step machine --------------------------------------------------------
+
+const STEPS = {
+  event(state, { event }) {
+    // Acidic: count each player's minions summoned this turn (Corrosion Chamber).
+    if (event.type === 'minionSummoned') {
+      const pl = state.players[event.player];
+      if (pl.summonTurn !== state.turn) { pl.summonTurn = state.turn; pl.summonCount = 0; }
+      pl.summonCount += 1;
+    }
+    const steps = dispatchEvent(state, event);
+    // Acidic: an enemy minion gaining Attack on its own turn opens a Quick Play window (Reactive Spill).
+    if (event.type === 'attackGained' && event.player === state.activePlayer) {
+      steps.push({ kind: 'window', name: 'enemyBuffed', priority: opponentOf(event.player), ctx: { event } });
+    }
+    // Damage opens a Quick Play window for the waiting player; Burn damage, for the player whose
+    // fire it is (the burning character's opponent: Feed the Flames).
+    if (event.type === 'damageDealt' || event.type === 'burnDamage') {
+      const priority = event.type === 'burnDamage' ? opponentOf(event.player) : opponentOf(state.activePlayer);
+      steps.push({ kind: 'window', name: event.type, priority, ctx: { event } });
+    }
+    // Demons: Quick Plays for your own attacks and for your own Hero losing Health (on either turn).
+    if (event.type === 'attackDeclared') {
+      steps.push({ kind: 'window', name: 'friendlyAttack', priority: event.player, ctx: { event } });
+    }
+    if (event.type === 'heroLostHealth') {
+      steps.push({ kind: 'window', name: 'heroLostHealth', priority: event.player, ctx: { event } });
+    }
+    // Radioactive: Quick Plays for an enemy character gaining Radiation (on either turn).
+    if (event.type === 'radiationApplied') {
+      steps.push({ kind: 'window', name: 'enemyIrradiated', priority: opponentOf(event.player), ctx: { event } });
+    }
+    pushFront(state, steps);
+  },
+
+  effect(state, { effect, ctx }) {
+    resolveEffect(state, effect, ctx);
+  },
+
+  selfTrigger(state, { uid, on, ctx }) {
+    const m = findCharacter(state, uid);
+    if (!m) return;
+    pushFront(state, selfTriggerSteps(state, getCard(m.cardId), on, ctx));
+  },
+
+  window(state, { name, priority, ctx }) {
+    if (eligibleQuickPlays(state, priority, name, ctx).length === 0) return;
+    state.pending = { type: 'reaction', player: priority, window: name, ctx };
+  },
+
+  combat(state, step) {
+    const { attacker, defender, friendlyFire } = step;
+    const a = findCharacter(state, attacker);
+    const d = findCharacter(state, defender);
+    if (!a || !d || a.health <= 0 || d.health <= 0 || (a.controller === d.controller && !friendlyFire) || a.encased > 0 || d.encased > 0) {
+      log(state, 'The attack fizzles.');
+      return;
+    }
+    if (step.cancelled) return; // Acidic: Rusted Jaws / Emergency Neutralizer stopped it
+    const aDmg = effectiveAttack(a);
+    const dDmg = d.kind === 'minion' ? effectiveAttack(d) : 0;
+    // The defending player may react before their minion takes the hit.
+    const responder = opponentOf(state.activePlayer);
+    const event = { type: 'wouldTakeDamage', source: a.uid, target: d.uid, player: d.controller, amount: aDmg };
+    if (!step.windowed && d.kind === 'minion' && d.controller === responder && aDmg > 0 &&
+        eligibleQuickPlays(state, responder, 'wouldTakeDamage', { event }).length) {
+      pushFront(state, [
+        { kind: 'window', name: 'wouldTakeDamage', priority: responder, ctx: { event } },
+        { ...step, windowed: true },
+      ]);
+      return;
+    }
+    const activeWeapon = a.kind === 'hero' ? (a.weaponUsedSlot === 2 ? a.weapon2 : a.weapon) : null;
+    const huntDmg = huntDamage(state, a, d, aDmg);
+    const wasPrey = d.kind === 'minion' && d.prey;
+    const dealt = dealDamage(state, a.uid, d.uid, huntDmg, {combat:true});
+    const executed = dealt > 0 && d.kind === 'minion' && activeWeapon?.executeFaction === getCard(d.cardId).faction;
+    if (executed) {
+      d.destroyed = true;
+      d.lastDamagedBy = a.uid;
+      d.lastDamagedByController = a.controller;
+      log(state, `🗡 ${nameOf(state, a)} executes ${nameOf(state, d)} with ${activeWeapon.name}.`);
+    }
+    if (a.kind === 'hero' && d.kind === 'minion' && (d.health <= 0 || d.destroyed) && a.dualWield && a.weapon && a.weapon2) {
+      const growingWeapon = a.weapon.attack <= a.weapon2.attack ? a.weapon : a.weapon2;
+      growingWeapon.attack += 1;
+      if (growingWeapon === a.weapon) a.attack += 1;
+      log(state, `⚔ Dual-Wield: ${growingWeapon.name} gains +1 Attack.`);
+    }
+    // Witches: a Hero attacking with a Wand fires from afar and takes no damage back.
+    const fromAfar = a.kind === 'hero' && (activeWeapon?.wand || activeWeapon?.ranged);
+    if (!fromAfar && !executed) dealDamage(state, d.uid, a.uid, dDmg, {combat:true});
+    // Acidic (Half-Digested): Acid Hide melts whatever attacks it.
+    if (!fromAfar) acidHideTouch(state, d, a);
+    // Scarred Leviathan: damage to Marked Prey heals your Hero by as much.
+    if (wasPrey && dealt > 0 && a.kind === 'minion' && getCard(a.cardId).leechPrey) heal(state, heroOf(state, a.controller).uid, dealt, { source: a.uid });
+    // Great White: killing Marked Prey lets it attack again this turn (once).
+    if (wasPrey && d.health <= 0 && a.kind === 'minion' && getCard(a.cardId).extraAttackOnPreyKill && a.extraAttackTurn !== state.turn) {
+      a.extraAttackTurn = state.turn;
+      a.bonusAttacks = (a.bonusAttacks ?? 0) + 1;
+      log(state, `${nameOf(state, a)} can attack again!`);
+    }
+    // Venomous: kills the enemy minion it attacks (if the hit landed).
+    if (dealt > 0 && d.kind === 'minion' && hasKeyword(a, 'Venomous')) {
+      d.destroyed = true;
+      d.lastDamagedBy = a.uid;
+      d.lastDamagedByController = a.controller;
+      log(state, `${nameOf(state, d)} succumbs to venom.`);
+      traceFx(state, { type: 'venom', source: a.uid, target: d.uid });
+    }
+    // New legendaries: what a killer gains from a kill. The Slayer Hornet (killAttacks: N) may
+    // attack again after each kill, up to N extra attacks a turn; Rex, the Tyrant King grows
+    // (killGrow); the Skinwalker takes the victim's keywords or full hide.
+    if (d.kind === 'minion' && (d.health <= 0 || d.destroyed) && a.kind === 'minion' && a.health > 0) {
+      const ac = getCard(a.cardId);
+      if (ac.killAttacks) {
+        if (a.killAttackTurn !== state.turn) { a.killAttackTurn = state.turn; a.killAttacksUsed = 0; }
+        if (a.killAttacksUsed < ac.killAttacks) {
+          a.killAttacksUsed += 1;
+          a.bonusAttacks = (a.bonusAttacks ?? 0) + 1;
+          log(state, `${nameOf(state, a)} can attack again!`);
+        }
+      }
+      if (ac.killGrow) applyBuff(state, a, ac.killGrow);
+      // Dragonfruit Duelist: every kill adds a random card from this list to its controller's hand.
+      if (ac.killAddsFrom?.length && !a.textLost && !hasKeyword(a, 'Silenced')) {
+        const id = pickRandom(state, ac.killAddsFrom);
+        addToHand(state, a.controller, id);
+        log(state, `${nameOf(state, a)} takes a ${getCard(id).name}.`);
+      }
+      if (ac.stealKeywordsOnKill) {
+        const taken = allKeywords(d).filter((k) => !NEGATIVE_KEYWORDS.includes(k) && !hasKeyword(a, k));
+        for (const k of taken) addKeyword(a, k, false, state);
+        if (taken.length) log(state, `${nameOf(state, a)} takes ${taken.join(', ')} from ${nameOf(state, d)}.`);
+      }
+      if ((ac.takeHideOnKill || a.takeHideUntilTurn === state.turn) && getCard(a.cardId).form === 'beast') {
+        takeHide(state, a, d);
+        delete a.takeHideUntilTurn;
+      }
+    }
+    // Varkhul, the Crimson Maw: killing a minion lets it attack again this turn (once).
+    if (d.kind === 'minion' && (d.health <= 0 || d.destroyed) && a.kind === 'minion' && a.health > 0 && getCard(a.cardId).extraAttackOnKill && a.extraAttackTurn !== state.turn) {
+      a.extraAttackTurn = state.turn;
+      a.bonusAttacks = (a.bonusAttacks ?? 0) + 1;
+      log(state, `${nameOf(state, a)} can attack again!`);
+    }
+  },
+
+  deaths(state) {
+    let dead = minionsInOrder(state).filter((m) => m.health <= 0 || m.destroyed);
+    // "When an enemy minion would die" Traps (Experimental Containment) can save it.
+    dead = dead.filter((m) => !interceptDeath(state, m));
+    if (!dead.length) return;
+    const steps = [];
+    // Was each killer a minion? (checked before anyone leaves the board)
+    const killerMinion = new Map(dead.map((m) => [m.uid, findCharacter(state, m.lastDamagedBy)?.kind === 'minion']));
+    for (const m of dead) {
+      const board = state.players[m.controller].board;
+      const at = board.indexOf(m);
+      board.splice(at, 1);
+      // Plants (Harvest Moon): whatever the Pumpkin held bursts out where it stood.
+      burstShell(state, m, at);
+      // Unique minions (the Queen) can never come back once they have died.
+      if (getCard(m.cardId).unique) (state.players[m.owner].uniquesDead ??= []).push(m.cardId);
+      // Divine (The Holy Pyre): a minion dying in Holy Flame is Reduced to Ash — removed like Obliterate.
+      if (m.holyFlame > 0 && !m.obliterate) {
+        m.obliterate = true;
+        const by = state.players[opponentOf(m.controller)];
+        by.ashed = (by.ashed ?? 0) + 1;
+        log(state, `✨ ${nameOf(state, m)} is Reduced to Ash.`);
+        steps.push({ kind: 'event', event: { type: 'minionAshed', source: m.uid, player: m.controller, cardId: m.cardId } });
+        continue;
+      }
+      // Obliterate: removed from the game — no graveyard, no Exit, no Reborn, no death events.
+      if (m.obliterate) { log(state, `☢ ${nameOf(state, m)} is obliterated.`); traceFx(state, { type: m.holyFlame > 0 ? 'ashed' : 'obliterated', target: m.uid }); continue; }
+      state.players[m.owner].graveyard.push({ uid: m.uid, cardId: m.cardId, owner: m.owner, died: true });
+      log(state, `${nameOf(state, m)} dies.`);
+      // Ghosts: deaths counted this turn / this game, and per player (friendly minions that died).
+      state.deathsThisTurn = (state.deathsThisTurn ?? 0) + 1;
+      state.deathsThisGame = (state.deathsThisGame ?? 0) + 1;
+      state.players[m.controller].minionDeaths = (state.players[m.controller].minionDeaths ?? 0) + 1;
+      const card = getCard(m.cardId);
+      // Eels: a minion that dies holding 2+ Volts Discharges half of them at a random enemy.
+      if (m.volts > 1) steps.push({ kind: 'effect', effect: { op: 'deathDischarge', volts: m.volts, uid: m.uid, cardId: m.cardId }, ctx: { controller: m.controller, self: null } }, { kind: 'deaths' });
+      const event = {
+        type: 'minionDied', source: m.uid, player: m.controller, cardId: m.cardId,
+        killer: m.lastDamagedBy, killerPlayer: m.lastDamagedByController, killerMinion: killerMinion.get(m.uid), byBurn: !!m.diedToBurn,
+        dead: { kind: 'minion', controller: m.controller, devilFruit: m.devilFruit ? structuredClone(m.devilFruit) : null, prey: !!m.prey, tribes: [...m.tribes], cardId: m.cardId, storedCost: m.storedCost, upgrades: m.upgrades ?? 0, irradiated: radiationOf(m) > 0, implanted: m.implanted ?? null, infected: m.infected ?? null },
+      };
+      // Poisonous: the enemy minion that killed it dies too.
+      const killer = findCharacter(state, m.lastDamagedBy);
+      // Graveshredder: a Zombie it kills heals its Hero.
+      const kw = killer?.kind === 'hero' ? (killer.weaponUsedSlot === 2 ? killer.weapon2 : killer.weapon) : null;
+      if (kw?.killHeal && killer.controller !== m.controller && getCard(m.cardId).faction === kw.killHealFaction) {
+        steps.push({ kind: 'effect', effect: { op: 'heal', target: 'friendlyHero', amount: kw.killHeal }, ctx: { self: killer.uid, controller: killer.controller } });
+      }
+      if (hasKeyword(m, 'Poisonous') && killer?.kind === 'minion' && killer.controller !== m.controller) {
+        killer.destroyed = true;
+        log(state, `${nameOf(state, killer)} is poisoned.`);
+        traceFx(state, { type: 'poison', source: m.uid, target: killer.uid });
+      }
+      // Plants (Carnivorous Garden): Devour — the enemy minion that destroyed it gains +1/+1.
+      if (killer?.kind === 'minion' && killer.controller !== m.controller && hasKeyword(killer, 'Devour') && killer.health > 0 && !killer.destroyed) {
+        steps.push({ kind: 'effect', effect: { op: 'devour' }, ctx: { self: killer.uid, controller: killer.controller, event } });
+      }
+      // Ghosts (Cursed Armory): a Relic outlives its Ghost and drifts to its Hero (if the Hero is unarmed).
+      if (m.relic) steps.push({ kind: 'effect', effect: { op: 'equipRelic', toHero: true, cardId: m.relic.cardId, lingering: true }, ctx: { controller: m.controller } });
+      // Every minion that dies leaves a Corpse on its side. Only Zombies and Fungus cards spend them,
+      // so the pile is only shown to sides that can use it (ui/board.js corpseHTML).
+      const cp = state.players[m.controller];
+      cp.corpses = (cp.corpses ?? 0) + 1;
+      if (usesCorpses(cp)) log(state, `🪦 ${nameOf(state, m)} leaves a Corpse.`);
+      // Zombies: count the dead Zombies (and living Infected) for Zombie cards.
+      if (m.tribes.includes('Zombie') || m.tribes.includes('Infected')) {
+        (cp.deadZombies ??= []).push(m.cardId);
+        cp.zombieDeathsThisTurn = (cp.zombieDeathsThisTurn ?? 0) + 1;
+      }
+      // noExit: destroyed without its Exit (Emergency Hatching).
+      if (!m.noExit && !m.textLost) steps.push(...selfTriggerSteps(state, card, 'deathrattle', { self: m.uid, controller: m.controller, event }));
+      // Granted Exits (Consume Decay) act for the player who granted them.
+      for (const g of (m.grantedTriggers ?? []).filter((t) => t.on === 'deathrattle')) {
+        const ctx = { self: m.uid, controller: g.controller, event, cardId: m.cardId };
+        steps.push(...g.effects.map((effect) => ({ kind: 'effect', effect, ctx })), { kind: 'deaths' });
+      }
+      if (hasKeyword(m, 'Reborn')) steps.push({ kind: 'reborn', cardId: m.cardId, controller: m.controller, resurrected: m.resurrected, owner: m.owner, uid: m.uid, onRebornSummon: m.onRebornSummon, hauntTag: m.hauntTag });
+      // Ghosts: marked to be Haunted if it dies (Soul Reaper, Grave Grasp, Irradiated Afterlife).
+      else if (m.hauntOnDeath && state.turn <= m.hauntOnDeath.until) {
+        steps.push({ kind: 'effect', effect: { op: 'hauntDead', uid: m.uid, ...m.hauntOnDeath.mods }, ctx: { controller: m.hauntOnDeath.controller, self: null } });
+      }
+      steps.push(
+        { kind: 'event', event },
+        { kind: 'window', name: 'minionDied', priority: opponentOf(state.activePlayer), ctx: { event } },
+      );
+    }
+    steps.push({ kind: 'deaths' });
+    pushFront(state, steps);
+  },
+
+  // Mushrooms on a drawn card burst: 1 damage to the drawer's Hero per Mushroom.
+  mushrooms(state, { player: p, cardUid }) {
+    const pl = state.players[p];
+    const inst = pl.hand.find((c) => c.uid === cardUid) ?? pl.graveyard.find((c) => c.uid === cardUid);
+    const n = inst?.mushrooms ?? 0;
+    if (!n) return;
+    inst.mushrooms = 0;
+    // Amanita, the Fly Agaric: the Mushrooms of the player who controls her deal double damage.
+    const doubled = state.players[opponentOf(p)].board.some((m) => getCard(m.cardId).doubleMushrooms && m.health > 0 && !m.destroyed);
+    const dmg = doubled ? n * 2 : n;
+    log(state, `🍄 ${n} Mushroom${n === 1 ? '' : 's'} burst from ${pl.name}'s card${doubled ? ' (doubled by the Fly Agaric)' : ''}!`);
+    dealDamage(state, null, pl.hero.uid, dmg, { sourceController: opponentOf(p) });
+    emit(state, { type: 'mushroomTriggered', player: p, amount: n, cardUid });
+  },
+
+  reborn(state, { cardId, controller, resurrected, owner, uid, onRebornSummon, hauntTag }) {
+    // It comes back from the Graveyard, so it is no longer there to be Haunted.
+    if (uid != null && owner != null) {
+      const grave = state.players[owner].graveyard;
+      const i = grave.findIndex((g) => g.uid === uid);
+      if (i >= 0) grave.splice(i, 1);
+    }
+    // rebornAs: it comes back as a different card, at that card's full Health (Sobek → Sobek's Fossil).
+    const into = getCard(cardId).rebornAs;
+    const m = summonMinion(state, controller, into ?? (getCard(cardId).luffy ? 'op_luffy' : cardId), { silent: true });
+    if (!m) return;
+    if (owner != null) m.owner = owner;
+    if (hauntTag) m.hauntTag = hauntTag; // still the same Haunted minion
+    // The Eternal Swarm: whenever it loses Reborn, a 1/1 Spectral Insect appears.
+    if (onRebornSummon) pushFront(state, [{ kind: 'effect', effect: { op: 'summon', cardId: onRebornSummon }, ctx: { controller, self: null } }]);
+    if (!into) {
+      m.health = state.rules.rebornHealth;
+      m.maxHealth = state.rules.rebornHealth;
+    }
+    removeKeyword(m, 'Reborn');
+    if (resurrected) m.resurrected = true; // Resurrection stays used up
+    m.rebornUsed = true; // Divine Intervention can't give it Reborn again
+    log(state, `${nameOf(state, m)} is Reborn.`);
+    enterBattlefield(state, m);
+    emit(state, { type: 'minionReborn', source: m.uid, player: controller, from: uid ?? null });
+  },
+
+  endTurn(state, { player: p }) {
+    log(state, `${state.players[p].name} ends their turn.`);
+    const event = { type: 'endOfTurn', player: p };
+    pushFront(state, [
+      { kind: 'event', event },
+      { kind: 'window', name: 'endOfTurn', priority: opponentOf(p), ctx: { event } },
+      { kind: 'burn', player: p },
+      { kind: 'storm', player: p },
+      { kind: 'extinction', player: p },
+      { kind: 'circleEnd', player: p },
+      { kind: 'beastWane', player: p },
+      { kind: 'deaths' },
+      { kind: 'cleanup', player: p },
+      { kind: 'startTurn', player: opponentOf(p) },
+    ]);
+  },
+
+  // Lycanthropes: Beast Form wears off. Each of this player's Beast Forms counts down one of their
+  // turns; at 0 it turns back into its Humanoid Form, as a Transform (its "whenever this
+  // transforms" effects happen). It doesn't use up the once-per-turn Transform.
+  beastWane(state, { player: p }) {
+    const back = [];
+    for (const m of state.players[p].board) {
+      if (!(m.beastTurnsLeft > 0) || m.health <= 0 || m.destroyed) continue;
+      m.beastTurnsLeft -= 1;
+      if (m.beastTurnsLeft === 0) back.push(m);
+    }
+    if (!back.length) return;
+    for (const m of back) log(state, `🌘 ${nameOf(state, m)}'s Beast Form wears off.`);
+    pushFront(state, [
+      ...back.map((m) => ({ kind: 'effect', effect: { op: 'shift', target: { uid: m.uid }, to: 'human' }, ctx: { self: m.uid, controller: p } })),
+      { kind: 'deaths' },
+    ]);
+  },
+
+  // Burned: each Burned minion loses 1 Health at the end of its controller's turn.
+  // Burn (Dragons): at the end of YOUR turn, each Burning enemy character takes its Burn value as
+  // damage, then the value rises by 1. So Burn you apply hits as soon as you end your turn.
+  // The Sixth Circle (Heresy): at the end of each turn, 1 damage to all minions.
+  // The Ninth Circle (Treachery): at the end of your turn, a random minion of yours is frozen
+  // in the ice of Cocytus (it misses your next turn). Thick Fur shrugs it off.
+  circleEnd(state, { player: p }) {
+    if (descentDepth(state) === 9) {
+      const mine = state.players[p].board.filter((m) => m.health > 0 && !m.destroyed && !hasKeyword(m, 'Frozen') && !hasKeyword(m, 'Thick Fur'));
+      const m = pickRandom(state, mine);
+      if (m) { log(state, `❄ Treachery: ${nameOf(state, m)} is frozen in the ice of Cocytus.`); addKeyword(m, 'Frozen', false, state); }
+      return;
+    }
+    if (descentDepth(state) !== 6) return;
+    const all = minionsInOrder(state).filter((m) => m.health > 0 && !m.destroyed);
+    if (!all.length) return;
+    log(state, '🔥 The tombs of Heresy burn: 1 damage to all minions.');
+    for (const m of all) dealDamage(state, null, m.uid, 1);
+  },
+
+  // Thalassa, the Endless Storm: the storm she left Chains at a random enemy at the end of your turn.
+  storm(state, { player: p }) {
+    const n = state.players[p].storm ?? 0;
+    if (n <= 0 || state.gameOver) return;
+    log(state, `⛈ The endless storm strikes (Chain ${n})!`);
+    chainLightning(state, { controller: p, self: null, cardId: 'thalassa_the_endless_storm' }, n);
+  },
+
+  burn(state, { player: p }) {
+    const pl = state.players[p];
+    for (const m of pl.board) if (hasKeyword(m, 'Burned')) loseHealth(state, m.uid, 1);
+    const foe = opponentOf(p);
+    for (const c of [state.players[foe].hero, ...state.players[foe].board]) {
+      if (!isBurning(c) || c.health <= 0 || c.destroyed) continue;
+      const n = c.burn;
+      const dealt = dealDamage(state, null, c.uid, n, { sourceController: p, burn: true });
+      if (c.kind === 'minion') c.diedToBurn = c.health <= 0;
+      if (dealt > 0) emit(state, { type: 'burnDamage', target: c.uid, player: foe, amount: dealt });
+      // After its last tick the fire goes out (Burn lasts at most burnTurns turns).
+      c.burnLeft = (c.burnLeft ?? 2) - 1;
+      if (c.burnLeft <= 0) { c.burn = 0; log(state, `${nameOf(state, c)} stops Burning.`); } else c.burn = n + 1;
+    }
+    // Holy Flame (Divine): each burning enemy takes its Holy Flame (double if Dark), plus 1
+    // per friendly Seraph of Embers; then it burns down by 1.
+    const bonus = pl.board.filter((m) => getCard(m.cardId).holyFlameBonus && m.health > 0 && !m.destroyed).length;
+    for (const c of [state.players[foe].hero, ...state.players[foe].board]) {
+      if (!(c.holyFlame > 0) || c.health <= 0 || c.destroyed) continue;
+      const n = c.holyFlame * (c.kind === 'minion' && isDarkOrUndead(c) ? 2 : 1) + bonus;
+      log(state, `✨ Holy Flame scorches ${nameOf(state, c)}.`);
+      dealDamage(state, null, c.uid, n, { sourceController: p });
+      // It burns down by 1 each time (a minion that dies from this tick still has it, so it's Reduced to Ash).
+      if (c.health > 0 && !c.destroyed) c.holyFlame -= 1;
+    }
+    // Bleed (Bloodripper's Talon): each bleeding enemy loses its Bleed in Health (as damage). It doesn't fade.
+    for (const c of [state.players[foe].hero, ...state.players[foe].board]) {
+      if (!(c.bleed > 0) || c.health <= 0 || c.destroyed) continue;
+      log(state, `🩸 ${nameOf(state, c)} bleeds.`);
+      traceFx(state, { type: 'bleed', target: c.uid, amount: c.bleed });
+      dealDamage(state, null, c.uid, c.bleed, { sourceController: p });
+    }
+  },
+
+  extinction(state, { player: p }) {
+    const ext = state.players[p].extinction;
+    if (ext && ext.turns >= ext.nextAt) extinction(state, p);
+    const gf = state.players[p].greatFreeze;
+    if (gf && gf.turns >= gf.every) greatFreeze(state, p);
+    // Meteor Shower: one random minion is destroyed at the end of each turn,
+    // 3 times, starting with the Extinction turn itself. No Primal Mana meanwhile.
+    for (const pl of state.players) {
+      if (!pl.extinction?.shower) continue;
+      const victim = pickRandom(state, minionsInOrder(state).filter((m) => !m.destroyed));
+      if (victim) { victim.destroyed = true; log(state, `A meteor strikes ${nameOf(state, victim)}!`); }
+      clearPrimal(pl);
+      pl.extinction.shower -= 1;
+      if (!pl.extinction.shower) log(state, `The Meteor Shower ends. ${pl.name} can gain Primal Mana again.`);
+    }
+  },
+
+  cleanup(state, { player: p }) {
+    // Temporary Radiation counts down at the end of the turns of the player who applied it.
+    for (const c of state.players.flatMap((x) => [x.hero, ...x.board])) {
+      if (!c.radTemp?.length) continue;
+      for (const r of c.radTemp) if (r.by === p) r.left -= 1;
+      const before = radiationOf(c);
+      c.radTemp = c.radTemp.filter((r) => r.left > 0);
+      if (before && !radiationOf(c)) log(state, `${nameOf(state, c)}'s Radiation fades.`);
+    }
+    for (const pl of state.players) {
+      pl.hero.tempAttack = 0;
+      pl.hero.tempKeywords = [];
+      for (const m of pl.board) {
+        m.tempAttack = 0;
+        m.tempKeywords = [];
+        m.cantAttackThisTurn = false;
+        m.justReturned = false;
+        delete m.gentleFist;
+        m.preyRush = false;
+        m.bonusAttacks = 0;
+        m.conductive = false; // Eels: Conductive lasts until the end of the turn
+        if (m.grantedTriggers?.some((t) => t.temporary)) m.grantedTriggers = m.grantedTriggers.filter((t) => !t.temporary);
+        if (m.tempHealth > 0) {
+          m.maxHealth -= m.tempHealth;
+          m.health = Math.min(m.health, m.maxHealth);
+        } else if (m.tempHealth < 0) {
+          // "-N Health this turn" ends: the Health comes back (Rapid Decay).
+          m.maxHealth -= m.tempHealth;
+          m.health -= m.tempHealth;
+        }
+        m.tempHealth = 0;
+      }
+    }
+    // Frozen minions thaw once they've missed one of their controller's turns, but not while
+    // their opponent has a minion that keeps them frozen (Glacius, the Winter Queen).
+    const holdsFrost = state.players[opponentOf(p)].board.some((m) => getCard(m.cardId).holdsFrost && m.health > 0 && !m.destroyed);
+    for (const m of holdsFrost ? [] : [state.players[p].hero, ...state.players[p].board]) {
+      if (m.thawAfter == null || !hasKeyword(m, 'Frozen')) continue;
+      m.thawAfter -= 1;
+      if (m.thawAfter <= 0) { removeKeyword(m, 'Frozen'); m.thawAfter = null; log(state, `${nameOf(state, m)} thaws.`); }
+    }
+    for (const m of minionsInOrder(state)) {
+      // "Return it to your hand at the end of the turn."
+      if (m.returnAtEndOfTurn) {
+        resolveEffect(state, { op: 'returnToHand', target: 'self' }, { self: m.uid, controller: m.controller });
+        continue;
+      }
+      // Temporarily controlled minions go home.
+      if (m.tempControl?.returnAtEndOfTurnOf !== p) continue;
+      const from = state.players[m.controller];
+      const to = state.players[m.tempControl.returnTo];
+      from.board.splice(from.board.indexOf(m), 1);
+      m.controller = m.tempControl.returnTo;
+      m.tempControl = null;
+      if (to.board.length >= state.rules.maxBoardSize) {
+        // OPEN QUESTION: what happens if the original owner's board is full?
+        log(state, `${nameOf(state, m)} has no room to return and is destroyed.`);
+        state.players[m.owner].graveyard.push({ uid: m.uid, cardId: m.cardId, owner: m.owner });
+        continue;
+      }
+      to.board.push(m);
+      log(state, `${nameOf(state, m)} returns to ${to.name}.`);
+    }
+  },
+
+  startTurn(state, { player: p }) {
+    state.turn += 1;
+    state.activePlayer = p;
+    const pl = state.players[p];
+    // Acidic (Half-Digested): Regenerate X — damaged minions heal X at the start of their turn.
+    for (const m of [...pl.board]) {
+      const r = m.regen ?? getCard(m.cardId).regenerate ?? 0;
+      if (r > 0 && m.health > 0 && m.health < m.maxHealth && heal(state, m.uid, r) > 0) emit(state, { type: 'regenerated', source: m.uid, player: p });
+    }
+    // Sub-Space Jump: banished minions come back with their buff.
+    for (const entry of [...(pl.limbo ?? [])]) {
+      if (entry.returnAt !== p) continue;
+      pl.limbo.splice(pl.limbo.indexOf(entry), 1);
+      if (pl.board.length >= state.rules.maxBoardSize) { log(state, `${nameOf(state, entry.minion)} has no room to return.`); continue; }
+      const m = entry.minion;
+      m.attack += entry.attack; m.health += entry.health; m.maxHealth += entry.health;
+      pl.board.push(m);
+      log(state, `${nameOf(state, m)} returns from sub-space (+${entry.attack}/+${entry.health}).`);
+      enterBattlefield(state, m);
+    }
+    for (const x of state.players) x.zombieDeathsThisTurn = 0;
+    // Ultraterrestrials: Displaced minions due back now return.
+    processBeyond(state, p);
+    // Plants (Harvest Moon): Plants inside Pumpkins grow.
+    growShells(state, p);
+    // Sand Sharks: Burrowed minions Surface.
+    for (const m of [...pl.board]) if (m.burrowed) surfaceMinion(state, m);
+    // Aliens (Hive Brood): Chestbursters grow, and Evolve when they're ready.
+    tickChestbursters(state, p);
+    // Ice Age (Frozen in Time): minions sealed in ice thaw a turn; ready ones break free.
+    tickThawing(state, p);
+    // Acidic: Caustic Reservoir keeps eating at its minion each turn it survives.
+    if (pl.reservoir != null) {
+      const m = state.players[opponentOf(p)].board.find((x) => x.uid === pl.reservoir);
+      if (m && m.health > 0 && !m.destroyed) resolveEffect(state, { op: 'corrode', target: { uid: m.uid }, amount: 1 }, { self: pl.hero.uid, controller: p });
+      else pl.reservoir = null;
+    }
+    state.deathsLastTurn = state.deathsThisTurn ?? 0;
+    state.deathsThisTurn = 0;
+    pl.turnsTaken += 1;
+    if (pl.extinction) pl.extinction.turns += 1;
+    if (pl.greatFreeze) pl.greatFreeze.turns += 1;
+    factionHook(pl, 'turnStartMana')(state, pl);
+    // Mana borrowed for Quick Plays on the opponent's turn comes off this refill.
+    if (pl.qpDebt > 0) {
+      const paid = Math.min(pl.qpDebt, pl.mana.current);
+      pl.mana.current -= paid;
+      pl.mana.temp = Math.min(pl.mana.temp ?? 0, pl.mana.current);
+      pl.mana.primal = Math.min(pl.mana.primal ?? 0, pl.mana.current);
+      log(state, `${pl.name} pays back ${pl.qpDebt} Mana borrowed for Quick Plays.`);
+      pl.qpDebt = 0;
+    }
+    pl.hero.attacksThisTurn = 0;
+    pl.hero.dualWieldStrikeUsed = false;
+    for (const hs of pl.heroSpells) { hs.uses = 0; if (hs.cooldown > 0 && pl.turnsTaken > 1) hs.cooldown -= 1; }
+    // "Until your next turn" effects that player p applied expire now.
+    for (const c of [...state.players.flatMap((x) => [x.hero, ...x.board])]) {
+      c.lingerAttack = (c.lingerAttack ?? []).filter((x) => x.until !== p);
+      c.lingerKeywords = (c.lingerKeywords ?? []).filter((x) => x.until !== p);
+      if (c.radProofUntil === p) c.radProofUntil = null;
+      // Temporary Health "until your next turn" (Sanctuary) ends now.
+      for (const x of (c.lingerHealth ?? []).filter((x) => x.until === p)) {
+        c.maxHealth -= x.amount;
+        c.health = Math.min(c.health, c.maxHealth);
+      }
+      c.lingerHealth = (c.lingerHealth ?? []).filter((x) => x.until !== p);
+    }
+    for (const m of pl.board) {
+      m.sick = false; m.attacksThisTurn = 0;
+      // Between Worlds: an enemy minion that came back exhausted can't attack this turn.
+      if (m.exhausted) { m.cantAttackThisTurn = true; m.exhausted = false; }
+    }
+    log(state, `— Turn ${state.turn}: ${pl.name} (${pl.mana.current} Mana) —`);
+    // The Descent: from round 2 on, each round the battle sinks one circle deeper (round 1 is
+    // still fought on the realms' own boards; round 2 is Limbo).
+    if (state.descent) {
+      if (state.descent.lead == null) state.descent.lead = p;
+      else if (state.descent.lead === p) sinkCircles(state, 1);
+    }
+    // The Great Chasm Beyond (Void): while the Chasm is open, no start-of-turn draw; a random friendly
+    // minion gains +1/+1 instead.
+    if (pl.chasmOpen) {
+      log(state, `🕳 The Chasm is open: ${pl.name} draws nothing.`);
+      const grow = pickRandom(state, pl.board.filter((m) => m.health > 0 && !m.destroyed));
+      if (grow) resolveEffect(state, { op: 'buff', target: { uid: grow.uid }, attack: 1, health: 1 }, { controller: p });
+    } else {
+      // The Third Circle (Gluttony): an extra card at the start of the turn.
+      drawCards(state, p, descentDepth(state) === 3 ? 2 : 1);
+    }
+    // The Eighth Circle (Fraud): steal a random card from the opponent's hand.
+    if (descentDepth(state) === 8) {
+      const foe = state.players[opponentOf(p)];
+      const inst = pickRandom(state, foe.hand);
+      if (inst) {
+        foe.hand.splice(foe.hand.indexOf(inst), 1);
+        inst.owner = p;
+        if (pl.hand.length >= maxHand(state)) { pl.graveyard.push(inst); log(state, `🎭 Fraud: ${pl.name} steals a card, but their hand is full and it is burned.`); }
+        else { pl.hand.push(inst); log(state, `🎭 Fraud: ${pl.name} steals a card from ${foe.name}'s hand.`); }
+        emit(state, { type: 'cardStolen', player: p, uid: inst.uid });
+      }
+    }
+    emit(state, { type: 'startOfTurn', player: p });
+    pushFront(state, [{ kind: 'deaths' }]);
+  },
+};
+
+function checkGameOver(state) {
+  const dead = state.players.filter((pl) => pl.hero.health <= 0);
+  if (!dead.length) return;
+  state.gameOver = true;
+  state.pending = null;
+  state.queue = [];
+  state.buffer = [];
+  state.winner = dead.length === 2 ? null : opponentOf(dead[0].index);
+  log(state, state.winner == null ? 'Both heroes fall. Draw!' : `${state.players[state.winner].name} wins!`);
+}
+
+export function run(state) {
+  let guard = 0;
+  const recent = [];
+  while (state.queue.length && !state.pending && !state.gameOver) {
+    // Safety net: effects that keep triggering each other forever are stopped
+    // (the rest of the chain is dropped) instead of freezing the game.
+    if (++guard > 20000) {
+      const kinds = [...new Set(recent.slice(-50))].join(', ');
+      log(state, `⚠ An endless chain of effects was stopped (${kinds}).`);
+      state.queue = [];
+      state.buffer = [];
+      break;
+    }
+    const step = state.queue.shift();
+    recent.push(step.kind + (step.cardId ? `:${step.cardId}` : '') + (step.event?.type ? `:${step.event.type}` : ''));
+    if (recent.length > 200) recent.splice(0, 100);
+    STEPS[step.kind](state, step);
+    checkRasengan(state);
+    if (state.buffer.length) {
+      const buffered = state.buffer;
+      state.buffer = [];
+      pushFront(state, buffered);
+    }
+    applyAuras(state);
+    checkGameOver(state);
+  }
+  return state;
+}
+
+hooks.hasReaction = (state, p, windowName, ctx) => eligibleQuickPlays(state, p, windowName, ctx).length > 0;
+
+// Traps on 'heroLethal' (Last Resort Protocol): fire before lethal damage lands; true = prevented.
+hooks.preventLethal = (state, hero) => {
+  const pl = state.players[hero.owner];
+  const trap = pl.traps.find((t) => getCard(t.cardId).trap?.on === 'heroLethal');
+  if (!trap) return false;
+  pl.traps.splice(pl.traps.indexOf(trap), 1);
+  pl.graveyard.push(trap);
+  const card = getCard(trap.cardId);
+  log(state, `Trap revealed: ${card.name}!`);
+  const ctx = { self: trap.uid, controller: hero.owner, cardId: trap.cardId };
+  state.buffer.push(...card.trap.effects.map((effect) => ({ kind: 'effect', effect, ctx })), { kind: 'deaths' },
+    { kind: 'event', event: { type: 'trapTriggered', player: hero.owner, cardId: trap.cardId } });
+  return true;
+};
+
+// Archangel's Divine Shield: a weapon with heroShield prevents damage to its Hero and loses 1 Durability.
+hooks.shieldHero = (state, hero) => {
+  const slot = hero.weapon?.heroShield ? 1 : hero.weapon2?.heroShield ? 2 : 0;
+  if (!slot) return false;
+  const w = slot === 2 ? hero.weapon2 : hero.weapon;
+  log(state, `🛡️ ${w.name} shields ${nameOf(state, hero)} from the damage.`);
+  traceFx(state, { type: 'heroShield', target: hero.uid });
+  EFFECT_OPS.wearHeroWeapon(state, { slot, shield: true }, { controller: hero.owner });
+  return true;
+};
+
+// The player who must act next (a reaction or choice can belong to the non-active player).
+export function actingPlayer(state) {
+  return state.pending?.player ?? state.activePlayer;
+}
+
+// Late-bound hooks keep the shared primitives independent of the faction module.
+hooks.initMinion = initOnePieceMinion;
+hooks.modifyIncomingDamage = onePieceIncomingDamage;
+hooks.healBlocked = onePieceHealBlocked;
+hooks.silenceRemovable = silenceRemovable;

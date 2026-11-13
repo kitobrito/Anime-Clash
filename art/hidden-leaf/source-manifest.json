@@ -1,0 +1,827 @@
+[
+  {
+    "source": "IMG_1896.WEBP",
+    "output": "IMG_1896.webp",
+    "source_size": [
+      1024,
+      768
+    ],
+    "crop_box": [
+      128,
+      0,
+      896,
+      768
+    ],
+    "sha256": "7527238769d48545a2fd2ef57fbfff579ec18c6928a5ffcd098a5bd117d8cfdc"
+  },
+  {
+    "source": "IMG_5184.PNG",
+    "output": "IMG_5184.webp",
+    "source_size": [
+      668,
+      668
+    ],
+    "crop_box": [
+      0,
+      0,
+      668,
+      668
+    ],
+    "sha256": "fcf1b266f6c7721f7a5b9f5cfc3a302461d0f127271f0e6bbaeb4f21779ec0da"
+  },
+  {
+    "source": "IMG_5185.JPG",
+    "output": "IMG_5185.webp",
+    "source_size": [
+      1280,
+      720
+    ],
+    "crop_box": [
+      280,
+      0,
+      1000,
+      720
+    ],
+    "sha256": "c353e50e9bf9b2b16d6e53ac436c4336166f49d243f4227f95f8791754a7e08d"
+  },
+  {
+    "source": "IMG_5186.AVIF",
+    "output": "IMG_5186.webp",
+    "source_size": [
+      1200,
+      700
+    ],
+    "crop_box": [
+      250,
+      0,
+      950,
+      700
+    ],
+    "sha256": "01d175f70a6e6bc092d7cec457c976622732e5e7c6825fb06f688191b2fa24b7"
+  },
+  {
+    "source": "IMG_5187.JPG",
+    "output": "IMG_5187.webp",
+    "source_size": [
+      736,
+      552
+    ],
+    "crop_box": [
+      92,
+      0,
+      644,
+      552
+    ],
+    "sha256": "75e4b000a076ca9137c33c66314e04e4923a8dce098ccd5a18d67eb0d61b566f"
+  },
+  {
+    "source": "IMG_5188.WEBP",
+    "output": "IMG_5188.webp",
+    "source_size": [
+      500,
+      382
+    ],
+    "crop_box": [
+      59,
+      0,
+      441,
+      382
+    ],
+    "sha256": "6b4e98ec064cf5869fb087cd9bf4c2b3fee3847a5719466f9b8da70821b4a27c"
+  },
+  {
+    "source": "IMG_5189.JPG",
+    "output": "IMG_5189.webp",
+    "source_size": [
+      1908,
+      1700
+    ],
+    "crop_box": [
+      104,
+      0,
+      1804,
+      1700
+    ],
+    "sha256": "56c5bd5e432f6dcc15a007eb6a2807e3225f3a6d73f92b7fb891fd0c0455c1d5"
+  },
+  {
+    "source": "IMG_5190.WEBP",
+    "output": "IMG_5190.webp",
+    "source_size": [
+      360,
+      272
+    ],
+    "crop_box": [
+      44,
+      0,
+      316,
+      272
+    ],
+    "sha256": "91a30600f2e52b20d9517481ae9fe4f55d9b25d4e7599fa068ba524ae47de04b"
+  },
+  {
+    "source": "IMG_5191.WEBP",
+    "output": "IMG_5191.webp",
+    "source_size": [
+      474,
+      575
+    ],
+    "crop_box": [
+      0,
+      50,
+      474,
+      524
+    ],
+    "sha256": "f64f69d8ca21128f1374152090c36d00183084a8ce7013217e1b1a49bd727dc7"
+  },
+  {
+    "source": "IMG_5192.WEBP",
+    "output": "IMG_5192.webp",
+    "source_size": [
+      985,
+      739
+    ],
+    "crop_box": [
+      123,
+      0,
+      862,
+      739
+    ],
+    "sha256": "f83509e13b9f023413b91f8d069ee8ba3ce26439cd9ae93c572380b98943c79c"
+  },
+  {
+    "source": "IMG_5193.JPG",
+    "output": "IMG_5193.webp",
+    "source_size": [
+      693,
+      442
+    ],
+    "crop_box": [
+      125,
+      0,
+      567,
+      442
+    ],
+    "sha256": "11509f5c3322034ee8f23884f4846d5caff2b3d6e6131f9aa7c36de1918f4a4d"
+  },
+  {
+    "source": "IMG_5194.PNG",
+    "output": "IMG_5194.webp",
+    "source_size": [
+      577,
+      1024
+    ],
+    "crop_box": [
+      0,
+      223,
+      577,
+      800
+    ],
+    "sha256": "eaea9b6311143468776d7203584811c0fda622bdbb07e1b85f214add57078431"
+  },
+  {
+    "source": "IMG_5195.WEBP",
+    "output": "IMG_5195.webp",
+    "source_size": [
+      600,
+      500
+    ],
+    "crop_box": [
+      50,
+      0,
+      550,
+      500
+    ],
+    "sha256": "280cbffe6b321160341052b3fed80e0da345dac83a7fa9898d8dfb46d276cd4e"
+  },
+  {
+    "source": "IMG_5196.JPG",
+    "output": "IMG_5196.webp",
+    "source_size": [
+      500,
+      500
+    ],
+    "crop_box": [
+      0,
+      0,
+      500,
+      500
+    ],
+    "sha256": "aff54f95f3601bf1f3c29b927f9129dda91668d1d9c6ed67ca859efc1a5597cd"
+  },
+  {
+    "source": "IMG_5197.WEBP",
+    "output": "IMG_5197.webp",
+    "source_size": [
+      443,
+      319
+    ],
+    "crop_box": [
+      62,
+      0,
+      381,
+      319
+    ],
+    "sha256": "c77fef7d7323535c6aef9936f92d9e65911d5a906f16f746b2bac0cc36ccf520"
+  },
+  {
+    "source": "IMG_5198.JPG",
+    "output": "IMG_5198.webp",
+    "source_size": [
+      720,
+      540
+    ],
+    "crop_box": [
+      90,
+      0,
+      630,
+      540
+    ],
+    "sha256": "a672424d0559ce03612cd0f72c700369aa766cdb1b249a7416d2a1b61d54026e"
+  },
+  {
+    "source": "IMG_5199.WEBP",
+    "output": "IMG_5199.webp",
+    "source_size": [
+      640,
+      480
+    ],
+    "crop_box": [
+      80,
+      0,
+      560,
+      480
+    ],
+    "sha256": "603c97e5d0d932e0a9bb9b2080d3bc6c787e1adb006766a6b766942b1a1631c4"
+  },
+  {
+    "source": "IMG_5200.PNG",
+    "output": "IMG_5200.webp",
+    "source_size": [
+      600,
+      454
+    ],
+    "crop_box": [
+      73,
+      0,
+      527,
+      454
+    ],
+    "sha256": "357e9f89c45930f6d977fa6efe2d1b13d315111962f521c3e21a186754ee8c53"
+  },
+  {
+    "source": "IMG_5201.AVIF",
+    "output": "IMG_5201.webp",
+    "source_size": [
+      1600,
+      900
+    ],
+    "crop_box": [
+      350,
+      0,
+      1250,
+      900
+    ],
+    "sha256": "8bfee6d02b4dbb96d9abfc1c3a9a6f6db6d2690f180d49dd9b6ca052c60a033a"
+  },
+  {
+    "source": "IMG_5202.WEBP",
+    "output": "IMG_5202.webp",
+    "source_size": [
+      2400,
+      1440
+    ],
+    "crop_box": [
+      480,
+      0,
+      1920,
+      1440
+    ],
+    "sha256": "4074b7b7cae1fc017cf96e15af7419eed09e5fed7502f428c0bc4a8526b5355e"
+  },
+  {
+    "source": "IMG_5203.AVIF",
+    "output": "IMG_5203.webp",
+    "source_size": [
+      1800,
+      900
+    ],
+    "crop_box": [
+      450,
+      0,
+      1350,
+      900
+    ],
+    "sha256": "ce1c36b072bf471bd68e772cc0c31ec50f6511ddcda64116fbc9c9696428298b"
+  },
+  {
+    "source": "IMG_5204.WEBP",
+    "output": "IMG_5204.webp",
+    "source_size": [
+      1440,
+      1460
+    ],
+    "crop_box": [
+      0,
+      10,
+      1440,
+      1450
+    ],
+    "sha256": "c147eb342f8e930367c98a9bc1f7ed90a8650b7048a0320e3687ba7b9dd7e02e"
+  },
+  {
+    "source": "IMG_5206.WEBP",
+    "output": "IMG_5206.webp",
+    "source_size": [
+      487,
+      375
+    ],
+    "crop_box": [
+      56,
+      0,
+      431,
+      375
+    ],
+    "sha256": "7e7d3b6e4fb0c91af80d9935f1b7ee428d28b6615905aa1d7afb5a19789110f8"
+  },
+  {
+    "source": "IMG_5207.WEBP",
+    "output": "IMG_5207.webp",
+    "source_size": [
+      640,
+      480
+    ],
+    "crop_box": [
+      80,
+      0,
+      560,
+      480
+    ],
+    "sha256": "90d0e4eb983700221231e83ce9f09df4bf5608595d4afca583668521dcf1ff6e"
+  },
+  {
+    "source": "IMG_5208.JPG",
+    "output": "IMG_5208.webp",
+    "source_size": [
+      512,
+      341
+    ],
+    "crop_box": [
+      85,
+      0,
+      426,
+      341
+    ],
+    "sha256": "b91814ce2978e9cb2246388681579f8709d9900a617b8edce0ebe7b1074bab72"
+  },
+  {
+    "source": "IMG_5209.JPG",
+    "output": "IMG_5209.webp",
+    "source_size": [
+      500,
+      375
+    ],
+    "crop_box": [
+      62,
+      0,
+      437,
+      375
+    ],
+    "sha256": "945ed3f3e5e77519d11e47d09864b56d0d1e92680cfdd0c9cf8c1de30533af0f"
+  },
+  {
+    "source": "IMG_5210.JPG",
+    "output": "IMG_5210.webp",
+    "source_size": [
+      500,
+      375
+    ],
+    "crop_box": [
+      62,
+      0,
+      437,
+      375
+    ],
+    "sha256": "5841b0dc8942f6b4263c42b7f237b015e260c621f5513b5f9fb917a3e192f1b4"
+  },
+  {
+    "source": "IMG_5211.WEBP",
+    "output": "IMG_5211.webp",
+    "source_size": [
+      635,
+      480
+    ],
+    "crop_box": [
+      77,
+      0,
+      557,
+      480
+    ],
+    "sha256": "a75896e7a4e0f6a8557d85ee3b26e9c0d6672a9ce04e062fd422adb3f0fd4617"
+  },
+  {
+    "source": "IMG_5212.WEBP",
+    "output": "IMG_5212.webp",
+    "source_size": [
+      1388,
+      1050
+    ],
+    "crop_box": [
+      169,
+      0,
+      1219,
+      1050
+    ],
+    "sha256": "959f9a78e8e85b5ce15461c9ca023f8e9ccd6c4d3e0c64ea6289b7cfd36dfe08"
+  },
+  {
+    "source": "IMG_5213.JPG",
+    "output": "IMG_5213.webp",
+    "source_size": [
+      1280,
+      720
+    ],
+    "crop_box": [
+      280,
+      0,
+      1000,
+      720
+    ],
+    "sha256": "d60f6cdea05763a222a71262a0f93a58182416120cac0a90edf02f28e86dc14d"
+  },
+  {
+    "source": "IMG_5214.WEBP",
+    "output": "IMG_5214.webp",
+    "source_size": [
+      1429,
+      1080
+    ],
+    "crop_box": [
+      174,
+      0,
+      1254,
+      1080
+    ],
+    "sha256": "37cf2fb772ccfa5e6da7d4c86a1fc92aacb19fe5f6bc4fe362efa8b7a40636a7"
+  },
+  {
+    "source": "IMG_5215.JPG",
+    "output": "IMG_5215.webp",
+    "source_size": [
+      1280,
+      720
+    ],
+    "crop_box": [
+      280,
+      0,
+      1000,
+      720
+    ],
+    "sha256": "6389022b19ca76e54d16b5299fb3bf88a250688ed609659804b058a35504f3a4"
+  },
+  {
+    "source": "IMG_5216.WEBP",
+    "output": "IMG_5216.webp",
+    "source_size": [
+      640,
+      485
+    ],
+    "crop_box": [
+      77,
+      0,
+      562,
+      485
+    ],
+    "sha256": "78e85c9e5dd79075c708339145584cfbeeb6ec22d09d963ebb231ce63bb80daf"
+  },
+  {
+    "source": "IMG_5217.WEBP",
+    "output": "IMG_5217.webp",
+    "source_size": [
+      300,
+      225
+    ],
+    "crop_box": [
+      37,
+      0,
+      262,
+      225
+    ],
+    "sha256": "cfa53b0afbbdaf2a2f6b1ea5088320b9b396ee8a594dda83257d0b1d031f4115"
+  },
+  {
+    "source": "IMG_5218 2.WEBP",
+    "output": "IMG_5218 2.webp",
+    "source_size": [
+      1024,
+      768
+    ],
+    "crop_box": [
+      128,
+      0,
+      896,
+      768
+    ],
+    "sha256": "fb8de7705298c40601aee8e216e80eb868fbd29f4f89533ed06acb168c0100fe"
+  },
+  {
+    "source": "IMG_5218.WEBP",
+    "output": "IMG_5218.webp",
+    "source_size": [
+      1024,
+      768
+    ],
+    "crop_box": [
+      128,
+      0,
+      896,
+      768
+    ],
+    "sha256": "fb8de7705298c40601aee8e216e80eb868fbd29f4f89533ed06acb168c0100fe"
+  },
+  {
+    "source": "IMG_5220.JPG",
+    "output": "IMG_5220.webp",
+    "source_size": [
+      480,
+      360
+    ],
+    "crop_box": [
+      60,
+      0,
+      420,
+      360
+    ],
+    "sha256": "c6a61629f76c443a438b5d24b759f5c999e070f973ff8ef624071e383bc29dd9"
+  },
+  {
+    "source": "IMG_5221.JPG",
+    "output": "IMG_5221.webp",
+    "source_size": [
+      613,
+      920
+    ],
+    "crop_box": [
+      0,
+      153,
+      613,
+      766
+    ],
+    "sha256": "2d94bfa049b4e50fc8a58320ae4e532a664bfc0f832cbc73e731f9c3f78cd8e7"
+  },
+  {
+    "source": "IMG_5222.WEBP",
+    "output": "IMG_5222.webp",
+    "source_size": [
+      985,
+      568
+    ],
+    "crop_box": [
+      208,
+      0,
+      776,
+      568
+    ],
+    "sha256": "7daae30b3237a5083655e3b57e9906ffd5ccc7dd7aeb16b847d811a39bb3bcd2"
+  },
+  {
+    "source": "IMG_5223.JPG",
+    "output": "IMG_5223.webp",
+    "source_size": [
+      1170,
+      869
+    ],
+    "crop_box": [
+      150,
+      0,
+      1019,
+      869
+    ],
+    "sha256": "6074e401344345d7586b3684901e952209256e85b01692fd7bfe5e935005e96f"
+  },
+  {
+    "source": "IMG_5224.WEBP",
+    "output": "IMG_5224.webp",
+    "source_size": [
+      640,
+      360
+    ],
+    "crop_box": [
+      140,
+      0,
+      500,
+      360
+    ],
+    "sha256": "29bc8fbf74a7c1dc15cb2bc8bde2b6782ad0a89a652550c407d8d9aef69b14d4"
+  },
+  {
+    "source": "IMG_5225.WEBP",
+    "output": "IMG_5225.webp",
+    "source_size": [
+      1600,
+      900
+    ],
+    "crop_box": [
+      350,
+      0,
+      1250,
+      900
+    ],
+    "sha256": "60191fbabef8e333b34ff519130c6eb87cdf6afcf1faecfac39d24cead69d143"
+  },
+  {
+    "source": "IMG_5226.AVIF",
+    "output": "IMG_5226.webp",
+    "source_size": [
+      1200,
+      675
+    ],
+    "crop_box": [
+      262,
+      0,
+      937,
+      675
+    ],
+    "sha256": "cd4b34289260b4918a310b132bb00d13976a8b3b0ea1ac328ad36f5c645a621b"
+  },
+  {
+    "source": "IMG_5227.WEBP",
+    "output": "IMG_5227.webp",
+    "source_size": [
+      1911,
+      1080
+    ],
+    "crop_box": [
+      415,
+      0,
+      1495,
+      1080
+    ],
+    "sha256": "6f4b51cbf4500abc78042f2ad08281dcd308592cc4da0c8f599cfdd6b849b764"
+  },
+  {
+    "source": "IMG_5228.AVIF",
+    "output": "IMG_5228.webp",
+    "source_size": [
+      1650,
+      928
+    ],
+    "crop_box": [
+      361,
+      0,
+      1289,
+      928
+    ],
+    "sha256": "062b5d263da14dcbdf79cc0f7e07d6e6f5a7f3f4542eb911dc26d89b7f3d1684"
+  },
+  {
+    "source": "IMG_5229.WEBP",
+    "output": "IMG_5229.webp",
+    "source_size": [
+      1912,
+      1078
+    ],
+    "crop_box": [
+      417,
+      0,
+      1495,
+      1078
+    ],
+    "sha256": "69720273bacf034b3e8fc379c227a7762b8c2b73edfa3dff86d6e995cc289eeb"
+  },
+  {
+    "source": "IMG_5230.JPG",
+    "output": "IMG_5230.webp",
+    "source_size": [
+      1280,
+      720
+    ],
+    "crop_box": [
+      280,
+      0,
+      1000,
+      720
+    ],
+    "sha256": "2391e56fb7576228dbe0af1b46d2b3fc2192bf7fc3f6eed3bcc80980ea833548"
+  },
+  {
+    "source": "IMG_5231.WEBP",
+    "output": "IMG_5231.webp",
+    "source_size": [
+      1024,
+      768
+    ],
+    "crop_box": [
+      128,
+      0,
+      896,
+      768
+    ],
+    "sha256": "fdca977ad5591a5624e5a52cf354f12aea2dd72c113c36a1b8c2309e35cce37e"
+  },
+  {
+    "source": "IMG_5232.WEBP",
+    "output": "IMG_5232.webp",
+    "source_size": [
+      1024,
+      768
+    ],
+    "crop_box": [
+      128,
+      0,
+      896,
+      768
+    ],
+    "sha256": "da433041606b98a9febec2f3ff0a1fd7a9e832350d66855bd00ecee37733678e"
+  },
+  {
+    "source": "IMG_5233.WEBP",
+    "output": "IMG_5233.webp",
+    "source_size": [
+      1912,
+      1080
+    ],
+    "crop_box": [
+      416,
+      0,
+      1496,
+      1080
+    ],
+    "sha256": "b1249a5da6543d7df7fb39cab2c7688886b04aec754bd4004ad9cfa009da1304"
+  },
+  {
+    "source": "IMG_5234.WEBP",
+    "output": "IMG_5234.webp",
+    "source_size": [
+      1200,
+      900
+    ],
+    "crop_box": [
+      150,
+      0,
+      1050,
+      900
+    ],
+    "sha256": "f2d3ca1a33c2f9437b3c270fb06b33f3fbf4d7d4e3780e047e5dc37cb0004999"
+  },
+  {
+    "source": "IMG_5235.WEBP",
+    "output": "IMG_5235.webp",
+    "source_size": [
+      1913,
+      1080
+    ],
+    "crop_box": [
+      416,
+      0,
+      1496,
+      1080
+    ],
+    "sha256": "d3babc986832c16a51feac67c531668f8c3df876d8a94e1f41f0739ee8b3ffb8"
+  },
+  {
+    "source": "IMG_5236.WEBP",
+    "output": "IMG_5236.webp",
+    "source_size": [
+      360,
+      270
+    ],
+    "crop_box": [
+      45,
+      0,
+      315,
+      270
+    ],
+    "sha256": "51c972ba469837da0b0fc81b2ee92f2d933dfb8bbfa728dc959e394ffbc535f9"
+  },
+  {
+    "source": "IMG_5237.WEBP",
+    "output": "IMG_5237.webp",
+    "source_size": [
+      1916,
+      1080
+    ],
+    "crop_box": [
+      418,
+      0,
+      1498,
+      1080
+    ],
+    "sha256": "35a5564b6f30d2e39db9afcf129f1c9bac3ff20a3ac96322b858efe35d304626"
+  },
+  {
+    "source": "IMG_5238.JPG",
+    "output": "IMG_5238.webp",
+    "source_size": [
+      1916,
+      1080
+    ],
+    "crop_box": [
+      418,
+      0,
+      1498,
+      1080
+    ],
+    "sha256": "0cd160581d1a64dd5735eb16f99751902912ad9a56c21600eda41cee72d84b76"
+  }
+]

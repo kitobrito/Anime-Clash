@@ -1,0 +1,14 @@
+{
+  "name": "anime-clash-tcg",
+  "private": true,
+  "type": "module",
+  "description": "A standalone anime faction card game, derived from Shattered Realms.",
+  "scripts": {
+    "start": "node tools/serve-anime.mjs",
+    "test": "node tools/test-naruto.mjs && node tools/test-one-piece.mjs",
+    "package": "python3 tools/package-anime.py"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

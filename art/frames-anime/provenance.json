@@ -1,0 +1,62 @@
+[
+  {
+    "kind": "frame",
+    "key": "basic-minion",
+    "path": "/workspace/generated_images/exec-969598e8-15a9-4628-a59b-e1770b8997c4.png"
+  },
+  {
+    "kind": "frame",
+    "key": "basic-spell",
+    "path": "/workspace/generated_images/exec-f9c81a5b-433a-42a2-9eed-38086f69a5b3.png"
+  },
+  {
+    "kind": "frame",
+    "key": "basic-trap",
+    "path": "/workspace/generated_images/exec-f4473fdf-0956-4dc4-85df-283e90abc280.png"
+  },
+  {
+    "kind": "frame",
+    "key": "basic-weapon",
+    "path": "/workspace/generated_images/exec-f86ccb86-af21-4305-b964-1cb155a87487.png"
+  },
+  {
+    "kind": "frame",
+    "key": "naruto-minion",
+    "path": "/workspace/generated_images/exec-dfbe07fd-49e7-4579-a52e-31b5b18bbaea.png"
+  },
+  {
+    "kind": "frame",
+    "key": "naruto-spell",
+    "path": "/workspace/generated_images/exec-543b006f-4735-46d7-a4f3-970fe938dd30.png"
+  },
+  {
+    "kind": "frame",
+    "key": "naruto-trap",
+    "path": "/workspace/generated_images/exec-ea8dfa38-3fc8-4f27-bcf3-5ebfb1b04a66.png"
+  },
+  {
+    "kind": "frame",
+    "key": "naruto-weapon",
+    "path": "/workspace/generated_images/exec-4b31668b-e153-460a-86dd-e0a78cc1c445.png"
+  },
+  {
+    "kind": "frame",
+    "key": "one-piece-minion",
+    "path": "/workspace/generated_images/exec-bedb7dda-2da5-4f4d-84a6-d06c6fbdf768.png"
+  },
+  {
+    "kind": "frame",
+    "key": "one-piece-spell",
+    "path": "/workspace/generated_images/exec-0c7f8882-996c-4bd5-9475-dea2ae1491db.png"
+  },
+  {
+    "kind": "frame",
+    "key": "one-piece-trap",
+    "path": "/workspace/generated_images/exec-b3befba0-06a2-4556-bbfc-4107f82e60e7.png"
+  },
+  {
+    "kind": "frame",
+    "key": "one-piece-weapon",
+    "path": "/workspace/generated_images/exec-21e9b4a5-542f-4c53-a724-41efe0d310df.png"
+  }
+]

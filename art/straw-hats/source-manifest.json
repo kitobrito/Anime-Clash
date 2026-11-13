@@ -1,0 +1,842 @@
+[
+  {
+    "card": "op_luffy",
+    "source": "5B8BDC89-737E-40C3-91D2-7744B12244DE.JPEG",
+    "source_size": [
+      1024,
+      908
+    ],
+    "crop_box": [
+      58,
+      0,
+      966,
+      908
+    ],
+    "sha256": "9dcec55d08a010c8c748c16fdf53f0c31e2c85937c8f8326793cf364e946ce1e"
+  },
+  {
+    "card": "op_gear2",
+    "source": "20676D6F-97ED-4E1C-BB45-130B757BCC1A.JPEG",
+    "source_size": [
+      1147,
+      860
+    ],
+    "crop_box": [
+      143,
+      0,
+      1003,
+      860
+    ],
+    "sha256": "63058867c72f874ec1d6a89ef90db10a820a373e681714cd18e0c6f6b41aca37"
+  },
+  {
+    "card": "op_gear3",
+    "source": "5D711D72-CA2F-4EAC-B2D6-B0115EF8646D.JPEG",
+    "source_size": [
+      1529,
+      860
+    ],
+    "crop_box": [
+      334,
+      0,
+      1194,
+      860
+    ],
+    "sha256": "c815d8a9740c9610b076abcfe14d33ee02d7ac4b22bebdbbe30ed3c695f42483"
+  },
+  {
+    "card": "op_bounceman",
+    "source": "80272EB4-5B7F-416B-8618-F60BC92817F0.JPEG",
+    "source_size": [
+      1075,
+      860
+    ],
+    "crop_box": [
+      107,
+      0,
+      967,
+      860
+    ],
+    "sha256": "dd1a2d1580ea8534d96d12754014dcc84fbb46b4278d1e962757156ab0ef8469"
+  },
+  {
+    "card": "op_snakeman",
+    "source": "9597ED21-F838-4AA3-833C-E0A85998BB63.JPEG",
+    "source_size": [
+      1332,
+      850
+    ],
+    "crop_box": [
+      241,
+      0,
+      1091,
+      850
+    ],
+    "sha256": "a282eae4f339255d4c407faf4f685ba61384090e4c456f145d57e159209f8ffe"
+  },
+  {
+    "card": "op_gear5",
+    "source": "5E7CC417-02A5-4FCD-8791-A9B10129219E.JPEG",
+    "source_size": [
+      1365,
+      768
+    ],
+    "crop_box": [
+      298,
+      0,
+      1066,
+      768
+    ],
+    "sha256": "a3d9eb813a08db09ade1492e5dcfe6d68357d4e74ae39dd3998d2c7f987662d3"
+  },
+  {
+    "card": "op_zoro",
+    "source": "IMG_5245.WEBP",
+    "source_size": [
+      1100,
+      733
+    ],
+    "crop_box": [
+      183,
+      0,
+      916,
+      733
+    ],
+    "sha256": "15311649457165ade2d9b2dd94527b1beeffdac9d879c74a2a475179c28a411f"
+  },
+  {
+    "card": "op_nami",
+    "source": "IMG_5246.AVIF",
+    "source_size": [
+      1400,
+      700
+    ],
+    "crop_box": [
+      350,
+      0,
+      1050,
+      700
+    ],
+    "sha256": "073eb39386276badc1262108df581cec06d5f6b64e44c5f2f9eab6d2a8aa488c"
+  },
+  {
+    "card": "op_usopp",
+    "source": "IMG_5247.WEBP",
+    "source_size": [
+      940,
+      529
+    ],
+    "crop_box": [
+      205,
+      0,
+      734,
+      529
+    ],
+    "sha256": "1477de03b6b3386efd8a58b60a85ebc60881f3c6db7c3687652837331d415f7a"
+  },
+  {
+    "card": "op_sanji",
+    "source": "IMG_5248.JPG",
+    "source_size": [
+      430,
+      713
+    ],
+    "crop_box": [
+      0,
+      141,
+      430,
+      571
+    ],
+    "sha256": "6cfa226ab76af3be0ad5747c9b1ae3223f6edad392032f6fc533aed150b2d6a1"
+  },
+  {
+    "card": "op_chopper",
+    "source": "IMG_5288.JPG",
+    "source_size": [
+      736,
+      328
+    ],
+    "crop_box": [
+      120,
+      125,
+      300,
+      305
+    ],
+    "sha256": "a941f350dab520e4ba397d4ecad417638e87d9a145e3e5dc6d71f96cf7b48b51"
+  },
+  {
+    "card": "op_robin",
+    "source": "IMG_5249.JPG",
+    "source_size": [
+      1280,
+      720
+    ],
+    "crop_box": [
+      280,
+      0,
+      1000,
+      720
+    ],
+    "sha256": "a2da7b81bb56aac479c16d802aeec886dd1acb38e517061dfe626bc060c80eb9"
+  },
+  {
+    "card": "op_franky",
+    "source": "IMG_5250.WEBP",
+    "source_size": [
+      1039,
+      1028
+    ],
+    "crop_box": [
+      5,
+      0,
+      1033,
+      1028
+    ],
+    "sha256": "d80e8d60e92c4e59291a0eea7adcd436612f697f610e578e87697571d9b55d02"
+  },
+  {
+    "card": "op_brook",
+    "source": "IMG_5251.WEBP",
+    "source_size": [
+      960,
+      540
+    ],
+    "crop_box": [
+      210,
+      0,
+      750,
+      540
+    ],
+    "sha256": "451a604140ecd1852f5d5e32a0d97a7f8cd892851033fe1085693205c8a83329"
+  },
+  {
+    "card": "op_jinbe",
+    "source": "IMG_5252.JPG",
+    "source_size": [
+      736,
+      736
+    ],
+    "crop_box": [
+      0,
+      0,
+      736,
+      736
+    ],
+    "sha256": "031b04340f9124b8f4f0cecb4b6084543db445f86505c5f5f946517d98538f97"
+  },
+  {
+    "card": "op_going_merry",
+    "source": "IMG_5253.WEBP",
+    "source_size": [
+      1074,
+      898
+    ],
+    "crop_box": [
+      88,
+      0,
+      986,
+      898
+    ],
+    "sha256": "0a2de63c1d0233c43672a0e2addb4931815a655d5c4c8eedee2bc6704f804bc8"
+  },
+  {
+    "card": "op_thousand_sunny",
+    "source": "IMG_5254.AVIF",
+    "source_size": [
+      1650,
+      825
+    ],
+    "crop_box": [
+      412,
+      0,
+      1237,
+      825
+    ],
+    "sha256": "dcc58ae63704d6b8aa6529025336d229f1bd313bd49480201e23c32b4d5a970a"
+  },
+  {
+    "card": "op_ace",
+    "source": "IMG_5255.WEBP",
+    "source_size": [
+      678,
+      1132
+    ],
+    "crop_box": [
+      0,
+      227,
+      678,
+      905
+    ],
+    "sha256": "4b5c20d622fc21345f2da07b09add3042bfb7304ecb840ebb55899e73bec1356"
+  },
+  {
+    "card": "op_sabo",
+    "source": "IMG_5256.WEBP",
+    "source_size": [
+      417,
+      609
+    ],
+    "crop_box": [
+      0,
+      96,
+      417,
+      513
+    ],
+    "sha256": "395333b325187b63df5549cee9d357c09c236c68b4afc4b148404644ab4520fa"
+  },
+  {
+    "card": "op_law",
+    "source": "IMG_5257.WEBP",
+    "source_size": [
+      736,
+      1313
+    ],
+    "crop_box": [
+      0,
+      288,
+      736,
+      1024
+    ],
+    "sha256": "e46a238f4d78d1935b26e62567ad6c49d3effc81b9a9ea02944f964b21c539c2"
+  },
+  {
+    "card": "op_bepo",
+    "source": "IMG_5258.WEBP",
+    "source_size": [
+      698,
+      1066
+    ],
+    "crop_box": [
+      0,
+      184,
+      698,
+      882
+    ],
+    "sha256": "b4cd5f5971535d21bd0b6e9eb4b7b09ba50655836b5d6a28a22130c45bffb691"
+  },
+  {
+    "card": "op_hancock",
+    "source": "IMG_5259.WEBP",
+    "source_size": [
+      1000,
+      2062
+    ],
+    "crop_box": [
+      0,
+      531,
+      1000,
+      1531
+    ],
+    "sha256": "0ebcf4362110c73b5ca67bfbb8e3bb0c6e0d40a4d6dbad54dc1a3a1f0076e409"
+  },
+  {
+    "card": "op_yamato",
+    "source": "IMG_5260.WEBP",
+    "source_size": [
+      1059,
+      1575
+    ],
+    "crop_box": [
+      0,
+      258,
+      1059,
+      1317
+    ],
+    "sha256": "9019b3796a74952f105e56a0de31cf9d08e9aac4a64611079c67bcc5568220f4"
+  },
+  {
+    "card": "op_carrot",
+    "source": "IMG_5261.AVIF",
+    "source_size": [
+      1200,
+      675
+    ],
+    "crop_box": [
+      262,
+      0,
+      937,
+      675
+    ],
+    "sha256": "99fae716fac6e340560b39820bb2b6539346f73b2724a8238a37cfbde95695a7"
+  },
+  {
+    "card": "op_kinemon",
+    "source": "IMG_5262.WEBP",
+    "source_size": [
+      583,
+      1080
+    ],
+    "crop_box": [
+      0,
+      248,
+      583,
+      831
+    ],
+    "sha256": "3d18b3dc256024d9a4aea54245c68e73a94c5010fe6188f6e61794159ab46a83"
+  },
+  {
+    "card": "op_bartolomeo",
+    "source": "IMG_5263.WEBP",
+    "source_size": [
+      948,
+      2155
+    ],
+    "crop_box": [
+      0,
+      603,
+      948,
+      1551
+    ],
+    "sha256": "f72c176c10d547ecbda895b559341a3994a9c807070e39876089014be573178d"
+  },
+  {
+    "card": "op_fleet_captain",
+    "source": "IMG_5264.WEBP",
+    "source_size": [
+      1920,
+      1080
+    ],
+    "crop_box": [
+      420,
+      0,
+      1500,
+      1080
+    ],
+    "sha256": "54372b1931a77477f9e4bc7ce65ea28f9ae2f749b540a6b11416718529755238"
+  },
+  {
+    "card": "op_mera",
+    "source": "IMG_5265.JPG",
+    "source_size": [
+      442,
+      452
+    ],
+    "crop_box": [
+      0,
+      5,
+      442,
+      447
+    ],
+    "sha256": "707dc02a936f7b883e24e99d62d7722f82cd33b0a99eab3a21f8d94da7f2ce4d"
+  },
+  {
+    "card": "op_goro",
+    "source": "IMG_5266.WEBP",
+    "source_size": [
+      650,
+      615
+    ],
+    "crop_box": [
+      17,
+      0,
+      632,
+      615
+    ],
+    "sha256": "834a9485f86c89fcd95d547417e000963e891af0b33ef3806b396c33052e96e2"
+  },
+  {
+    "card": "op_hie",
+    "source": "IMG_5267.WEBP",
+    "source_size": [
+      324,
+      447
+    ],
+    "crop_box": [
+      0,
+      61,
+      324,
+      385
+    ],
+    "sha256": "bce5be7507360746456bc8806bcac3cb49838959334c5c9e56c680d092d7e647"
+  },
+  {
+    "card": "op_hana",
+    "source": "IMG_5268.WEBP",
+    "source_size": [
+      580,
+      738
+    ],
+    "crop_box": [
+      0,
+      79,
+      580,
+      659
+    ],
+    "sha256": "f5cc2244b6636201f9384c84098ec361de5e2808740b54b939ff34737db3639f"
+  },
+  {
+    "card": "op_bara",
+    "source": "IMG_5269.WEBP",
+    "source_size": [
+      300,
+      392
+    ],
+    "crop_box": [
+      0,
+      46,
+      300,
+      346
+    ],
+    "sha256": "c3b58f6933acff381debb9a4688638b835339048b47d21cfbddb9ba306728d4f"
+  },
+  {
+    "card": "op_supa",
+    "source": "IMG_5270.JPG",
+    "source_size": [
+      474,
+      421
+    ],
+    "crop_box": [
+      26,
+      0,
+      447,
+      421
+    ],
+    "sha256": "8bdc7ed6afd3458d3d9020b2737ff5f225b84e6e957e4dca03742ba8e21d9d7b"
+  },
+  {
+    "card": "op_bomu",
+    "source": "IMG_5271.WEBP",
+    "source_size": [
+      490,
+      705
+    ],
+    "crop_box": [
+      0,
+      107,
+      490,
+      597
+    ],
+    "sha256": "f690f05858386f67b378a4681c53a6e2d89f0b40a808d1d7ca9c9274b6b9b123"
+  },
+  {
+    "card": "op_tori",
+    "source": "IMG_5272.WEBP",
+    "source_size": [
+      532,
+      727
+    ],
+    "crop_box": [
+      0,
+      97,
+      532,
+      629
+    ],
+    "sha256": "0e001f2c29ae5a6cd000c7a7aeae74a698858e20d95b2b455c695c03a4a35a4e"
+  },
+  {
+    "card": "op_pistol",
+    "source": "IMG_9494.WEBP",
+    "source_size": [
+      1838,
+      1080
+    ],
+    "crop_box": [
+      379,
+      0,
+      1459,
+      1080
+    ],
+    "sha256": "e8aff2da78eb95ba19da7f9755f72f04fc599f2c48e240c6335837be9ff8e8fe"
+  },
+  {
+    "card": "op_gatling",
+    "source": "IMG_5274.WEBP",
+    "source_size": [
+      640,
+      512
+    ],
+    "crop_box": [
+      64,
+      0,
+      576,
+      512
+    ],
+    "sha256": "3ef899df0db2aa050219fdf8e39678fee9b86a99d50eb181195015129bf15965"
+  },
+  {
+    "card": "op_red_hawk",
+    "source": "IMG_5275.JPG",
+    "source_size": [
+      736,
+      414
+    ],
+    "crop_box": [
+      161,
+      0,
+      575,
+      414
+    ],
+    "sha256": "b858f47a8bb35aa5d71fd1cfd823ec2ade2f0ffdf40c4f4b7cf4e2553ba23304"
+  },
+  {
+    "card": "op_oni_giri",
+    "source": "IMG_5276.WEBP",
+    "source_size": [
+      640,
+      480
+    ],
+    "crop_box": [
+      80,
+      0,
+      560,
+      480
+    ],
+    "sha256": "f1cf816b066589bde27ada9ac7ea8add1821b2030a60ddf6e073a1160d690428"
+  },
+  {
+    "card": "op_diable",
+    "source": "IMG_5277.JPG",
+    "source_size": [
+      399,
+      501
+    ],
+    "crop_box": [
+      0,
+      51,
+      399,
+      450
+    ],
+    "sha256": "3ada88c7aeb06dca79e3afaa00d108d6b042cc433d3d5f48a9dd21f05fc1579b"
+  },
+  {
+    "card": "op_thunderbolt",
+    "source": "IMG_5278.WEBP",
+    "source_size": [
+      1277,
+      718
+    ],
+    "crop_box": [
+      279,
+      0,
+      997,
+      718
+    ],
+    "sha256": "89ccbcb3cb20d5244cb44b425e5e03b8d50ff81ed0e82665b69e59fa496732c3"
+  },
+  {
+    "card": "op_armament",
+    "source": "IMG_5279.JPG",
+    "source_size": [
+      1800,
+      900
+    ],
+    "crop_box": [
+      450,
+      0,
+      1350,
+      900
+    ],
+    "sha256": "3228b0543dafa82cb128858ed76ebc9670a084ef9b2b557c0bf468a5bb3256fe"
+  },
+  {
+    "card": "op_observation",
+    "source": "IMG_5280.jpg",
+    "source_size": [
+      339,
+      339
+    ],
+    "crop_box": [
+      0,
+      0,
+      339,
+      339
+    ],
+    "sha256": "2670fb3adaa60c68c175adedaf0387d6b9ee4476707b24cd8db9ab32fb76a2c9"
+  },
+  {
+    "card": "op_conqueror",
+    "source": "IMG_5281.AVIF",
+    "source_size": [
+      825,
+      413
+    ],
+    "crop_box": [
+      206,
+      0,
+      619,
+      413
+    ],
+    "sha256": "d40527a46d2b2114705ada694c98601de68263165c5ff8dea55bd07d2d03f7de"
+  },
+  {
+    "card": "op_grand_fleet",
+    "source": "IMG_5282.WEBP",
+    "source_size": [
+      2000,
+      2707
+    ],
+    "crop_box": [
+      0,
+      353,
+      2000,
+      2353
+    ],
+    "sha256": "f99b8ca8ef0441315ff655366f4a989616cb6e55a7f09ba3723dfcc357e508e2"
+  },
+  {
+    "card": "op_meat",
+    "source": "IMG_5283.AVIF",
+    "source_size": [
+      1200,
+      675
+    ],
+    "crop_box": [
+      262,
+      0,
+      937,
+      675
+    ],
+    "sha256": "7b1c082c51b3a1bd0476c9d16631eef61773fc71d7f2e0ff4639271ed0476e07"
+  },
+  {
+    "card": "op_emergency",
+    "source": "IMG_5284.PNG",
+    "source_size": [
+      580,
+      535
+    ],
+    "crop_box": [
+      22,
+      0,
+      557,
+      535
+    ],
+    "sha256": "40fb3c286e5516805e1ec189d0a6d834e537ad2a88789bed9ff9790abe5ed0ff"
+  },
+  {
+    "card": "op_shackles",
+    "source": "IMG_5285.JPG",
+    "source_size": [
+      596,
+      335
+    ],
+    "crop_box": [
+      130,
+      0,
+      465,
+      335
+    ],
+    "sha256": "b65bd9871f58b0d7f8d4529ee116085439b8c6330ca9916195f7c7eeb3383c38"
+  },
+  {
+    "card": "op_buster",
+    "source": "IMG_5286.WEBP",
+    "source_size": [
+      1920,
+      1080
+    ],
+    "crop_box": [
+      420,
+      0,
+      1500,
+      1080
+    ],
+    "sha256": "476946136b32061ead90984154cb1c70a9169ab006b2f25e46338843188d11d8"
+  },
+  {
+    "card": "op_will",
+    "source": "IMG_5287.AVIF",
+    "source_size": [
+      1400,
+      700
+    ],
+    "crop_box": [
+      350,
+      0,
+      1050,
+      700
+    ],
+    "sha256": "dbfd9e6a13f7ad7e37e64e50e30baccfed90011e084583d547384b19b785ef5b"
+  },
+  {
+    "card": "op_nakama",
+    "source": "IMG_5288.JPG",
+    "source_size": [
+      736,
+      328
+    ],
+    "crop_box": [
+      204,
+      0,
+      532,
+      328
+    ],
+    "sha256": "a941f350dab520e4ba397d4ecad417638e87d9a145e3e5dc6d71f96cf7b48b51"
+  },
+  {
+    "card": "op_flower_hand",
+    "source": "IMG_5268.WEBP",
+    "source_size": [
+      580,
+      738
+    ],
+    "crop_box": [
+      0,
+      79,
+      580,
+      659
+    ],
+    "sha256": "f5cc2244b6636201f9384c84098ec361de5e2808740b54b939ff34737db3639f"
+  },
+  {
+    "card": "op_flower_guard",
+    "source": "IMG_5249.JPG",
+    "source_size": [
+      1280,
+      720
+    ],
+    "crop_box": [
+      280,
+      0,
+      1000,
+      720
+    ],
+    "sha256": "a2da7b81bb56aac479c16d802aeec886dd1acb38e517061dfe626bc060c80eb9"
+  },
+  {
+    "card": "op_crewman",
+    "source": "IMG_5288.JPG",
+    "source_size": [
+      736,
+      328
+    ],
+    "crop_box": [
+      204,
+      0,
+      532,
+      328
+    ],
+    "sha256": "a941f350dab520e4ba397d4ecad417638e87d9a145e3e5dc6d71f96cf7b48b51"
+  },
+  {
+    "card": "op_fleet_pirate",
+    "source": "IMG_5264.WEBP",
+    "source_size": [
+      1920,
+      1080
+    ],
+    "crop_box": [
+      420,
+      0,
+      1500,
+      1080
+    ],
+    "sha256": "54372b1931a77477f9e4bc7ce65ea28f9ae2f749b540a6b11416718529755238"
+  },
+  {
+    "card": "op_rubber_toy",
+    "source": "5E7CC417-02A5-4FCD-8791-A9B10129219E.JPEG",
+    "source_size": [
+      1365,
+      768
+    ],
+    "crop_box": [
+      298,
+      0,
+      1066,
+      768
+    ],
+    "sha256": "a3d9eb813a08db09ade1492e5dcfe6d68357d4e74ae39dd3998d2c7f987662d3"
+  }
+]
