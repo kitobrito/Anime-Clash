@@ -20,4 +20,4 @@ The Boards tab offers portrait (9:16), landscape (16:9), or automatic orientatio
 Every change merged into `main` rebuilds the zip (`.github/workflows/itch-build.yml`) and attaches it to the `itch-latest` GitHub release. To have it pushed to the itch page automatically, add in the repository's Settings → Secrets and variables → Actions:
 
 - Secret `BUTLER_API_KEY`: an itch.io API key (itch.io → Settings → API keys).
-- Variable `ITCH_GAME`: the page as `username/game-slug` (from the page's URL).
+- The page is already set to `fadeawaytoday/anime-clash` (an `ITCH_GAME` variable can override it).

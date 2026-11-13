@@ -1,7 +1,7 @@
 # Builds the itch.io upload on every change to main and publishes it on the "itch-latest" release:
 # https://github.com/kitobrito/Anime-Clash/releases/download/itch-latest/Anime-Clash-itch.zip
-# With the BUTLER_API_KEY secret and the ITCH_GAME variable (e.g. "yourname/anime-clash") set in
-# the repository's Settings, it also pushes the game straight to that itch.io page (channel "html5").
+# With the BUTLER_API_KEY secret set in
+# the repository's Settings, it also pushes the game to fadeawaytoday.itch.io/anime-clash (channel "html5").
 name: itch build
 on:
   push:
@@ -46,7 +46,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
-          ITCH_GAME: ${{ vars.ITCH_GAME }}
+          ITCH_GAME: ${{ vars.ITCH_GAME || 'fadeawaytoday/anime-clash' }}
         run: |
           if [ -z "$BUTLER_API_KEY" ] || [ -z "$ITCH_GAME" ]; then
             echo "::notice::itch.io publishing is off: add the BUTLER_API_KEY secret and the ITCH_GAME variable to turn it on."
