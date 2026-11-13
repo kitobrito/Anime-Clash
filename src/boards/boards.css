@@ -56,3 +56,21 @@
 .framed-inspect>.inspect-caption{padding:10px 0 0;text-align:center;color:#e9d5b1;font:12px/1.5 Arial,sans-serif}
 .framed-inspect .fruit-label{font-size:10px;margin-top:7px}
 .framed-inspect .fruit-detail p{margin:8px 0 0;font-size:12px}
+/* Sunny v2: fixed bases, independently articulated source-pixel pieces. */
+.sunny-part{position:absolute;pointer-events:none;will-change:transform;transform-origin:50% 70%}
+.sunny-part>.prop-pixels,.sunny-part>.prop-hit{position:absolute;inset:0;width:100%;height:100%}
+.board-art[data-key^="sunny-"] .prop-breathe{animation:none}
+.sunny-part.part-flag{transform-origin:0 50%;animation:sunny-flag 4.8s ease-in-out infinite alternate}
+.sunny-part.part-fruit{animation:sunny-fruit 4.5s ease-in-out infinite alternate}
+.sunny-part.part-globe{animation:sunny-globe 6s ease-in-out infinite alternate}
+.sunny-part.part-scope{transform-origin:70% 65%;animation:sunny-scope 8s ease-in-out infinite alternate}
+.board-art[data-key^="sunny-"] .kind-sunlion .prop-breathe{transform-origin:50% 85%;animation:sunny-lion 5.8s ease-in-out infinite alternate}
+@keyframes sunny-flag{from{transform:skewY(-1deg) scaleX(.99)}to{transform:skewY(2deg) scaleX(.95)}}
+@keyframes sunny-fruit{from{filter:drop-shadow(0 0 1px #be8aff44);transform:translateY(0)}to{filter:drop-shadow(0 0 5px #be8aff88);transform:translateY(-2%)}}
+@keyframes sunny-globe{from{filter:brightness(1);transform:rotate(-1deg)}to{filter:brightness(1.1);transform:rotate(1deg)}}
+@keyframes sunny-scope{from{transform:rotate(-.6deg)}to{transform:rotate(.6deg)}}
+@keyframes sunny-lion{from{transform:rotate(-.7deg) scale(1)}to{transform:rotate(.7deg) scale(1.012)}}
+.board-stage:has([data-theme="sunny"][data-orientation="landscape"]) .battle-opponent{top:18%}
+@media(prefers-reduced-motion:reduce){.sunny-part,.board-art[data-key^="sunny-"] .kind-sunlion .prop-breathe{animation:none!important}}
+
+.board-stage:has([data-theme="sunny"][data-orientation="portrait"]) .battle-opponent{top:1%;left:30%;width:40%}

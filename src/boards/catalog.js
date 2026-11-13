@@ -1,3 +1,4 @@
+import {sunnyVariant} from './sunny-rig.js';
 // Every orientation has its own traced paths, bounds, anchors and placement areas.
 // Coordinates are in a normalized 1000 x 1000 artwork space. They are never
 // stretched from the other orientation. Fill holes use the even-odd rule.
@@ -34,15 +35,7 @@ export const BOARD_THEMES={
  prop('cabinet','Scroll shrine','cabinet','M 831 34 L 874 25 L 887 0 L 925 16 L 963 8 L 999 49 L 999 473 L 836 475 L 818 452 L 825 271 L 821 243 L 841 232 L 841 107 L 824 98 Z',[905,238]),
  prop('ramen','Ramen stand and lantern','ramen','M 0 576 L 26 576 L 58 552 L 84 564 L 125 618 L 171 675 L 176 697 L 157 697 L 151 724 L 182 791 L 186 999 L 0 999 Z',[85,795]),
  prop('seal','Sealing pedestal and candles','seal','M 695 934 L 749 800 L 774 761 L 788 769 L 798 732 L 826 751 L 831 703 L 846 735 L 851 718 L 862 741 L 871 684 L 886 739 L 935 781 L 950 747 L 960 793 L 999 810 L 999 999 L 699 999 Z',[866,849])]}},
- sunny:{faction:'One Piece',name:'Sunny at Sea',accent:'#73e5f4',portrait:{source:'IMG_5292.JPG',size:[768,1376],platform:'M 213 247 L 779 247 L 993 815 L 0 815 Z',play:[.23,.33,.54,.37],props:[
- prop('treasure','Treasure chest and coins','treasure','M 194 191 L 295 172 L 322 199 L 359 201 L 375 231 L 359 260 L 208 258 L 171 234 Z',[267,219]),
- prop('cannon','Deck cannon','cannon','M 686 195 L 734 184 L 771 201 L 801 215 L 822 233 L 845 237 L 848 264 L 787 268 L 761 257 L 699 245 Z',[767,226]),
- prop('galley','Galley stove and food','galley','M 0 848 L 25 846 L 30 866 L 74 866 L 86 871 L 111 869 L 133 873 L 137 884 L 167 886 L 191 879 L 217 873 L 244 882 L 260 895 L 286 899 L 327 917 L 337 965 L 299 999 L 0 999 Z',[145,909]),
- prop('navigator','Navigation table and telephone snail','navigator','M 689 900 L 746 895 L 761 911 L 827 903 L 867 874 L 904 867 L 935 879 L 960 902 L 982 906 L 999 929 L 999 999 L 664 999 L 685 972 L 674 945 Z',[853,938])]},landscape:{source:'IMG_5291.JPG',size:[1376,768],platform:'M 236 286 L 730 286 L 916 800 L 59 800 Z',play:[.255,.35,.49,.34],props:[
- prop('treasure','Treasure chest and coins','treasure','M 228 151 L 281 129 L 308 137 L 312 172 L 345 155 L 359 174 L 355 197 L 348 208 L 359 229 L 349 268 L 300 289 L 248 277 L 220 235 Z',[289,215]),
- prop('cannon','Deck cannon','cannon','M 690 176 L 717 166 L 743 178 L 767 199 L 781 219 L 802 222 L 816 264 L 797 297 L 772 299 L 739 271 L 691 267 L 679 245 L 694 229 L 680 204 Z',[746,231]),
- prop('galley','Galley stove and food','galley','M 4 740 L 36 737 L 37 767 L 69 767 L 94 756 L 116 763 L 136 788 L 171 780 L 208 813 L 244 837 L 257 863 L 219 905 L 198 993 L 5 999 Z',[122,846]),
- prop('navigator','Navigation table and telephone snail','navigator','M 769 899 L 804 882 L 821 863 L 834 842 L 841 805 L 858 802 L 861 780 L 876 784 L 875 812 L 905 805 L 923 836 L 925 867 L 949 886 L 948 925 L 923 942 L 917 981 L 890 999 L 725 999 L 741 958 Z',[866,907])]}},
+ sunny:{faction:'One Piece',name:'Thousand Sunny',accent:'#73e5f4',portrait:sunnyVariant('portrait'),landscape:sunnyVariant('landscape')},
  sea:{faction:'One Piece',name:'Sea King Tempest',accent:'#5ed7e5',portrait:{source:'IMG_5313.JPG',size:[286,512],platform:'M 227 231 L 741 231 L 818 776 L 157 776 Z',play:[.24,.30,.49,.40],props:[
  prop('monster','Sea King eye','monster','M 0 82 L 30 91 L 60 105 L 87 126 L 100 151 L 178 154 L 222 179 L 250 206 L 207 231 L 167 231 L 139 250 L 97 259 L 32 243 L 0 230 Z',[113,184]),
  prop('harpoon','Harpoon cannon','harpoon','M 749 174 L 758 163 L 901 175 L 955 164 L 970 171 L 999 159 L 999 312 L 959 304 L 918 281 L 885 269 L 873 243 L 815 239 L 803 220 L 766 210 Z',[890,219]),

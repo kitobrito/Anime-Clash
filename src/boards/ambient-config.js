@@ -10,23 +10,8 @@ const fireflies = (rects, count = 22) => ({type: 'fireflies', layer: 'front', re
 const forestLeaves = {type: 'leaves', layer: 'front', rect: [0, -20, 1000, 1040], count: 4, colors: ['#5f8f3a', '#7fae49', '#a7b552', '#6d7f34'], fall: 10, size: 5, wind: .12, gap: 1.6};
 
 export const AMBIENT = {
- 'sunny-landscape': {layers: [
-  {type: 'rockingSea', sea: 'sunny-landscape-sea.webp', ship: 'sunny-landscape-ship.webp', horizon: 127, roll: .16, heave: 2, margin: .014,
-   ripple: {amp: 1.25, k: .085, w: 1.15}, bands: [[0, 127, 1000, 215], [0, 215, 300, 600], [820, 215, 1000, 520]], glints: 80, glintArea: [0, 132, 1000, 560],
-   parts: [
-    {src: 'sunny-landscape-garland.webp', rect: [0, 0, 121.501, 352.188], motion: {kind: 'pivot', pivot: [135, -6], rot: .55, period: 5.6, flutter: .5}},
-    {src: 'sunny-landscape-sail.webp', rect: [770.101, 0, 229.899, 114.194], motion: {hinge: 0, dir: 1, ax: 1.1, flutter: .3, period: 4.4, wave: 22, curve: 1.2}}],
-   gulls: [{src: 'sunny-landscape-gull0.webp', rect: [356.164, 17.076, 32.162, 25.614]}, {src: 'sunny-landscape-gull1.webp', rect: [431.209, 59.765, 25.61, 25.614]}, {src: 'sunny-landscape-gull2.webp', rect: [556.284, 71.505, 23.824, 23.479]}, {src: 'sunny-landscape-gull3.webp', rect: [800.476, 113.127, 15.485, 19.21]}]},
-  {type: 'glow', at: [960, 150], r: 90, color: 'rgba(255,250,225,1)', alpha: [.05, .14], period: 6.5, core: .05, squash: .55, blend: 'screen'},
- ]},
- 'sunny-portrait': {layers: [
-  {type: 'rockingSea', sea: 'sunny-portrait-sea.webp', ship: 'sunny-portrait-ship.webp', horizon: 93, roll: .16, heave: 1.4, margin: .016,
-   ripple: {amp: 1.6, k: .12, w: 1.15}, bands: [[0, 93, 1000, 260], [0, 260, 150, 580], [880, 150, 1000, 580]], glints: 60, glintArea: [0, 96, 1000, 400],
-   parts: [
-    {src: 'sunny-portrait-garland.webp', rect: [0, 0, 188.901, 243.597], motion: {kind: 'pivot', pivot: [190, -6], rot: .6, period: 5.6, flutter: .6}},
-    {src: 'sunny-portrait-sail.webp', rect: [728.922, 0, 240.128, 213.818], motion: {hinge: 0, dir: 1, ax: 1.6, flutter: .4, period: 4.4, wave: 30, curve: 1.2}}],
-   gulls: [{src: 'sunny-portrait-gull0.webp', rect: [363.927, 32.162, 37.353, 14.294]}, {src: 'sunny-portrait-gull1.webp', rect: [439.701, 55.986, 29.883, 13.103]}, {src: 'sunny-portrait-gull2.webp', rect: [563.501, 63.728, 29.883, 11.912]}]},
- ]},
+ 'sunny-landscape': {layers: []},
+ 'sunny-portrait': {layers: []},
  'sea-landscape': {layers: [
   {type: 'lightning', sky: [0, 0, 1000, 92], bolts: [[740, 32, 45], [872, 55, 28]], every: 9, skyAlpha: .35, color: 'rgba(170,200,255,.9)'},
   {type: 'water', src: 'sea-landscape-water.webp', rect: [0, 86.446, 1000, 913.554], horizon: 88, amp: 1.9, k: .075, w: 1.6, swell: 1},
