@@ -45,3 +45,14 @@
 /* Highlighted words in card text: keywords red, triggers purple, numbers bold. */
 .rules-parchment b.kw{color:#9b1c1c;font-weight:800}.rules-parchment b.kw-trig{color:#5a2a8a;font-weight:800}.rules-parchment b.kw-num{color:#1e3a8a;font-weight:800}
 .inspect-text b.kw{color:#ff8a7a;font-weight:800}.inspect-text b.kw-trig{color:#d4a8ff;font-weight:800}.inspect-text b.kw-num{color:#ffd77a;font-weight:800}
+
+/* The inspector reuses the complete card renderer and its faction frame. */
+.inspect-shade{overflow-y:auto;padding:32px 24px;align-items:safe center}
+.inspect-modal.framed-inspect{display:block;position:relative;width:min(440px,calc((100dvh - 116px)*.6708),calc(100vw - 48px));max-width:none;max-height:none;overflow:visible;padding:0;border:0;border-radius:0;background:none;box-shadow:none;flex-shrink:0}
+.framed-inspect>.card{display:block;width:100%;min-width:0;max-width:none;margin:0;transform:none!important;filter:none;flex:none;cursor:default}
+.framed-inspect .realm-card{width:100%;filter:drop-shadow(0 14px 28px #000a)}
+.framed-inspect .rules-parchment p{margin:0!important;min-height:0;max-height:100%;color:#281b13!important}
+.framed-inspect .modal-close{position:absolute;right:-10px;top:-14px;z-index:20;width:38px;height:38px;border:1px solid #c09b5a;border-radius:50%;background:#241b24;color:#f7e9cf;font-size:26px;display:grid;place-items:center;line-height:1}
+.framed-inspect>.inspect-caption{padding:10px 0 0;text-align:center;color:#e9d5b1;font:12px/1.5 Arial,sans-serif}
+.framed-inspect .fruit-label{font-size:10px;margin-top:7px}
+.framed-inspect .fruit-detail p{margin:8px 0 0;font-size:12px}
