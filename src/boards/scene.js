@@ -1,4 +1,5 @@
 import {boardVariant} from './catalog.js';
+import {Ambient} from './ambient.js';
 const NS='http://www.w3.org/2000/svg';
 const images=new Map(),spriteCache=new Map();
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -40,7 +41,10 @@ export class BoardScene{
   const source=await imageAsset(`art/boards-anime/${this.def.source}`);if(this.dead)return;
   const platform=maskSprite(source,[{d:this.def.platform}]);this.platform=make('canvas','scene-platform');this.platform.width=platform.width;this.platform.height=platform.height;this.platform.getContext('2d').drawImage(platform.canvas,0,0);this.position(this.platform,platform.bounds);this.platform.setAttribute('aria-hidden','true');this.el.append(this.platform);
   for(const prop of this.def.props){let sprite=spriteCache.get(`${this.def.key}:${prop.id}`);if(!sprite){sprite=maskSprite(source,prop.pieces);spriteCache.set(`${this.def.key}:${prop.id}`,sprite);if(spriteCache.size>12)spriteCache.delete(spriteCache.keys().next().value);}this.addProp(prop,sprite);}
-  this.addAmbient(source);this.applyMotionPreference();
+  // Living-board idle animation (water, foliage, creatures, light). Never blocks the board if it fails.
+  this.ambient=new Ambient(this);this.ambient.mount(this.platform,this.el.querySelector('.scene-prop')??this.fx);
+  try{const plate=await imageAsset(`art/boards-anime/${this.def.key}-clean.webp`);if(this.dead)return;await this.ambient.load(plate);}catch(error){console.warn('Ambient board animation unavailable',error);}
+  this.applyMotionPreference();
  }
  position(node,b){Object.assign(node.style,{left:`${b[0]/10}%`,top:`${b[1]/10}%`,width:`${b[2]/10}%`,height:`${b[3]/10}%`});}
  addProp(prop,sprite){
@@ -58,14 +62,8 @@ export class BoardScene{
  }
  hitClient(state,x,y){const matrix=state.svg.getScreenCTM();if(!matrix)return false;const p=new DOMPoint(x,y).matrixTransform(matrix.inverse());return alphaAt(state.sprite,p.x,p.y)>=96;}
  hitTest(x,y){for(const p of [...this.props.values()].reverse())if(this.hitClient(p,x,y))return p.id;return null;}
- addAmbient(source){
-  // Visual-only cutout strips share the same independent compositing model.
-  const strips=this.def.theme==='forest'?[{d:'M 261 0 L 310 0 L 315 103 L 297 130 L 285 127 L 287 49 Z'},{d:'M 676 0 L 706 0 L 730 69 L 720 103 L 704 96 L 694 50 Z'}]:this.def.theme==='sunny'?[{d:'M 876 0 L 998 0 L 997 160 L 922 127 Z'}]:[];
-  for(let i=0;i<strips.length;i++){const s=maskSprite(source,[strips[i]]),c=make('canvas','scene-ambient-sway');c.width=s.width;c.height=s.height;c.getContext('2d').drawImage(s.canvas,0,0);this.position(c,s.bounds);c.style.animationDelay=`${i*-3}s`;c.setAttribute('aria-hidden','true');this.el.append(c);}
-  this.motes=Array.from({length:this.def.theme==='forest'?24:16},(_,i)=>({x:(i*197+37)%1000,y:(i*331+11)%1000,phase:i*2.399,speed:4+i%6,size:1+i%3}));
- }
- applyMotionPreference(){this.el.dataset.reducedMotion=String(this.motion.matches);this.schedule();}
- resize(){if(this.dead)return;const b=this.el.getBoundingClientRect();this.width=b.width;this.height=b.height;this.dpr=Math.min(devicePixelRatio||1,1.5);if(b.width>0&&b.height>0){this.fx.width=Math.round(b.width*this.dpr);this.fx.height=Math.round(b.height*this.dpr);}this.schedule();}
+ applyMotionPreference(){this.el.dataset.reducedMotion=String(this.motion.matches);this.stillDrawn=false;this.lastFrame=0;this.schedule();}
+ resize(){if(this.dead)return;const b=this.el.getBoundingClientRect();this.width=b.width;this.height=b.height;this.dpr=Math.min(devicePixelRatio||1,1.5);if(b.width>0&&b.height>0){this.fx.width=Math.round(b.width*this.dpr);this.fx.height=Math.round(b.height*this.dpr);this.ambient?.resize(b.width,b.height,this.dpr);this.stillDrawn=false;}this.schedule();}
  setSound(enabled){this.sound.set(enabled);}
  setDebug(debug){this.el.dataset.debug=String(debug);}
  reparent(host){if(host===this.host&&this.el.parentNode===host)return;this.host=host;host.append(this.el);this.resize();}
@@ -82,10 +80,10 @@ export class BoardScene{
  schedule(){if(this.dead||this.frame)return;if(document.hidden||!this.visible||!this.el.isConnected)return;this.frame=requestAnimationFrame(t=>this.draw(t));}
  draw(now){this.frame=0;if(this.dead||document.hidden||!this.visible)return;
   const delta=this.lastFrame?now-this.lastFrame:16;this.lastFrame=now;if(delta<150){this.fpsSamples.push(delta);if(this.fpsSamples.length>120)this.fpsSamples.shift();}
-  const c=this.ctx,w=this.width,h=this.height;if(!w||!h)return;const d=this.dpr;c.setTransform(d,0,0,d,0,0);c.clearRect(0,0,w,h);c.save();
+  const c=this.ctx,w=this.width,h=this.height;if(!w||!h)return;
+  if(this.ambient){if(!this.motion.matches)this.ambient.draw(now);else if(!this.stillDrawn){this.ambient.draw(now,true);this.stillDrawn=true;}}const d=this.dpr;c.setTransform(d,0,0,d,0,0);c.clearRect(0,0,w,h);c.save();
   // Effects can never cover the rectangular card-placement surface.
   const [px,py,pw,ph]=this.def.play;c.beginPath();c.rect(0,0,w,h);c.rect(px*w,py*h,pw*w,ph*h);c.clip('evenodd');
-  if(!this.motion.matches){for(const mote of this.motes??[]){let x=(mote.x+Math.sin(now/6200+mote.phase)*13)/1000*w,y=((mote.y-now/1000*mote.speed)%1000+1000)%1000/1000*h;if(this.def.theme==='forest'){c.globalAlpha=.3+.4*(.5+.5*Math.sin(now/1200+mote.phase));c.fillStyle='#d4f881';c.shadowColor='#caff78';c.shadowBlur=5;c.beginPath();c.arc(x,y,mote.size*.55,0,Math.PI*2);c.fill();}else if(this.def.theme==='village'){c.globalAlpha=.4;c.fillStyle='#cfb764';c.beginPath();c.ellipse(x,y,2.3,1.1,now/4000+mote.phase,0,Math.PI*2);c.fill();}else{c.globalAlpha=.19;c.strokeStyle='#b7f6f9';c.lineWidth=.6;c.beginPath();c.arc(x,y,1.5+mote.size,0,Math.PI*2);c.stroke();}}}
   if(!this.motion.matches){for(const p of this.props.values()){const x=p.anchor[0]/1000*w,y=p.anchor[1]/1000*h,u=w/1000;
    if(p.kind==='scroll'||p.kind==='seal'){for(let i=0;i<6;i++){const phase=(now/3400+i/6)%1;c.globalAlpha=(1-phase)*.42;c.fillStyle=i%2?'#d6599b':'#a584ed';c.beginPath();c.arc(x+Math.sin(i*2.4+now/2400)*13*u,y-phase*48*u,(1+i%2)*u,0,Math.PI*2);c.fill();}}
    if(p.kind==='serpent'&&now%8500<450&&!this.active.has(p.id)){c.globalAlpha=Math.sin(now%8500/450*Math.PI)*.7;c.strokeStyle='#ce8791';c.lineWidth=Math.max(.7,u);c.beginPath();c.moveTo(x,y);c.lineTo(x+17*u,y+7*u);c.lineTo(x+22*u,y+4*u);c.moveTo(x+17*u,y+7*u);c.lineTo(x+21*u,y+11*u);c.stroke();}
