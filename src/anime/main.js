@@ -143,3 +143,11 @@ document.addEventListener('click',e=>{if(Date.now()<ignoreClickUntil){e.preventD
 scrollRoot().addEventListener('scroll',()=>{if(!restoringScroll)scrollingUntil=performance.now()+140;},{passive:true});
 
 let boardResizeTimer;window.addEventListener('resize',()=>{clearTimeout(boardResizeTimer);boardResizeTimer=setTimeout(()=>{const host=$('.board-art-mount');if(boardOrientation==='auto'&&host&&host.dataset.orientation!==orientationFor())render();},180);},{passive:true});
+
+// Card rules text always fits inside its parchment: shrink the text a step at a time until it does
+// (fonts render a little larger on some phones, which used to push lines above the box).
+function fitRulesText(root=document){root.querySelectorAll('.rules-parchment p').forEach(p=>{p.style.fontSize='';const box=p.parentElement;if(!box||!box.clientHeight)return;let size=parseFloat(getComputedStyle(p).fontSize);for(let i=0;i<14&&p.scrollHeight>box.clientHeight+1;i++){size*=.93;p.style.setProperty('font-size',size+'px','important');}});}
+let fitQueued=false;const queueFit=()=>{if(fitQueued)return;fitQueued=true;requestAnimationFrame(()=>{fitQueued=false;fitRulesText();});};
+new MutationObserver(queueFit).observe(document.body,{childList:true,subtree:true});addEventListener('resize',queueFit);document.fonts?.ready.then(queueFit);
+// Collection and deck builder: tapping anywhere on a card opens it big (buttons keep their own jobs).
+document.addEventListener('click',e=>{if(e.target.closest('button,a,input,select,.modal'))return;const card=e.target.closest('.card-grid .realm-card, .card-grid .new-skin');const inspect=card?.querySelector('.art-inspect');if(inspect){e.preventDefault();inspect.click();}});
