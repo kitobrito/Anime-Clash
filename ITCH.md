@@ -14,3 +14,10 @@ Artwork stays at **512 × 512** independently of the embed dimensions. Collectio
 For local preview, extract `Anime-Clash-source.zip`, run `npm start`, and open `http://localhost:8080`. Run `npm test` for engine checks or `npm run package` to recreate both ZIPs (Python 3 required only for packaging).
 
 The Boards tab offers portrait (9:16), landscape (16:9), or automatic orientation. Both orientations have animated interactive corners. Sound is opt-in. The new ZIP must replace the previous HTML upload for the iPhone scrolling fix to take effect; reload the game after replacing it.
+
+## Automatic publishing
+
+Every change merged into `main` rebuilds the zip (`.github/workflows/itch-build.yml`) and attaches it to the `itch-latest` GitHub release. To have it pushed to the itch page automatically, add in the repository's Settings → Secrets and variables → Actions:
+
+- Secret `BUTLER_API_KEY`: an itch.io API key (itch.io → Settings → API keys).
+- Variable `ITCH_GAME`: the page as `username/game-slug` (from the page's URL).
