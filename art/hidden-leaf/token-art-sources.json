@@ -1,0 +1,62 @@
+[
+  {
+    "card": "summoning_jutsu_gamabunta",
+    "picture": 1,
+    "source": "1-Photo-1.jpg",
+    "squarePrepared": false
+  },
+  {
+    "card": "shadow_clone",
+    "picture": 2,
+    "source": "2-Photo-2.jpg",
+    "squarePrepared": false
+  },
+  {
+    "card": "akamaru",
+    "picture": 3,
+    "source": "3-Photo-3.jpg",
+    "squarePrepared": true
+  },
+  {
+    "card": "summoned_toad",
+    "picture": 4,
+    "source": "4-Photo-4.jpg",
+    "squarePrepared": true
+  },
+  {
+    "card": "wooden_log",
+    "picture": 5,
+    "source": "5-Photo-5.jpg",
+    "squarePrepared": true
+  },
+  {
+    "card": "gamabunta",
+    "picture": 6,
+    "source": "6-Photo-6.jpg",
+    "squarePrepared": true
+  },
+  {
+    "card": "wooden_barrier",
+    "picture": 7,
+    "source": "7-Photo-7.jpg",
+    "squarePrepared": false
+  },
+  {
+    "card": "ink_beast",
+    "picture": 8,
+    "source": "8-Photo-8.jpg",
+    "squarePrepared": true
+  },
+  {
+    "card": "wood_golem",
+    "picture": 9,
+    "source": "9-Photo-9.jpg",
+    "squarePrepared": true
+  },
+  {
+    "card": "water_clone",
+    "picture": 10,
+    "source": "10-Photo-10.jpg",
+    "squarePrepared": false
+  }
+]
