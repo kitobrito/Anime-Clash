@@ -42,3 +42,6 @@
 .scene-game-overlay .card-backs{display:flex!important;justify-content:center;margin:0;height:22px;pointer-events:none}.scene-game-overlay .card-backs i{width:16px;height:23px;margin-left:-5px;transform:rotate(0);font-size:0;background-size:100% 100%!important;background-position:center;border:1px solid #b38b50;border-radius:2px}
 .frame-inspector{padding:0;max-width:min(95vw,540px);background:radial-gradient(#38404a,#1b1720);overflow:auto}.frame-inspector>img{display:block;width:100%;max-height:85dvh;object-fit:contain}
 .card-grid .realm-card{cursor:zoom-in}
+/* Highlighted words in card text: keywords red, triggers purple, numbers bold. */
+.rules-parchment b.kw{color:#9b1c1c;font-weight:800}.rules-parchment b.kw-trig{color:#5a2a8a;font-weight:800}.rules-parchment b.kw-num{color:#1e3a8a;font-weight:800}
+.inspect-text b.kw{color:#ff8a7a;font-weight:800}.inspect-text b.kw-trig{color:#d4a8ff;font-weight:800}.inspect-text b.kw-num{color:#ffd77a;font-weight:800}
