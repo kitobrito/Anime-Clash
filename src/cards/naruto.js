@@ -652,7 +652,7 @@ export const NARUTO_CARDS = [
       "type": "minion",
       "side": "enemy"
     },
-    "image": "art/hidden-leaf/rasengan.webp"
+    "image": "art/hidden-leaf/rasengan.jpg"
   },
   {
     "id": "sexy_jutsu",
