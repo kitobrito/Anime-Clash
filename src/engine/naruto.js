@@ -4,6 +4,50 @@ import { allKeywords, dealDamage, drawCards, effectiveAttack, findCharacter, has
 import { addKeyword, applyBuff, EFFECT_OPS } from './effects.js';
 import { getCard } from './registry.js';
 import { pickRandom } from './rng.js';
+import { NARUTO_TEAMS } from '../cards/naruto-teams.js';
+import { nextTurnMana } from './core.js';
+
+// Crystals remain owned by their player; disruption only affects the next refill.
+export function jamMana(state,p,amount=1) {
+ const mana=state.players[p].mana;
+ const added=Math.max(0,Math.min(amount,state.rules.maxMana-(mana.jammedNextTurn??0)));
+ mana.jammedNextTurn=(mana.jammedNextTurn??0)+added;
+ if(added)log(state,`${state.players[p].name}: ${added} Mana crystal${added===1?'':'s'} Jammed for next turn.`);
+ return added;
+}
+export function resolveJammedMana(state,pl) {
+ const m=pl.mana;
+ m.jammedThisTurn=Math.min(m.jammedNextTurn??0,m.current);
+ m.current-=m.jammedThisTurn;
+ m.temp=Math.min(m.temp??0,m.current);
+ m.primal=Math.min(m.primal??0,m.current);
+ m.jammedNextTurn=0;
+ if(m.jammedThisTurn)log(state,`${pl.name} has ${m.jammedThisTurn} Jammed Mana crystals this turn.`);
+}
+export function checkNarutoTeams(state) {
+ for(const pl of state.players) {
+  if(pl.board.length<3)continue;
+  const board=pl.board.filter(alive);
+  for(const team of NARUTO_TEAMS) {
+   if(pl.narutoTeamsCompleted?.includes(team.id)||!team.members.every(id=>board.some(m=>m.cardId===id)))continue;
+   (pl.narutoTeamsCompleted??=[]).push(team.id); // record before any summon can reenter
+   for(const m of board)if(team.members.includes(m.cardId))applyBuff(state,m,{attack:3,health:3,byController:pl.index});
+   log(state,`${team.name} complete! Teammates gain +3/+3 (once per game).`);
+   if(pl.board.length>=state.rules.maxBoardSize)continue;
+   const zone=[pl.hand,pl.deck].find(cards=>cards.some(c=>c.cardId===team.mentor));
+   if(!zone)continue;
+   const ctx={controller:pl.index};
+   EFFECT_OPS.summon(state,{cardId:team.mentor},ctx);
+   if(ctx.summoned!=null)zone.splice(zone.findIndex(c=>c.cardId===team.mentor),1);
+  }
+ }
+}
+export function narutoCanReact(state,card,p,event,window) {
+ if(card.id!=='eight_trigrams_palm_rotation')return true;
+ if(state.activePlayer===p||!event)return false;
+ if(window==='cardPlayed'&&event.cardType!=='spell')return false;
+ return [event.target,event.target2].some(uid=>{const m=findCharacter(state,uid);return alive(m)&&m.controller===p;});
+}
 
 const alive = m => m && m.health > 0 && !m.destroyed;
 const team7 = ['naruto_uzumaki','sasuke_uchiha','sakura_haruno'];
@@ -27,6 +71,10 @@ function block(state,m,controller) {
 }
 export function narutoTick(state,event) {
  if (!['startOfTurn','endOfTurn'].includes(event.type)) return;
+ if(event.type==='endOfTurn') {
+  for(const m of state.players.flatMap(pl=>pl.board))if(m.gentleFist?.by===event.player)delete m.gentleFist;
+  state.rotationShields=[];
+ }
  const due = (state.narutoTimers ?? []).filter(t => t.when === event.type && t.player === event.player && (!t.next || state.turn > t.created));
  state.narutoTimers = (state.narutoTimers ?? []).filter(t => !due.includes(t));
  for (const t of due) {
@@ -70,9 +118,11 @@ export function resolveNaruto(state,e,ctx) {
    case 'rock_lee': if(ev.source===self.uid)buff(self,1);break;
    case 'might_guy': if(alive(source)&&source.controller===p&&source.kind==='minion')buff(source,1,0,{temporary:true});break;
    case 'hinata_hyuga': if(alive(hit)&&hit.controller===p&&hit.cardId==='naruto_uzumaki')heal(state,hit.uid,2,{source:self.uid});break;
-   case 'neji_hyuga': if(ev.source===self.uid&&hit?.kind==='minion')strip(state,hit,p,true);break;
+   case 'neji_hyuga': break; // direct Hero damage is handled by narutoDamageEvent
    case 'choji_akimichi': if(ev.target===self.uid&&ev.amount>0)buff(self,1);break;
-   case 'shino_aburame': if(ev.source===self.uid&&hit?.kind==='minion'&&hit.controller!==p)buff(hit,-1);break;
+   case 'shino_aburame': if(ev.source===self.uid&&hit&&hit.controller!==p&&ev.amount>0&&nextTurnMana(state,1-p)>0) {
+    const stolen=jamMana(state,1-p,1);pl.mana.bonusNextTurn=(pl.mana.bonusNextTurn??0)+stolen;
+   }break;
    case 'tsunade': if(ev.amount>0&&hit?.kind==='minion'&&hit.controller===p)buff(hit,1);break;
    case 'asuma_sarutobi': if(alive(source)&&source.controller===p&&trio.includes(source.cardId))damage(hit,1);break;
    case 'hashirama_senju': if(ev.player===p)for(const m of friends())heal(state,m.uid,2,{source:self.uid});break;
@@ -103,10 +153,9 @@ export function resolveNaruto(state,e,ctx) {
  }
  case 'konohamaru':if(controls('naruto_uzumaki'))buff(self,1,1);break;
  case 'naruto_uzumaki':
-  if(controls('sakura_haruno')&&controls('sasuke_uchiha'))buff(self,1,1);
   if(self)schedule(state,'endOfTurn',p,'clone',{uid:self.uid,snapshot:{attack:self.attack,health:self.health,keywords:[...self.keywords]}},false);break;
- case 'sakura_haruno':if(target)heal(state,target.uid,3,{source:ctx.self});if(controls('naruto_uzumaki')&&controls('sasuke_uchiha'))buff(self,1,1);break;
- case 'sasuke_uchiha':if(controls('naruto_uzumaki')&&controls('sakura_haruno'))buff(self,1,1);break;
+ case 'sakura_haruno':if(target)heal(state,target.uid,3,{source:ctx.self});break;
+ case 'sasuke_uchiha':break;
  case 'kakashi_hatake':for(const m of named(team7))buff(m,1,1);break;
  case 'might_guy':for(const m of named(['rock_lee']))buff(m,2,2);break;
  case 'hinata_hyuga':buff(target,-1,0,{lingerUntil:p});break;
@@ -144,6 +193,18 @@ export function resolveNaruto(state,e,ctx) {
   break;
  }
  case 'gentle_fist':buff(target,2,0,{temporary:true});if(target)target.gentleFist={by:p};break;
+ case 'eight_trigrams_palm_rotation': {
+  if(!narutoCanReact(state,getCard('eight_trigrams_palm_rotation'),p,ev,ev.type))break;
+  if(ev.type==='attackDeclared') {
+   const combat=state.queue.find(s=>s.kind==='combat'&&s.attacker===ev.source);
+   if(combat)combat.preventDefenderDamage=true;
+   if(controls('neji_hyuga'))damage(findCharacter(state,ev.source),3);
+  } else for(const uid of [ev.target,ev.target2]) {
+   const m=findCharacter(state,uid);
+   if(alive(m)&&m.controller===p)(state.rotationShields??=[]).push({source:ev.source,target:uid,turn:state.turn});
+  }
+  log(state,'Eight Trigrams Palm Rotation deflects incoming damage.');break;
+ }
  case 'eight_gates_gate_of_opening':buff(target,4,0,{temporary:true,temporaryKeywords:['Rush']});if(target)schedule(state,'endOfTurn',p,'damage',{uid:target.uid,amount:3,by:p},false);break;
  case 'summoning_jutsu_gamabunta':summon('gamabunta',1,{keywords:['Taunt',...(['naruto_uzumaki','jiraiya'].some(controls)?['Rush']:[])]});break;
  case 'thousand_years_of_death':damage(target,2);bounce(target);if(controls('kakashi_hatake'))drawCards(state,p,1);break;
@@ -160,11 +221,13 @@ export function resolveNaruto(state,e,ctx) {
   // Each hit is its own queue step: damage triggers (including Hinata) resolve
   // between hits, and dead targets cannot take later hits.
   const steps=Array.from({length:8},()=>({kind:'effect',effect:{op:'naruto',action:'palms_hit'},ctx:{...ctx}}));
-  if(['neji_hyuga','hinata_hyuga'].some(controls))steps.push({kind:'effect',effect:{op:'naruto',action:'palms_strip'},ctx:{...ctx}});
   state.queue.unshift(...steps);break;
  }
- case 'palms_hit':damage(target,1);state.queue.unshift({kind:'deaths'});break;
- case 'palms_strip':strip(state,target,p);break;
+ case 'palms_hit': {
+  const victim=pickRandom(state,foes())??enemy.hero;
+  if(damage(victim,1)>0&&victim.kind==='hero')jamMana(state,1-p,1);
+  state.queue.unshift({kind:'deaths'});break;
+ }
  case 'expansion_jutsu':if(target)buff(target,2,4,target.cardId==='choji_akimichi'?{keywords:['Taunt']}:{lingerUntil:p,temporaryHealth:true,lingerKeywords:['Taunt']});break;
  case 'wood_style_deep_forest_emergence':{const bonus=controls('hashirama_senju')?2:0;summon('wood_golem',3,{attack:2+bonus,health:4+bonus});break;}
  }
@@ -175,7 +238,9 @@ export function resolveNaruto(state,e,ctx) {
 export function narutoDamageEvent(state,event) {
  if(event.type!=='damageDealt'||event.amount<=0)return;
  const source=findCharacter(state,event.source), target=findCharacter(state,event.target);
- if(source?.gentleFist&&target?.kind==='minion'&&source.controller!==target.controller){strip(state,target,source.gentleFist.by,true);delete source.gentleFist;}
+ if(!source||target?.kind!=='hero'||source.controller===target.controller||!event.combat||event.attacker!==source.uid)return;
+ if(['neji_hyuga','hinata_hyuga'].includes(source.cardId)&&!source.textLost&&!hasKeyword(source,'Silenced'))jamMana(state,target.controller,1);
+ if(source.gentleFist){jamMana(state,target.controller,1);delete source.gentleFist;}
 }
 
 // Check after each atomic step, so breaking or expiring Freeze releases Rasengan.

@@ -28,6 +28,7 @@ export function evaluate(state, me) {
   score += my.board.reduce((s, m) => s + minionValue(m), 0);
   score -= opp.board.reduce((s, m) => s + minionValue(m), 0) * 1.1;
   score += my.mana.bonusNextTurn * 1.5;
+  score += Math.min(opp.mana.jammedNextTurn??0,opp.mana.max+1) - Math.min(my.mana.jammedNextTurn??0,my.mana.max+1);
   score += mushroomsIn(opp.deck) * 0.7 - mushroomsIn(my.deck) * 0.7; // Mushrooms: delayed damage
   const burnValue = (pl) => [pl.hero, ...pl.board].reduce((t, c) => t + (c.burn ?? 0) * (c.kind === 'hero' ? 1.5 : 0.7), 0);
   score += burnValue(opp) - burnValue(my); // Burn: damage still to come

@@ -22,3 +22,12 @@
 .tg-equipment{display:flex;flex-wrap:wrap;align-items:center;gap:12px;max-width:1000px;margin:12px auto;padding:12px;background:#20151e;border:1px solid #69415a;border-radius:7px}.tg-equipment img{width:48px;height:48px;object-fit:cover;border-radius:6px}.tg-equipment>div{flex:1;min-width:130px}.tg-equipment strong,.tg-equipment small{display:block}.tg-equipment strong{font-size:12px;color:#efd5df}.tg-equipment small{font-size:10px;color:#c3a9bb;margin-top:5px}.tg-equipment>span{font-size:11px;flex:1}.hero-power-art{width:45px;height:45px;object-fit:cover;border-radius:5px}
 .hunger-indicator{position:absolute;left:3px;top:3px;font:9px Arial;color:#ffd1df;background:#311323dd;border:1px solid #be7291;padding:2px 4px;border-radius:8px}.hunger-indicator.starving{color:#fff;background:#841b39;border-color:#f27d96}.activated-abilities{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.activated-abilities button{font-size:10px;padding:9px 12px}.battle-hero>b>small{display:inline;font-size:10px;color:#c8d8eb;white-space:nowrap}
 @media(max-width:700px){.faction-picker{flex-wrap:wrap}.faction-picker>button{flex:1 1 29%;min-width:95px;padding:8px 5px}.faction-picker>button img{width:27px;height:34px}.faction-picker>button span{font-size:10px}.faction-picker>button small{font-size:6px}.tg-equipment{gap:8px;padding:9px}.tg-equipment strong{font-size:10px}.tg-equipment small{font-size:8px}.hero-power-art{width:30px;height:30px}.hunger-indicator{font-size:7px;padding:1px 3px}.battle-hero>b>small{font-size:8px}.collection-tools .tabs{flex-wrap:wrap}}
+
+/* Naruto resource disruption and once-per-game team progress. */
+.jammed-status{display:block;color:#e6b1ff;font-weight:700;font-size:12px}
+.naruto-teams{margin:12px 0;padding:12px 16px;border:1px solid #766744;border-radius:10px;background:#101a16;color:#e9e8dc}
+.naruto-teams summary{cursor:pointer;font-weight:700}
+.naruto-teams>div{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;padding-top:12px}
+.naruto-teams article{padding:10px;background:#ffffff08;border-radius:6px}
+.naruto-teams p{line-height:1.5;margin:6px 0;font-size:13px}
+.naruto-teams small{color:#b4c2ac}

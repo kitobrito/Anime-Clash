@@ -1,4 +1,4 @@
-// Naruto: 45 collectibles, 9 generated tokens, and one Hero Spell.
+// Naruto: 46 collectibles, 9 generated tokens, and one Hero Spell.
 export const NARUTO_CARDS = [
   {
     "id": "konohamaru",
@@ -33,7 +33,7 @@ export const NARUTO_CARDS = [
     "faction": "Naruto",
     "type": "minion",
     "cost": 4,
-    "text": "Arrival: Summon a copy of this minion at the end of this turn. If Sakura and Sasuke are on your battlefield, gain +1/+1.",
+    "text": "Arrival: Summon a copy of this minion at the end of this turn. Team 7: +3/+3 to teammates and summon Kakashi from hand/deck (once per game).",
     "art": "🍃",
     "jutsu": false,
     "attack": 3,
@@ -52,7 +52,8 @@ export const NARUTO_CARDS = [
         ]
       }
     ],
-    "image": "art/hidden-leaf/naruto_uzumaki.webp"
+    "image": "art/hidden-leaf/naruto_uzumaki.webp",
+    "narutoTeam": "team7"
   },
   {
     "id": "sakura_haruno",
@@ -60,7 +61,7 @@ export const NARUTO_CARDS = [
     "faction": "Naruto",
     "type": "minion",
     "cost": 3,
-    "text": "Arrival: Restore 3 Health to an ally. If Naruto and Sasuke are on your battlefield, gain +1/+1.",
+    "text": "Arrival: Restore 3 Health to an ally. Team 7: +3/+3 to teammates and summon Kakashi from hand/deck (once per game).",
     "art": "🍃",
     "jutsu": false,
     "attack": 2,
@@ -83,7 +84,8 @@ export const NARUTO_CARDS = [
       "type": "character",
       "side": "friendly"
     },
-    "image": "art/hidden-leaf/sakura_haruno.webp"
+    "image": "art/hidden-leaf/sakura_haruno.webp",
+    "narutoTeam": "team7"
   },
   {
     "id": "sasuke_uchiha",
@@ -91,7 +93,7 @@ export const NARUTO_CARDS = [
     "faction": "Naruto",
     "type": "minion",
     "cost": 4,
-    "text": "Evade. Arrival: If Naruto and Sakura are on your battlefield, gain +1/+1.",
+    "text": "Evade. Team 7: +3/+3 to teammates and summon Kakashi from hand/deck (once per game).",
     "art": "🍃",
     "jutsu": false,
     "attack": 4,
@@ -113,7 +115,8 @@ export const NARUTO_CARDS = [
     "keywords": [
       "Evade"
     ],
-    "image": "art/hidden-leaf/sasuke_uchiha.webp"
+    "image": "art/hidden-leaf/sasuke_uchiha.webp",
+    "narutoTeam": "team7"
   },
   {
     "id": "kakashi_hatake",
@@ -162,7 +165,7 @@ export const NARUTO_CARDS = [
     "faction": "Naruto",
     "type": "minion",
     "cost": 2,
-    "text": "Rush. After this attacks and survives, gain +1 Attack.",
+    "text": "Rush. After this attacks and survives, gain +1 Attack. Team Guy: +3/+3 to teammates and summon Might Guy from hand/deck (once per game).",
     "art": "🍃",
     "jutsu": false,
     "attack": 3,
@@ -194,7 +197,8 @@ export const NARUTO_CARDS = [
     "keywords": [
       "Rush"
     ],
-    "image": "art/hidden-leaf/rock_lee.webp"
+    "image": "art/hidden-leaf/rock_lee.webp",
+    "narutoTeam": "teamGuy"
   },
   {
     "id": "might_guy",
@@ -239,7 +243,7 @@ export const NARUTO_CARDS = [
     "faction": "Naruto",
     "type": "minion",
     "cost": 3,
-    "text": "Whenever Naruto takes damage, restore 2 Health to him. Arrival: Give an enemy minion -1 Attack until your next turn.",
+    "text": "After this directly damages the enemy Hero with an attack, Jam 1 Mana crystal next turn. Whenever Naruto takes damage, heal him for 2. Arrival: Give an enemy minion -1 Attack until your next turn. Team 8: +3/+3 to teammates and summon Kurenai from hand/deck (once per game).",
     "art": "🍃",
     "jutsu": false,
     "attack": 2,
@@ -272,7 +276,8 @@ export const NARUTO_CARDS = [
       "type": "minion",
       "side": "enemy"
     },
-    "image": "art/hidden-leaf/hinata_hyuga.webp"
+    "image": "art/hidden-leaf/hinata_hyuga.webp",
+    "narutoTeam": "team8"
   },
   {
     "id": "neji_hyuga",
@@ -280,7 +285,7 @@ export const NARUTO_CARDS = [
     "faction": "Naruto",
     "type": "minion",
     "cost": 4,
-    "text": "Evade. Whenever this attacks a minion, remove its keywords until your next turn.",
+    "text": "Evade. After this directly damages the enemy Hero with an attack, Jam 1 of their Mana crystals next turn. Team Guy: +3/+3 to teammates and summon Might Guy from hand/deck (once per game).",
     "art": "🍃",
     "jutsu": false,
     "attack": 4,
@@ -297,22 +302,13 @@ export const NARUTO_CARDS = [
             "action": "neji_hyuga"
           }
         ]
-      },
-      {
-        "on": "attackDeclared",
-        "effects": [
-          {
-            "op": "naruto",
-            "action": "event",
-            "ability": "neji_hyuga"
-          }
-        ]
       }
     ],
     "keywords": [
       "Evade"
     ],
-    "image": "art/hidden-leaf/neji_hyuga.webp"
+    "image": "art/hidden-leaf/neji_hyuga.webp",
+    "narutoTeam": "teamGuy"
   },
   {
     "id": "shikamaru_nara",
@@ -320,7 +316,7 @@ export const NARUTO_CARDS = [
     "faction": "Naruto",
     "type": "minion",
     "cost": 3,
-    "text": "Arrival: Choose an enemy minion. It cannot attack during its controller’s next turn.",
+    "text": "Arrival: Choose an enemy minion. It cannot attack during its controller’s next turn. Ino–Shika–Cho: +3/+3 to teammates and summon Asuma from hand/deck (once per game).",
     "art": "🍃",
     "jutsu": false,
     "attack": 2,
@@ -343,7 +339,8 @@ export const NARUTO_CARDS = [
       "type": "minion",
       "side": "enemy"
     },
-    "image": "art/hidden-leaf/shikamaru_nara.webp"
+    "image": "art/hidden-leaf/shikamaru_nara.webp",
+    "narutoTeam": "inoshikacho"
   },
   {
     "id": "choji_akimichi",
@@ -351,7 +348,7 @@ export const NARUTO_CARDS = [
     "faction": "Naruto",
     "type": "minion",
     "cost": 3,
-    "text": "Taunt. Whenever this takes damage and survives, gain +1 Attack.",
+    "text": "Taunt. Whenever this takes damage and survives, gain +1 Attack. Ino–Shika–Cho: +3/+3 to teammates and summon Asuma from hand/deck (once per game).",
     "art": "🍃",
     "jutsu": false,
     "attack": 2,
@@ -383,7 +380,8 @@ export const NARUTO_CARDS = [
     "keywords": [
       "Taunt"
     ],
-    "image": "art/hidden-leaf/choji_akimichi.webp"
+    "image": "art/hidden-leaf/choji_akimichi.webp",
+    "narutoTeam": "inoshikacho"
   },
   {
     "id": "ino_yamanaka",
@@ -391,7 +389,7 @@ export const NARUTO_CARDS = [
     "faction": "Naruto",
     "type": "minion",
     "cost": 4,
-    "text": "Arrival: Take control of an enemy minion with 2 or less Attack until the end of your turn.",
+    "text": "Arrival: Take control of an enemy minion with 2 or less Attack until the end of your turn. Ino–Shika–Cho: +3/+3 to teammates and summon Asuma from hand/deck (once per game).",
     "art": "🍃",
     "jutsu": false,
     "attack": 2,
@@ -415,7 +413,8 @@ export const NARUTO_CARDS = [
       "side": "enemy",
       "maxAttack": 2
     },
-    "image": "art/hidden-leaf/ino_yamanaka.webp"
+    "image": "art/hidden-leaf/ino_yamanaka.webp",
+    "narutoTeam": "inoshikacho"
   },
   {
     "id": "kiba_inuzuka",
@@ -423,7 +422,7 @@ export const NARUTO_CARDS = [
     "faction": "Naruto",
     "type": "minion",
     "cost": 2,
-    "text": "Arrival: Summon Akamaru, a 1/1 Beast with Rush.",
+    "text": "Arrival: Summon Akamaru, a 1/1 Beast with Rush. Team 8: +3/+3 to teammates and summon Kurenai from hand/deck (once per game).",
     "art": "🍃",
     "jutsu": false,
     "attack": 2,
@@ -442,7 +441,8 @@ export const NARUTO_CARDS = [
         ]
       }
     ],
-    "image": "art/hidden-leaf/kiba_inuzuka.webp"
+    "image": "art/hidden-leaf/kiba_inuzuka.webp",
+    "narutoTeam": "team8"
   },
   {
     "id": "shino_aburame",
@@ -450,7 +450,7 @@ export const NARUTO_CARDS = [
     "faction": "Naruto",
     "type": "minion",
     "cost": 4,
-    "text": "Whenever this damages an enemy minion, give it -1 Attack permanently.",
+    "text": "Whenever this damages an enemy, steal 1 available Mana crystal for your next turn: Jam theirs and gain 1 temporary Mana. Team 8: +3/+3 to teammates and summon Kurenai from hand/deck (once per game).",
     "art": "🍃",
     "jutsu": false,
     "attack": 3,
@@ -479,7 +479,8 @@ export const NARUTO_CARDS = [
         ]
       }
     ],
-    "image": "art/hidden-leaf/shino_aburame.webp"
+    "image": "art/hidden-leaf/shino_aburame.webp",
+    "narutoTeam": "team8"
   },
   {
     "id": "tenten",
@@ -487,7 +488,7 @@ export const NARUTO_CARDS = [
     "faction": "Naruto",
     "type": "minion",
     "cost": 2,
-    "text": "Whenever you cast a Jutsu, deal 1 damage to a random enemy minion.",
+    "text": "Whenever you cast a Jutsu, deal 1 damage to a random enemy minion. Team Guy: +3/+3 to teammates and summon Might Guy from hand/deck (once per game).",
     "art": "🍃",
     "jutsu": false,
     "attack": 2,
@@ -516,7 +517,8 @@ export const NARUTO_CARDS = [
         ]
       }
     ],
-    "image": "art/hidden-leaf/tenten.webp"
+    "image": "art/hidden-leaf/tenten.webp",
+    "narutoTeam": "teamGuy"
   },
   {
     "id": "jiraiya",
@@ -781,12 +783,41 @@ export const NARUTO_CARDS = [
     "reactionOnly": true
   },
   {
+    "id": "eight_trigrams_palm_rotation",
+    "name": "Eight Trigrams: Palm Rotation",
+    "faction": "Naruto",
+    "type": "spell",
+    "cost": 2,
+    "text": "Quick Play: On the enemy turn, when an attack or spell targets your Hero or a minion, prevent its damage to that target. If Neji is on your field, deal 3 damage to the attacker.",
+    "art": "🍃",
+    "jutsu": true,
+    "extra": true,
+    "effects": [
+      {
+        "op": "naruto",
+        "action": "eight_trigrams_palm_rotation"
+      }
+    ],
+    "image": "art/hidden-leaf/eight_trigrams_palm_rotation.webp",
+    "quickPlay": {
+      "windows": [
+        "attackDeclared",
+        "cardPlayed"
+      ],
+      "filter": {
+        "player": "enemy",
+        "duringYourTurn": false
+      }
+    },
+    "reactionOnly": true
+  },
+  {
     "id": "gentle_fist",
     "name": "Gentle Fist",
     "faction": "Naruto",
     "type": "spell",
     "cost": 2,
-    "text": "Give a friendly minion +2 Attack this turn. The next enemy minion it damages loses all keywords until your next turn.",
+    "text": "Give a friendly minion +2 Attack this turn. Its next direct attack that damages the enemy Hero this turn Jams 1 of their Mana crystals next turn.",
     "art": "🍃",
     "jutsu": true,
     "effects": [
@@ -1238,7 +1269,7 @@ export const NARUTO_CARDS = [
     "faction": "Naruto",
     "type": "spell",
     "cost": 5,
-    "text": "Deal 1 damage to an enemy minion eight times. If you control Neji or Hinata, that minion also loses all keywords.",
+    "text": "Deal 1 damage eight times, hitting random enemy minions first, then the Hero. Each hit that damages the Hero Jams 1 Mana crystal next turn (up to 8).",
     "art": "🍃",
     "jutsu": true,
     "effects": [
@@ -1247,10 +1278,6 @@ export const NARUTO_CARDS = [
         "action": "eight_trigrams_sixty_four_palms"
       }
     ],
-    "target": {
-      "type": "minion",
-      "side": "enemy"
-    },
     "extra": true,
     "image": "art/hidden-leaf/eight_trigrams_sixty_four_palms.webp"
   },
@@ -1370,7 +1397,7 @@ export const NARUTO_CARDS = [
     "faction": "Naruto",
     "type": "minion",
     "cost": 0,
-    "text": "Rush.",
+    "text": "Rush. Team 8: +3/+3 to teammates and summon Kurenai from hand/deck (once per game).",
     "art": "🍃",
     "jutsu": false,
     "attack": 1,
@@ -1383,7 +1410,8 @@ export const NARUTO_CARDS = [
       "Rush"
     ],
     "image": "art/hidden-leaf/akamaru.webp",
-    "token": true
+    "token": true,
+    "narutoTeam": "team8"
   },
   {
     "id": "summoned_toad",

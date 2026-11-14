@@ -11,7 +11,7 @@ for folder in ['src/anime', 'src/boards', 'src/engine', 'art/hidden-leaf', 'art/
 for name in [
     'src/ai/greedy.js', 'src/cards/index.js', 'src/cards/deck-check.js',
     'src/cards/neutral.js', 'src/cards/naruto.js', 'src/cards/one-piece.js', 'src/cards/tokyo-ghoul.js',
-    'src/cards/anime-presets.js', 'src/cards/validate.js',
+    'src/cards/naruto-teams.js', 'src/cards/anime-presets.js', 'src/cards/validate.js',
     'art/fonts/card-text.ttf', 'art/fonts/card-text-bold.ttf', 'art/fonts/cinzel.woff2',
     'art/frames/painted-minion.png', 'art/frames/painted-spell.png',
     'art/frames/painted-quickplay.png', 'art/frames/legendary-minion.png',
@@ -21,7 +21,7 @@ for name in [
 source = runtime + [ROOT / name for name in [
     'package.json', 'package-lock.json', 'Readme.md', 'ITCH.md', 'BOARD-ANIMATION.md',
     'tools/serve-anime.mjs', 'tools/package-anime.py',
-    'tools/test-naruto.mjs', 'tools/test-one-piece.mjs', 'tools/test-boards.mjs', 'tools/test-tokyo-ghoul.mjs', 'tools/test-tokyo-ghoul-browser.mjs', 'tools/test-boards-browser.mjs', 'tools/record-board-video.mjs',
+    'tools/test-naruto.mjs', 'tools/test-naruto-browser.mjs', 'tools/test-one-piece.mjs', 'tools/test-boards.mjs', 'tools/test-tokyo-ghoul.mjs', 'tools/test-tokyo-ghoul-browser.mjs', 'tools/test-boards-browser.mjs', 'tools/record-board-video.mjs',
 ]]
 for name, files, prefix in [
     ('Anime-Clash-itch.zip', runtime, ''),

@@ -261,7 +261,7 @@ export const QP_REFLEX_DISCOUNT = 1;
 export function nextTurnMana(state, p) {
   const pl = state.players[p];
   const grow = pl.factions?.includes('Dinosaurs') ? 2 : (state.rules.manaPerTurn ?? 1);
-  return Math.min(state.rules.maxMana, (pl.mana.max ?? 0) + grow) + (pl.mana.bonusNextTurn ?? 0);
+  return Math.max(0,Math.min(state.rules.maxMana, (pl.mana.max ?? 0) + grow) + (pl.mana.bonusNextTurn ?? 0) - (pl.mana.jammedNextTurn ?? 0));
 }
 export const isOffTurn = (state, p) => state.activePlayer !== p;
 export function quickPlayCost(state, inst) {
@@ -606,6 +606,7 @@ function reduceHealth(c, amount) {
 export function dealDamage(state, sourceId, targetId, amount, opts = {}) {
   const t = findCharacter(state, targetId);
   if (!t) return 0;
+  if(state.rotationShields?.some(s=>s.source===sourceId&&s.target===targetId&&s.turn===state.turn))return 0;
   // Prevention set by a "would take damage" Quick Play (Blood Shield, Protective Mother).
   const prevent = state.damagePrevention?.[targetId];
   if (prevent != null) {
@@ -667,7 +668,7 @@ export function dealDamage(state, sourceId, targetId, amount, opts = {}) {
   const gone = !src && sourceId != null ? state.players.flatMap((p) => p.graveyard).find((c) => c.uid === sourceId) : null;
   const who = src ? nameOf(state, src) : gone ? `${getCard(gone.cardId).name}'s Exit` : opts.burn ? '🔥 Burn' : 'Effect';
   log(state, `${who} deals ${amount} to ${nameOf(state, t)}.`);
-  emit(state, { type: 'damageDealt', source: sourceId, target: t.uid, player: t.controller, amount });
+  emit(state, { type: 'damageDealt', source: sourceId, target: t.uid, player: t.controller, amount, combat:!!opts.combat, attacker:opts.attacker??null });
   // Bleed: a Vampire card that wounds a bleeding enemy drinks half of it back.
   if ((t.bleed ?? 0) > 0 && src && src.controller !== t.controller && vampireSource(src)) {
     const back = Math.ceil(amount / 2);

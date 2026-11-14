@@ -11,7 +11,7 @@ A separate anime card game derived from [Shattered Realms TCG](https://github.co
 
 ## Included
 
-Three separate factions, each with 45 collectibles and three editable 30-card starter decks:
+Three separate factions with three editable 30-card starter decks each (Naruto: 46 collectibles; One Piece and Tokyo Ghoul: 45 each):
 
 | Faction | Minions | Spells | Legendary cards | Hero Spell |
 | --- | --- | --- | --- | --- |
@@ -104,3 +104,20 @@ The replacement Thousand Sunny boards use the supplied 1280×720 and 720×1280 p
 - Traps are automatic and use the existing three-trap limit. Hidden in Plain Sight can invalidate either target of a two-target spell. All 45 cards and eight Hero paths have executable effects; the UI provides Feed targeting, two-step spell targeting, Kakuja choices, equipment durability/attack controls, Armor, Hunger and Cannibalism status.
 - Artwork: supplied collages were separated with AI cleanup, and borders/labels removed. Aogiri Ghoul shares the hooded Masked Ghoul image because a separate source was not identified. The Investigator power variants share the supplied Quinque Arsenal image; Predatory Instinct uses its supplied image. Source mapping is in `art/tokyo-ghoul/provenance.json`. Tokyo Ghoul uses the supplied animated Gourmet/Cochlea boards; see `BOARD-ANIMATION.md` for sound hooks and optional missing environment layers.
 - Verification: 34 Tokyo Ghoul engine tests cover all collectibles, traps, Hero selection, Hunger, consuming, hybrid choices, durability, deterministic saves and AI progression. `tools/test-tokyo-ghoul-browser.mjs` exercises desktop/mobile collection filters, saved Hero choices, deck export, both Hero paths and complete Feed/spell/evolution/weapon interactions. Browser tests use optional Playwright and do not add a runtime dependency.
+
+### Naruto team and Hyuga update
+
+Controlling a complete team grants its current teammates permanent +3/+3 and summons its mentor from hand (first) or deck, once per team per player per game:
+
+- Naruto, Sasuke, Sakura → Kakashi.
+- Neji, Rock Lee, Tenten → Might Guy.
+- Shino, Hinata, Kiba, Akamaru → Kurenai.
+- Shikamaru, Ino, Choji → Asuma.
+
+Duplicate teammates present at completion also receive the buff. Summoning a mentor does not trigger Arrival. A full board still receives the team buff but leaves the mentor in its original zone; missing mentors are never generated. Reassembling the team does not trigger another reward, including after saving and loading.
+
+**Jammed** blocks Mana on its owner's next refill, then clears. Maximum crystals remain unchanged. Pending Jammed Mana is excluded from Quick Play borrowing. Neji and Hinata Jam 1 on a successful direct Hero attack; Gentle Fist adds 1 on its next successful direct Hero hit that turn. Prevented damage and attacks into minions do not Jam. Sixty-Four Palms resolves eight separate 1-damage hits, checking living enemy minions before every hit; only when none remain does it hit the Hero and Jam 1 per successful Hero hit (up to 8). Shino replaces its old Attack drain with stealing 1 available next-turn Mana crystal whenever it damages an enemy, granting its controller 1 temporary Mana on their next turn.
+
+**Eight Trigrams: Palm Rotation** is a 2-Mana Quick Play Jutsu using the supplied artwork. On an opponent's turn, it prevents the incoming attack's damage to your Hero or minion, or the triggering targeted spell's damage to its friendly target(s). Neji adds 3 damage to an attacking character. Defender retaliation still occurs; it does not make characters Immune for the turn or cancel nondamage spell effects. Off-turn reflex discount and borrowed Mana follow the existing rules. Each updated Naruto starter includes one copy; custom saved decks are retained.
+
+Verification: `npm test`; browser flow: `PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs node tools/test-naruto-browser.mjs` against the local server on port 4174. The browser test checks desktop and touch layouts, the supplied image, all three presets, a real reaction, Neji's counter, team progress and the Jammed HUD.

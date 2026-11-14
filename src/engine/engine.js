@@ -1,6 +1,6 @@
 import {tgInitPlayer,tgInitMinion,tgCanPlay,tgLegalActions,tgApplyAction,tgEquip,tgIncomingDamage,tgCombatBonus} from './tokyo-ghoul.js';
 import { activateGear, applyOnePieceAction, canGear, initOnePieceMinion, isLuffy, onePieceCanReact, onePieceHealBlocked, onePieceIncomingDamage, onePieceLegalActions, silenceRemovable } from './one-piece.js';
-import { checkRasengan } from './naruto.js';
+import { checkRasengan, checkNarutoTeams, resolveJammedMana, narutoCanReact } from './naruto.js';
 import { checkDeck } from '../cards/deck-check.js';
 // Game engine: state creation, the action API, and the step machine.
 //
@@ -279,6 +279,7 @@ function eligibleQuickPlays(state, p, windowName, windowCtx) {
     const qp = card.quickPlay;
     if (!qp || !(qp.windows ?? DEFAULT_QUICK_PLAY_WINDOWS).includes(windowName)) continue;
     if (!onePieceCanReact(state, card, p, windowCtx?.event, windowName)) continue;
+    if (!narutoCanReact(state, card, p, windowCtx?.event, windowName)) continue;
     // Off-turn: left-over Mana plus next turn's (minus what is already borrowed), at the reflex discount.
     const budget = quickPlayBudget(state, p);
     const affordable = budget == null ? costOf(state, inst) <= manaFor(state.players[p], card) : quickPlayCost(state, inst) <= budget;
@@ -845,7 +846,7 @@ const STEPS = {
     const activeWeapon = a.kind === 'hero' ? (a.weaponUsedSlot === 2 ? a.weapon2 : a.weapon) : null;
     const huntDmg = huntDamage(state, a, d, aDmg)+tgCombatBonus(state,a,d);
     const wasPrey = d.kind === 'minion' && d.prey;
-    const dealt = dealDamage(state, a.uid, d.uid, huntDmg, {combat:true});
+    const dealt = step.preventDefenderDamage ? 0 : dealDamage(state, a.uid, d.uid, huntDmg, {combat:true,attacker:a.uid});
     const executed = dealt > 0 && d.kind === 'minion' && activeWeapon?.executeFaction === getCard(d.cardId).faction;
     if (executed) {
       d.destroyed = true;
@@ -861,7 +862,7 @@ const STEPS = {
     }
     // Witches: a Hero attacking with a Wand fires from afar and takes no damage back.
     const fromAfar = a.kind === 'hero' && (activeWeapon?.wand || activeWeapon?.ranged);
-    if (!fromAfar && !executed) dealDamage(state, d.uid, a.uid, dDmg, {combat:true});
+    if (!fromAfar && !executed) dealDamage(state, d.uid, a.uid, dDmg, {combat:true,attacker:a.uid});
     // Acidic (Half-Digested): Acid Hide melts whatever attacks it.
     if (!fromAfar) acidHideTouch(state, d, a);
     // Scarred Leviathan: damage to Marked Prey heals your Hero by as much.
@@ -1272,6 +1273,7 @@ const STEPS = {
     if (pl.extinction) pl.extinction.turns += 1;
     if (pl.greatFreeze) pl.greatFreeze.turns += 1;
     factionHook(pl, 'turnStartMana')(state, pl);
+    resolveJammedMana(state,pl);
     // Mana borrowed for Quick Plays on the opponent's turn comes off this refill.
     if (pl.qpDebt > 0) {
       const paid = Math.min(pl.qpDebt, pl.mana.current);
@@ -1364,6 +1366,7 @@ export function run(state) {
     if (recent.length > 200) recent.splice(0, 100);
     STEPS[step.kind](state, step);
     checkRasengan(state);
+    checkNarutoTeams(state);
     if (state.buffer.length) {
       const buffered = state.buffer;
       state.buffer = [];
