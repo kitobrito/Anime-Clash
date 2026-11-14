@@ -89,3 +89,4 @@
 .board-art[data-ready=true]{animation:board-reveal 220ms ease-out}
 @keyframes board-reveal{from{opacity:.8}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.board-art[data-ready=true]{animation:none}}
+.new-skin .rules-parchment p{min-height:0!important}

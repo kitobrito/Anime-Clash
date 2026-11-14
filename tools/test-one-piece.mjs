@@ -23,7 +23,7 @@ function attack(s,m,target){const a=getLegalActions(s).find(a=>a.type==='attack'
 function gear(s,m){const a=getLegalActions(s).find(a=>a.type==='gearShift'&&a.minion===m.uid);assert.ok(a);applyAction(s,a);}
 function noGear(s,m){assert.ok(!getLegalActions(s).some(a=>a.type==='gearShift'&&a.minion===m.uid));}
 
-test('90 collectibles, 45 per faction, 22 Straw Hat minions, 23 spells and 11 Legendary cards; all assets and six decks valid',()=>{
+test('135 collectibles, 45 per faction, 22 Straw Hat minions, 23 spells and 11 Legendary cards; all assets and nine decks valid',()=>{
  const c=FACTION_POOLS[STRAW_HATS].map(getCard);assert.equal(c.length,45);assert.equal(c.filter(x=>x.type==='minion').length,22);assert.equal(c.filter(x=>x.type==='spell').length,23);assert.equal(c.filter(x=>x.legendary).length,11);
  assert.equal(allCards().filter(x=>x.luffy).length,6);assert.deepEqual(validateAllCards().filter(c=>c.errors.length||c.incomplete.length),[]);
  for(const c of allCards().filter(c=>c.faction===STRAW_HATS))assert.ok(fs.existsSync(new URL('../'+c.image,import.meta.url)),c.name);

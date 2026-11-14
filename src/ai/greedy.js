@@ -9,6 +9,7 @@ import { getCard } from '../engine/registry.js';
 
 function minionValue(m) {
   let v = effectiveAttack(m) * 1.4 + m.health;
+  if(m.hunger!=null)v-=Math.min(m.hunger,4)*.35;
   for (const k of allKeywords(m)) {
     if (NEGATIVE_KEYWORDS.includes(k)) v -= 1.5;
     else v += k === 'Taunt' || k === 'Lifesteal' || k === 'Venomous' ? 1 : 0.5;
@@ -22,6 +23,8 @@ export function evaluate(state, me) {
   const opp = state.players[1 - me];
   let score = 0;
   score += my.hero.health * 0.8 - opp.hero.health * 1.0;
+  const equipment=pl=>(pl.hero.armor??0)*.55+(pl.hero.weapon?(pl.hero.weapon.exhausted?0:pl.hero.weapon.attack*1.2)+pl.hero.weapon.durability*.6:0)+(pl.tokyo?.stacks??0)*.65+(pl.tokyo?.evolved?2:0);
+  score+=equipment(my)-equipment(opp)+my.hand.length*.8-opp.hand.length*.75;
   score += my.board.reduce((s, m) => s + minionValue(m), 0);
   score -= opp.board.reduce((s, m) => s + minionValue(m), 0) * 1.1;
   score += my.mana.bonusNextTurn * 1.5;
@@ -72,6 +75,7 @@ export function chooseAction(state) {
     // A reaction window may pause the clone mid-resolution; assume the
     // opponent passes so the full outcome is scored.
     while (sim.pending?.type === 'reaction' && sim.pending.player !== me) applyAction(sim, { type: 'pass', player: sim.pending.player });
+    for(let i=0;i<4&&sim.pending?.type==='choice'&&sim.pending.player===me;i++)applyAction(sim,chooseAction(sim));
     const score = evaluate(sim, me);
     if (score > bestScore) { bestScore = score; best = action; }
   }

@@ -451,5 +451,5 @@ export const CARD_FRAMES = {
     ]
   }
 };
-export function frameFor(card){const type=card.frameType??(card.type==='trap'?'trap':card.type==='weapon'||card.weapon||card.wand?'weapon':card.type==='minion'?'minion':'spell');const prefix=card.legendary?(card.faction==='One Piece'?'one-piece':'naruto'):'basic';return CARD_FRAMES[`${prefix}-${type}`];}
+export function frameFor(card){const type=card.frameType??(card.type==='trap'?'trap':card.type==='weapon'||card.weapon||card.wand?'weapon':card.type==='minion'?'minion':'spell');const prefix=card.legendary?(card.faction==='One Piece'?'one-piece':card.faction==='Naruto'?'naruto':'basic'):'basic';return CARD_FRAMES[`${prefix}-${type}`];}
 export function frameVars(frame){return Object.entries(frame).filter(([key])=>key!=='src').flatMap(([key,box])=>box.map((v,i)=>`--${key}-${['l','t','w','h'][i]}:${v}%`)).join(';');}

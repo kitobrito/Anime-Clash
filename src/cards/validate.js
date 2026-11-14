@@ -47,6 +47,7 @@ export function validateCard(card) {
     if (card.health == null) incomplete.push('Health not specified');
     else if (!isInt(card.health) || card.health < 1) errors.push(`invalid health ${card.health}`);
   }
+  if(card.type==='weapon'&&(!isInt(card.attack)||!isInt(card.durability)||card.durability<1))errors.push('Weapons need nonnegative Attack and positive Durability.');
   for (const k of card.keywords ?? []) {
     if (!KEYWORDS.includes(k)) errors.push(`unknown keyword "${k}"`);
     else if (UNDEFINED_KEYWORDS.includes(k) && !card.pending) incomplete.push(`${k} is not defined yet`);

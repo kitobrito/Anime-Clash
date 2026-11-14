@@ -3,7 +3,7 @@ const F='Tokyo Ghoul',art=id=>`art/tokyo-ghoul/${id}.webp`,op=action=>({op:'toky
 const minion=(id,name,cost,attack,health,species,text,keywords=[],legendary=false,arrival=false,target)=>({id:'tg_'+id,name,faction:F,type:'minion',cost,attack,health,species,tribes:[species],text,keywords,legendary,image:art(id),triggers:arrival?[{on:'battlecry',effects:[op(id)]}]:[],...(target?{target}: {})});
 const friendly={type:'minion',side:'friendly'},enemy={type:'minion',side:'enemy'};
 const M=[
- minion('kaneki','Ken Kaneki — The One-Eyed Ghoul',6,5,6,'Half-Ghoul','Lifesteal. Arrival: Consume a damaged enemy minion with 3 or less Health. Whenever Kaneki consumes a character, gain +1 Attack permanently.',['Lifesteal'],true,true,{...enemy,damaged:true,maxHealth:3}),
+ minion('kaneki','Ken Kaneki — The One-Eyed Ghoul',6,5,6,'Half-Ghoul','Lifesteal. Arrival: Consume a damaged enemy minion with 3 or less Health. Whenever Kaneki consumes a character, gain +1 Attack permanently.',['Lifesteal'],true,true,{...enemy,damaged:true,maxHealth:3,tgConsume:true}),
  minion('touka','Touka Kirishima — Rabbit',4,4,3,'Ghoul','Stealth, Rush. After Touka attacks, gain Stealth until your next turn if she survives.',['Stealth','Rush'],true),
  minion('rize','Rize Kamishiro — Binge Eater',5,4,6,'Ghoul','Lifesteal. Whenever an enemy minion dies during your turn, restore 2 Health to Rize. Once per turn, if Rize is at full Health, give her +1/+1 permanently instead.',['Lifesteal'],true),
  minion('yoshimura','Yoshimura — The Non-Killing Owl',8,7,9,'Ghoul','Taunt, Lifesteal. Arrival: Restore 5 Health to all friendly Ghouls and Half-Ghouls. Your Ghouls do not gain Hunger while Yoshimura is on the battlefield.',['Taunt','Lifesteal'],true,true),

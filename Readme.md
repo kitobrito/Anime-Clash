@@ -1,4 +1,4 @@
-# Anime Clash — Naruto & One Piece
+# Anime Clash — Naruto, One Piece & Tokyo Ghoul
 
 A separate anime card game derived from [Shattered Realms TCG](https://github.com/kitobrito/Shattered-Realms-TCG), based on source commit `4c51640`. **Anime Clash** is a working title. The original repository is untouched. This repository contains only the standalone anime game.
 
@@ -11,16 +11,19 @@ A separate anime card game derived from [Shattered Realms TCG](https://github.co
 
 ## Included
 
-Two separate factions, each with 45 collectibles and three editable 30-card starter decks:
+Three separate factions, each with 45 collectibles and three editable 30-card starter decks:
 
 | Faction | Minions | Spells | Legendary cards | Hero Spell |
 | --- | --- | --- | --- | --- |
 | Naruto | 27 | 18 | 7 | Shadow Clone Technique |
 | One Piece | 22 | 23 | 11 | Nakama! |
+| Tokyo Ghoul | 21 | 10 | 13 | Predatory Instinct / Investigator variants |
+
+Tokyo Ghoul also includes 3 Investigator Hero cards, 5 traps and 6 Quinque weapons, for 45 total collectibles.
 
 A deck contains exactly 30 cards from one faction, at most two of an ordinary card and one of each Legendary. Tokens, Gear forms, generated neutral potions, and Hero Spells cannot be added to decks. Fusion cards, charging, and fusion actions are absent from the active engine.
 
-The game supports collection search, token/form galleries, full card inspection, mana filters, separate saved faction decks, import/export, mulligans, saved matches, summon positioning, AI rivals from either faction, reactions, triggered effects, and activated abilities. All gameplay state is serializable for saves and AI simulations.
+The game supports collection search, token/form galleries, full card inspection, mana filters, separate saved faction decks, import/export, mulligans, saved matches, summon positioning, AI rivals from all three factions, reactions, triggered effects, and activated abilities. All gameplay state is serializable for saves and AI simulations.
 
 **Local AI practice is supported.** The original account/multiplayer/economy code and old factions are excluded. No online account or ranked integration is claimed.
 
@@ -89,3 +92,15 @@ Everything else on each board has its own idle animation (`src/boards/ambient.js
 The app uses one internal native scroll viewport so it remains scrollable inside itch’s iframe even when the surrounding page cannot scroll. UI updates preserve scroll position and wait for momentum scrolling to settle. Safari/WebKit layout scrolling and Chromium touch gestures were checked in embedded and full-viewport configurations; physical iPhone testing remains useful.
 
 The replacement Thousand Sunny boards use the supplied 1280×720 and 720×1280 paintings. Corner bases retain their original pixels, with separately traced hat, fruit, flag, telescope, food and Log Pose layers. Reconstructed surfaces appear only inside the concealed object footprints. The lion figurehead sways, blinks and reacts to clicks. Hit tests use each moving layer’s current screen transform and raster alpha; visual effects leave the central card rectangle clear.
+
+## Tokyo Ghoul rules and implementation
+
+- Choose one of four Ghoul Heroes (Kaneki/Rinkaku, Touka/Ukaku, Tsukiyama/Koukaku, Nishiki/Bikaku) or a generic Investigator. Include at most one named Investigator Hero card (Arima, Amon or Akira) to replace that choice. Its card counts toward the 30-card deck and starts outside the draw pile, leaving 29 drawable cards. Named Heroes cannot be cast or summoned. Hero selection survives deck export/import.
+- Ghouls and Half-Ghouls gain Hunger at their controller’s turn end unless they consumed that turn. At Hunger 3 or more, starvation deals 1 damage. Feed costs 1 Mana and the minion’s remaining attacks, once per turn, requiring that it can attack. It can consume an allied Human token or a damaged enemy minion with at most 2 current Health; Heroes and itself are never targets. Silence removes printed abilities, while species and Hunger remain.
+- Consuming a Human or Half-Human heals the consumer for 3; a Half-Ghoul heals for 3 and grants +0/+1; a Ghoul grants +1/+2 without a separate heal. Stat buffs increase current Health with maximum Health as usual. Feed and consume spells reset Hunger; spell consumption does not spend the consumer’s attack. Enemy Human Civilians cannot be consumed during their summon turn.
+- A Ghoul Hero receives a Cannibalism stack when an ally consumes a Ghoul/Half-Ghoul, capped at four. Once per game, spend four stacks and 4 Mana to choose a distinct second Kagune type. The original Hero and equipment identity persist; the hybrid gains 6 Armor, +2 weapon Attack, +3 maximum Durability, a full repair and Lifesteal. A newly added Ukaku grants Evade; a newly added Koukaku grants 2 Armor. Kakuja Awakening can evolve for its printed spell cost and adds temporary Attack, otherwise it summons a Ravenous Ghoul and draws.
+- Kagunes persist at zero Durability, exhausted and unable to attack until repaired. They cannot be replaced with Quinques. Investigator Quinques use ordinary breakage; Jason’s kill repair resolves before its final attack would break it. Hero spells are once per own turn and discover only Quinques remaining in the deck, removing the chosen card. With no available Quinque and no equipped weapon, the fallback grants 2 Armor. Durability increases from Hero powers can exceed the printed maximum; Maintenance caps at the current maximum.
+- Card text saying **Ghoul** uses the Ghoul species; text saying **Ghoul or Half-Ghoul** uses both. The Hero’s Ghoul path includes either. Yoshimura suppresses Hunger gain for Ghouls while remaining Half-Ghouls still gain Hunger. Named Humans/Half-Humans and ordinary living Naruto/One Piece humans are classified for consume/target effects; wooden bodies, drawn beasts and illusion tokens are excluded.
+- Traps are automatic and use the existing three-trap limit. Hidden in Plain Sight can invalidate either target of a two-target spell. All 45 cards and eight Hero paths have executable effects; the UI provides Feed targeting, two-step spell targeting, Kakuja choices, equipment durability/attack controls, Armor, Hunger and Cannibalism status.
+- Artwork: supplied collages were separated with AI cleanup, and borders/labels removed. Aogiri Ghoul shares the hooded Masked Ghoul image because a separate source was not identified. The Investigator power variants share the supplied Quinque Arsenal image; Predatory Instinct uses its supplied image. Source mapping is in `art/tokyo-ghoul/provenance.json`. Tokyo Ghoul uses the supplied animated Gourmet/Cochlea boards; see `BOARD-ANIMATION.md` for sound hooks and optional missing environment layers.
+- Verification: 34 Tokyo Ghoul engine tests cover all collectibles, traps, Hero selection, Hunger, consuming, hybrid choices, durability, deterministic saves and AI progression. `tools/test-tokyo-ghoul-browser.mjs` exercises desktop/mobile collection filters, saved Hero choices, deck export, both Hero paths and complete Feed/spell/evolution/weapon interactions. Browser tests use optional Playwright and do not add a runtime dependency.

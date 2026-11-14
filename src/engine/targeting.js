@@ -2,6 +2,7 @@
 // characters at resolution time, and how trigger filters match events.
 
 import { allKeywords, defensiveKeywordOf, hasTribe, effectiveAttack, findCharacter, hasKeyword, heroOf, isBuffed, isBurning, isDarkOrUndead, minionsInOrder, opponentOf, radiationOf } from './core.js';
+import {tgSpecies,tgHuman} from './tokyo-types.js';
 import { getCard } from './registry.js';
 import { pickRandom } from './rng.js';
 
@@ -22,10 +23,10 @@ export function canBeChosenBy(target, controller, bySpell = false, spec = null) 
 
 // Extra minion conditions shared by target specs and selectors.
 export function minionPasses(m, f) {
-  const species=getCard(m.cardId).species;
+  const species=tgSpecies(m);
   if(f.tgSpecies&&species!==f.tgSpecies)return false;
   if(f.tgHungry&&!['Ghoul','Half-Ghoul'].includes(species))return false;
-  if(f.tgHuman&&!['Human','Half-Human'].includes(species)&&!(m.tribes??[]).some(t=>['Shinobi','Pirate'].includes(t)))return false;
+  if(f.tgHuman&&!tgHuman(m))return false;
   const user = !!m.devilFruitUser || !!m.devilFruit || !!getCard(m.cardId).devilFruitUser;
   if (f.nonDevilFruit && user) return false;
   if (f.devilFruitUser && !user) return false;

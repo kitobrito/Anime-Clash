@@ -793,6 +793,7 @@ export function drawCards(state, p, count = 1, filter = null) {
 // Puts a new minion onto p's board. Stat/keyword overrides come from the
 // summoning card's text (e.g. "summon a 2/2 Vampire Thrall with Taunt").
 export function summonMinion(state, p, cardId, opts = {}) {
+  if(getCard(cardId).investigatorHero)return null;
   const pl = state.players[p];
   if (pl.board.length >= state.rules.maxBoardSize) {
     log(state, `${pl.name}'s board is full; ${getCard(cardId).name} is not summoned.`);
