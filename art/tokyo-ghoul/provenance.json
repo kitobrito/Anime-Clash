@@ -7,8 +7,9 @@
       720,
       720
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": "Display P3"
   },
   "rize": {
     "source": "user-supplied anime screenshot",
@@ -18,8 +19,9 @@
       441,
       441
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": "Display P3"
   },
   "eto": {
     "source": "user-supplied anime screenshot",
@@ -29,8 +31,9 @@
       736,
       736
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": null
   },
   "noro": {
     "source": "user-supplied anime screenshot",
@@ -40,8 +43,9 @@
       1080,
       1080
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": null
   },
   "yoshimura": {
     "source": "user-supplied anime screenshot",
@@ -51,8 +55,9 @@
       720,
       720
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": "Display P3"
   },
   "touka": {
     "source": "user-supplied anime screenshot",
@@ -62,8 +67,9 @@
       447,
       447
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": null
   },
   "nishiki": {
     "source": "user-supplied anime screenshot",
@@ -73,8 +79,9 @@
       500,
       500
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": null
   },
   "tsukiyama": {
     "source": "user-supplied anime screenshot",
@@ -84,8 +91,9 @@
       554,
       554
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": null
   },
   "hinami": {
     "source": "user-supplied anime screenshot",
@@ -95,8 +103,9 @@
       805,
       805
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": "Display P3"
   },
   "ayato": {
     "source": "user-supplied anime screenshot",
@@ -106,8 +115,9 @@
       447,
       447
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": null
   },
   "waitress": {
     "source": "user-supplied anime screenshot",
@@ -117,8 +127,9 @@
       428,
       467
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": null
   },
   "yomo": {
     "source": "user-supplied anime screenshot",
@@ -128,8 +139,9 @@
       736,
       737
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": null
   },
   "juuzou": {
     "source": "user-supplied anime screenshot",
@@ -139,8 +151,9 @@
       600,
       600
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": "Display P3"
   },
   "starving": {
     "source": "user-supplied anime screenshot",
@@ -150,8 +163,9 @@
       337,
       337
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": "Display P3"
   },
   "hirako": {
     "source": "user-supplied anime screenshot",
@@ -161,8 +175,9 @@
       414,
       414
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": "Display P3"
   },
   "ui": {
     "source": "user-supplied anime screenshot",
@@ -172,8 +187,9 @@
       720,
       730
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": null
   },
   "uta": {
     "source": "user-supplied anime screenshot",
@@ -183,8 +199,9 @@
       415,
       415
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": "uRGB"
   },
   "amon": {
     "source": "user-supplied anime screenshot",
@@ -194,8 +211,9 @@
       413,
       413
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": "Display P3"
   },
   "arima": {
     "source": "user-supplied anime screenshot",
@@ -205,8 +223,9 @@
       518,
       592
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": null
   },
   "takizawa": {
     "source": "user-supplied anime screenshot",
@@ -216,8 +235,9 @@
       768,
       768
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": "Display P3"
   },
   "akira": {
     "source": "user-supplied anime screenshot",
@@ -227,8 +247,9 @@
       675,
       675
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": "Display P3"
   },
   "feeding_frenzy": {
     "generated": "exec-00ef609f-1f73-444b-bec5-a7830bfa6314.png",
@@ -242,8 +263,9 @@
       413,
       413
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": "Display P3"
   },
   "cannibalistic_feast": {
     "generated": "exec-6f62710a-c4a8-4e84-b244-4134473db5db.png",
@@ -257,8 +279,9 @@
       628,
       628
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": "Display P3"
   },
   "human_prey": {
     "generated": "exec-cdc65472-9af6-4f9a-a1e8-cd89d0433522.png",
@@ -308,8 +331,9 @@
       189,
       189
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": "Display P3"
   },
   "surprise_raid": {
     "generated": "exec-2ab366cb-b832-456e-a54d-ffbe3856ea6c.png",
@@ -323,8 +347,9 @@
       958,
       958
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": "Display P3"
   },
   "extermination": {
     "generated": "exec-ea219cba-308b-4dd9-8d84-5d9c5f642b92.png",
@@ -342,8 +367,9 @@
       819,
       819
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": "Display P3"
   },
   "civilian": {
     "generated": "exec-b391b4de-d81a-4623-a9c2-70cacbc1cb35.png",
@@ -357,8 +383,9 @@
       361,
       361
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": "Display P3"
   },
   "masked": {
     "generated": "exec-8f2f8a80-b0df-4615-ab4a-7701acc3c57b.png",
@@ -372,8 +399,9 @@
       366,
       366
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": "Display P3"
   },
   "fueguchi": {
     "source": "user-supplied anime screenshot",
@@ -383,8 +411,9 @@
       647,
       647
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": "Display P3"
   },
   "agent": {
     "generated": "exec-76ef0a76-9224-40c5-8431-0fa53a561eed.png",
@@ -398,8 +427,9 @@
       1080,
       1080
     ],
-    "conversion": "lossless WebP; original dimensions and pixels preserved",
-    "sharedWith": null
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": "Display P3"
   },
   "ravenous": {
     "generated": "exec-b61125f5-fec8-4d6f-be5b-0e2f34e77b80.png",
