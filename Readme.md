@@ -129,3 +129,20 @@ Naruto Uzumaki, Sasuke Uchiha, Ino Yamanaka, Neji Hyuga and Shino Aburame now co
 Team 7 Combo now runs two copies of Naruto, Sasuke and Sakura, with more draw, protection and useful Jutsu. Ino–Shika–Cho Control now runs two copies of each member of Ino–Shika–Cho and Team Guy, both mentors, Shino, and supporting control spells. Will of Fire, One Piece and Tokyo Ghoul lineups are unchanged. The canonical Naruto lists live in `src/cards/naruto-starters.js`, shared by the default deck and preset selector. Custom saved decks are preserved; reload the updated Team 7 or Ino–Shika–Cho preset to use its new lineup.
 
 Candidate screening compares costs only, decks only, and their combination through isolated test-worker card overrides. Release validation uses the real card definitions without overrides. Use `tools/tune-naruto.mjs --candidates=path/to/candidates.json --seeds=12` to screen; full matched runs use `tools/balance-anime.mjs`. Fresh-seed validation uses `--only=naruto-cross --seeds=50 --seed-offset=1000 --hero-seeds=0 --sensitivity-seeds=12`. Do not use fresh-seed results to select a candidate and then describe those same seeds as an independent test.
+
+### Tokyo Ghoul Hero selection and Yukimura
+
+The deck builder and battle setup have a full-width **Choose your Hero** panel: first choose **Ghoul** or **Investigator**, then select a named Hero. Each option shows its starting Armor, Kagune, passive, Hero Spell and deck requirement. The selected Hero is saved and repeated beside the match start button. Your Hero is your player character; a minion with the same name is a separate card.
+
+- Ghouls: Ken Kaneki (Rinkaku/Lifesteal), Touka Kirishima (Ukaku/Evade), Shuu Tsukiyama (Koukaku/2 Armor), and Nishiki Nishio (Bikaku/first-attack damage).
+- Investigators: CCG Investigator (5 Armor), Kishou Arima (8 Armor/first-attack Evade), Koutarou Amon (6 Armor/damage against Ghouls), and Akira Mado (5 Armor/first Quinque discount).
+
+Named Investigators occupy one of the 30 deck slots and start outside the 29-card draw pile. Choosing one in a full deck asks which card to replace. Switching back asks which card fills the freed slot. Switching between named Investigators swaps their Hero cards. Cancel keeps the current deck and Hero. Other Heroes require no Hero card.
+
+Yukimura explicitly lets the equipped Hero attack Stealth minions; spells and other attackers keep their normal targeting restrictions, and visible Taunt still applies. The first Hero attack each turn gains +2 Attack against Stealth or Evade. While Arima is your Hero and Yukimura remains equipped, it grants Twin Strike (two attacks per turn). Replacing or breaking Yukimura removes that grant.
+
+Verification: `npm test`; `tools/test-hero-picker-browser.mjs` checks desktop and mobile selection, cancellation, deck swaps, persistence, actual match setup and both Yukimura attacks against Stealth. `tools/test-tokyo-ghoul-browser.mjs` covers existing gameplay flows. Set `PLAYWRIGHT_MODULE` to your installed Playwright module and run against port 4174.
+
+### Shared weapon frame
+
+Every weapon uses the supplied green frame with a blue Mana orb, including Legendary weapons. Art, names, rules, Attack and Durability align with its built-in windows. The same asset is used in Shattered Realms. Renderer tests: `tools/test-weapon-frames.mjs`; desktop/mobile browser checks: `tools/test-weapon-frame-browser.mjs`.

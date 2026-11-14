@@ -1,4 +1,4 @@
-import {tgInitPlayer,tgInitMinion,tgCanPlay,tgLegalActions,tgApplyAction,tgEquip,tgIncomingDamage,tgCombatBonus} from './tokyo-ghoul.js';
+import {tgInitPlayer,tgInitMinion,tgCanPlay,tgLegalActions,tgApplyAction,tgEquip,tgIncomingDamage,tgCombatBonus,tgYukimuraTwinStrike} from './tokyo-ghoul.js';
 import { activateGear, applyOnePieceAction, canGear, initOnePieceMinion, isLuffy, onePieceCanReact, onePieceHealBlocked, onePieceIncomingDamage, onePieceLegalActions, silenceRemovable } from './one-piece.js';
 import { checkRasengan, checkNarutoTeams, resolveJammedMana, narutoCanReact } from './naruto.js';
 import { checkDeck } from '../cards/deck-check.js';
@@ -217,6 +217,16 @@ function defendersFor(state, c) {
   }
   if (c.kind === 'hero') {
     const weapon = c.weapon2 && c.attacksThisTurn % 2 === 1 ? c.weapon2 : c.weapon;
+    // Yukimura grants attack targeting only. It does not reveal minions or
+    // change spell targeting, and visible Taunts still protect hidden allies.
+    if (weapon?.attackStealth && weapon.durability > 0 && !weapon.exhausted) {
+      const enemy = state.players[opponentOf(c.controller)];
+      const taunts = enemy.board.some(m => m.health > 0 && !m.destroyed && !(m.encased > 0) && hasKeyword(m,'Taunt') && !hasKeyword(m,'Stealth'));
+      if (!taunts || c.ignoreTauntTurn === state.turn) {
+        const hidden = enemy.board.filter(m => m.health > 0 && !m.destroyed && !(m.encased > 0) && hasKeyword(m,'Stealth'));
+        all = [...new Set([...all, ...hidden.map(m => m.uid)])];
+      }
+    }
     if (weapon?.heroOnly) all = all.filter((id) => findCharacter(state, id)?.kind === 'hero');
   }
   // Sharks: Marked Prey can't hide from a Shark (Blood in the Water): a Shark can attack it through
@@ -586,7 +596,7 @@ function transformAction(state, { player: p, minion }) {
 
 function declareAttack(state, { player: p, attacker, defender }) {
   const a = findCharacter(state, attacker);
-  if (a.kind === 'hero' && a.attacksThisTurn === 0 && hasKeyword(a, 'Twin Strike')) a.dualWieldStrikeUsed = true;
+  if (a.kind === 'hero' && a.attacksThisTurn === 0 && hasKeyword(a, 'Twin Strike') && !tgYukimuraTwinStrike(state,a.controller)) a.dualWieldStrikeUsed = true;
   a.attacksThisTurn += 1;
   // Two weapons take turns: Weapon 1, then Weapon 2, then Weapon 1 again (extra attacks).
   if (a.kind === 'hero') a.weaponUsedSlot = a.weapon2 && a.attacksThisTurn % 2 === 0 ? 2 : 1;
@@ -700,7 +710,7 @@ function applyAuras(state) {
     // different weapons) is kept here too, or this recompute would wipe it.
     const dualTwin = pl.hero.dualWield && pl.hero.weapon && pl.hero.weapon2 && pl.hero.weapon.cardId !== pl.hero.weapon2.cardId;
     const wk = [...(pl.hero.weapon?.keywords ?? []), ...(pl.hero.weapon?.runes?.some((r) => r.id === 'twinBolt') ? ['Twin Strike'] : []), ...(darkArts ? ['Lifesteal'] : []),
-      ...(dualTwin ? ['Twin Strike'] : []), ...(pl.hero.eclipse ? ['Lifesteal'] : [])];
+      ...(dualTwin || tgYukimuraTwinStrike(state,pl.index) ? ['Twin Strike'] : []), ...(pl.hero.eclipse ? ['Lifesteal'] : [])];
     if (wk.length) pl.hero.auraKeywords = [...new Set(wk)];
     else if (pl.hero.auraKeywords) delete pl.hero.auraKeywords;
   }

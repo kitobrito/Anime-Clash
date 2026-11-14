@@ -132,3 +132,29 @@ test('Ghoul Hero species participates in hunting bonuses and Predatory Instinct 
  const s=game('amon');play(s,'yukimura');attack(s,s.players[0].hero,s.players[1].hero);assert.equal(s.players[1].hero.health,27);
  const g=game();g.players[0].hero.health=20;attack(g,g.players[0].hero,g.players[1].hero);assert.equal(g.players[0].hero.health,23);power(g);assert.equal(g.players[0].hero.health,26);
 });
+
+test('Yukimura alone lets the armed Hero attack Stealth; minions and targeted spells cannot',()=>{
+ const s=game('investigator');const hidden=put(s,1,'assassin');hidden.health=hidden.maxHealth=10;const ally=put(s,0,'nishiki');play(s,'yukimura');const h=s.players[0].hero;
+ assert.ok(getLegalActions(s).some(a=>a.type==='attack'&&a.attacker===h.uid&&a.defender===hidden.uid));assert.ok(!getLegalActions(s).some(a=>a.type==='attack'&&a.attacker===ally.uid&&a.defender===hidden.uid));
+ const spell=addToHand(s,0,'chidori');assert.ok(!getLegalActions(s).some(a=>a.card===spell.uid&&a.target===hidden.uid));
+ attack(s,h,hidden);assert.equal(hidden.health,6);assert.ok(hasKeyword(hidden,'Stealth'));assert.equal(h.weapon.durability,2);
+});
+test('Yukimura respects visible Taunt, frozen chambers, normal weapons, and its active weapon slot',()=>{
+ const s=game('investigator');const hidden=put(s,1,'assassin'),taunt=put(s,1,'hinami');play(s,'yukimura');const h=s.players[0].hero;
+ const mayHit=()=>getLegalActions(s).some(a=>a.type==='attack'&&a.attacker===h.uid&&a.defender===hidden.uid);
+ assert.equal(mayHit(),false);taunt.keywords=[];assert.equal(mayHit(),true);hidden.encased=1;assert.equal(mayHit(),false);hidden.encased=0;
+ h.weapon.exhausted=true;assert.equal(mayHit(),false);h.weapon.exhausted=false;const yuki={...h.weapon};play(s,'doujima');assert.equal(mayHit(),false);
+ h.weapon2=yuki;h.dualWield=true;h.bonusAttacks=1;assert.equal(mayHit(),false);h.attacksThisTurn=1;assert.equal(mayHit(),true);
+});
+test('Yukimura grants Arima exactly two attacks; only the first receives its conditional +2',()=>{
+ const s=game('arima');const hidden=put(s,1,'assassin');hidden.health=hidden.maxHealth=12;play(s,'yukimura');const h=s.players[0].hero;
+ assert.ok(hasKeyword(h,'Twin Strike'));attack(s,h,hidden);assert.equal(hidden.health,8);attack(s,h,hidden);assert.equal(hidden.health,6);assert.equal(h.weapon.durability,1);assert.ok(!getLegalActions(s).some(a=>a.type==='attack'&&a.attacker===h.uid));
+ const plain=game('investigator');play(plain,'yukimura');assert.equal(hasKeyword(plain.players[0].hero,'Twin Strike'),false);
+});
+test('Yukimura Twin Strike disappears on replacement or break, and survives saving correctly',()=>{
+ for(const breakIt of [true,false]){
+  const s=game('arima');play(s,'yukimura');const h=s.players[0].hero;if(breakIt)h.weapon.durability=1;attack(s,h,s.players[1].hero);
+  if(!breakIt)play(s,'doujima');h.tempAttack=2;assert.equal(hasKeyword(h,'Twin Strike'),false);assert.ok(!getLegalActions(s).some(a=>a.type==='attack'&&a.attacker===h.uid));
+ }
+ const s=game('arima');play(s,'yukimura');const saved=JSON.parse(JSON.stringify(s));assert.ok(hasKeyword(saved.players[0].hero,'Twin Strike'));const hidden=put(saved,1,'assassin');assert.ok(getLegalActions(saved).some(a=>a.type==='attack'&&a.defender===hidden.uid));
+});

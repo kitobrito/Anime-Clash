@@ -451,5 +451,17 @@ export const CARD_FRAMES = {
     ]
   }
 };
-export function frameFor(card){const type=card.frameType??(card.type==='trap'?'trap':card.type==='weapon'||card.weapon||card.wand?'weapon':card.type==='minion'?'minion':'spell');const prefix=card.legendary?(card.faction==='One Piece'?'one-piece':card.faction==='Naruto'?'naruto':'basic'):'basic';return CARD_FRAMES[`${prefix}-${type}`];}
+// Shared across all factions and rarities: the supplied green weapon frame.
+export const WEAPON_FRAME = {
+ src:'art/frames-anime/weapon-universal.webp',
+ art:[17.0,10.1,66.1,42.1],
+ name:[18,54.2,65,4.9],
+ rules:[18,66.3,64,20.8],
+ mana:[5.26,3.66,19.08,12.79],
+ attack:[5.6,84.4,17,11.8],
+ health:[77.9,84.4,17,11.8],
+};
+CARD_FRAMES.weapon=WEAPON_FRAME;
+for(const key of ['basic-weapon','naruto-weapon','one-piece-weapon'])CARD_FRAMES[key]=WEAPON_FRAME;
+export function frameFor(card){if(card.type==='weapon'||card.weapon||card.wand)return WEAPON_FRAME;const type=card.frameType??(card.type==='trap'?'trap':card.type==='weapon'||card.weapon||card.wand?'weapon':card.type==='minion'?'minion':'spell');if(type==='weapon')return WEAPON_FRAME;const prefix=card.legendary?(card.faction==='One Piece'?'one-piece':card.faction==='Naruto'?'naruto':'basic'):'basic';return CARD_FRAMES[`${prefix}-${type}`];}
 export function frameVars(frame){return Object.entries(frame).filter(([key])=>key!=='src').flatMap(([key,box])=>box.map((v,i)=>`--${key}-${['l','t','w','h'][i]}:${v}%`)).join(';');}
