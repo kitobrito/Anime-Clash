@@ -167,7 +167,7 @@ export function costOf(state, inst) {
     const tax = state.players[inst.owner]?.spellTax;
     if (tax && tax.turn === state.turn) aura += tax.amount;
   }
-  return Math.max(inst.minCost ?? card.minCost ?? 0, card.cost + (inst.costMod ?? 0) + aura);
+  return Math.max(inst.minCost ?? card.minCost ?? 0, card.cost + (inst.costMod ?? 0) + aura - (card.quinque&&state?.players[inst.owner]?.tokyo?.hero==='akira'&&!state.players[inst.owner].tokyo.quinquesEquipped?2:0));
 }
 
 // ---- Demons: The Descent (rules.js CIRCLES) ------------------------------------------

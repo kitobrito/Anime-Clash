@@ -1,4 +1,4 @@
-import { LEAF, STRAW_HATS, FACTION_LISTS } from './index.js';
+import { LEAF, STRAW_HATS, TOKYO_GHOUL, FACTION_LISTS } from './index.js';
 const LEAF_PRESETS = {
  'Team 7 Combo': [...FACTION_LISTS[LEAF]],
  'Ino–Shika–Cho Control': ['konohamaru','rock_lee','hinata_hyuga','shikamaru_nara','choji_akimichi','ino_yamanaka','kiba_inuzuka','shino_aburame','tenten','kakashi_hatake','tsunade','hiruzen_sarutobi','asuma_sarutobi','kurenai_yuhi','iruka_umino','sai','neji_hyuga','shikamaru_nara','choji_akimichi','asuma_sarutobi','shadow_possession_jutsu','shadow_strangle_jutsu','expansion_jutsu','gentle_fist','byakugan','eight_trigrams_sixty_four_palms','substitution_jutsu','thousand_years_of_death','chidori','rasengan'],
@@ -102,4 +102,4 @@ const STRAW_HAT_PRESETS = {
     "op_will"
   ]
 };
-export const ANIME_PRESETS = {[LEAF]:LEAF_PRESETS,[STRAW_HATS]:STRAW_HAT_PRESETS};
+export const ANIME_PRESETS = {[LEAF]:LEAF_PRESETS,[STRAW_HATS]:STRAW_HAT_PRESETS,[TOKYO_GHOUL]:{'Cannibalism Kakuja':[...FACTION_LISTS[TOKYO_GHOUL]],'Ravenous Predator':['kaneki','touka','rize','noro','nishiki','nishiki','tsukiyama','hinami','hinami','ayato','uta','yomo','amon_ghoul','takizawa','aogiri','aogiri','starving','starving','waitress','waitress','assassin','assassin','feeding_frenzy','feeding_frenzy','human_prey','human_prey','uncontrollable_hunger','rc_regeneration','rc_regeneration','kagune_manifestation'].map(id=>'tg_'+id),'CCG Quinque Hunter':['arima','juuzou','juuzou','hirako','hirako','ui','ui','nishiki','nishiki','hinami','hinami','uta','yomo','aogiri','aogiri','human_prey','ccg_reinforcements','ccg_reinforcements','quinque_maintenance','quinque_maintenance','extermination','desperate_regeneration','hidden_plain_sight','surprise_raid','counterattack','narukami','ixa','jason','doujima','yukimura'].map(id=>'tg_'+id)}};

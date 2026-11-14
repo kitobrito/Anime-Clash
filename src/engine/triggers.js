@@ -1,3 +1,4 @@
+import {tgEvents} from './tokyo-ghoul.js';
 import { onePieceEvents } from './one-piece.js';
 import { narutoTick, narutoDamageEvent } from './naruto.js';
 // Trigger dispatch. Self triggers (Arrival, Summon, Exit) belong to
@@ -42,6 +43,7 @@ export function enterBattlefield(state, minion) {
 // Collects listener effects for a board event: active player's minions first
 // (left to right), then the opponent's, then hidden Traps.
 export function dispatchEvent(state, event) {
+  tgEvents(state,event);
   onePieceEvents(state, event);
   narutoTick(state, event);
   narutoDamageEvent(state, event);
@@ -75,6 +77,7 @@ export function dispatchEvent(state, event) {
     const pl = state.players[p];
     for (const trap of [...pl.traps]) {
       const card = getCard(trap.cardId);
+      if(card.tgTrap)continue;
       const t = card.trap;
       if (!t || t.on !== event.type) continue;
       const ctx = { self: trap.uid, controller: p, event, cardId: trap.cardId };

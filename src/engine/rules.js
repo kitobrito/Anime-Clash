@@ -1,14 +1,14 @@
 // Global rules, rosters, and vocabularies. Designer rulings live here so they
 // can be changed in one place.
 
-export const FACTIONS = ['Naruto', 'One Piece'];
+export const FACTIONS = ['Naruto', 'One Piece', 'Tokyo Ghoul'];
 
 // Cards that belong to no faction (e.g. the Mana Potion).
 export const NEUTRAL = 'Neutral';
 
-export const LAUNCH_FACTIONS = ['Naruto', 'One Piece'];
+export const LAUNCH_FACTIONS = ['Naruto', 'One Piece', 'Tokyo Ghoul'];
 
-export const CARD_TYPES = ['minion', 'spell', 'trap'];
+export const CARD_TYPES = ['minion', 'spell', 'trap', 'weapon', 'hero'];
 
 // Keywords stored on a character. Arrival / Exit / Summon are trigger
 // types (see TRIGGER_EVENTS), not stored keywords. Designer definitions:

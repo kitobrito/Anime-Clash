@@ -1,3 +1,4 @@
+import {tgInitPlayer,tgInitMinion,tgCanPlay,tgLegalActions,tgApplyAction,tgEquip,tgIncomingDamage,tgCombatBonus} from './tokyo-ghoul.js';
 import { activateGear, applyOnePieceAction, canGear, initOnePieceMinion, isLuffy, onePieceCanReact, onePieceHealBlocked, onePieceIncomingDamage, onePieceLegalActions, silenceRemovable } from './one-piece.js';
 import { checkRasengan } from './naruto.js';
 import { checkDeck } from '../cards/deck-check.js';
@@ -62,7 +63,7 @@ export function hasPassiveHeroSpell(faction) {
 export function createGame({ players, seed = Date.now(), rules = {} }) {
   if (!Array.isArray(players) || players.length !== 2) throw new Error('A match needs two players.');
   for (const cfg of players) {
-    const result = checkDeck({format:'single', factions:cfg.factions, deck:cfg.deck});
+    const result = checkDeck({format:'single', factions:cfg.factions, deck:cfg.deck, hero:cfg.hero});
     if (result.error) throw new Error(result.error);
   }
   const state = {
@@ -100,6 +101,7 @@ export function createGame({ players, seed = Date.now(), rules = {} }) {
     if (cfg.factions.includes('Monster Hunter')) { pl.hero.dualWield = true; pl.hero.auraKeywords = []; }
     shuffle(state, pl.deck);
     state.players.push(pl);
+    tgInitPlayer(state,p,cfg);
     // Bees: the game starts with The Living Hive on the board.
     if (cfg.factions.includes('Bees')) {
       const hive = summonMinion(state, p, 'the_hive', { silent: true });
@@ -177,6 +179,7 @@ function mulligan(state, { player: p, replace }) {
 // ---- Legal actions -------------------------------------------------------
 
 function canAttack(c, state) {
+  if(c.tgFeedUsedTurn===state.turn||c.weapon?.kagune&&c.weapon.durability<=0)return false;
   if (c.petrified?.length) return false;
   if (c.devilFruit?.kind === 'hie' && c.fruitLastAttackOwnTurn === state.players[c.controller].turnsTaken - 1) return false;
   if (c.kind === 'minion' && getCard(c.cardId).cantAttack) return false; // The Living Hive
@@ -208,7 +211,7 @@ export function attackTargets(state, p) {
 // Rush: on the turn it arrives, a minion may attack only minions.
 function defendersFor(state, c) {
   let all = attackTargets(state, c.controller);
-  if (c.ignoreTauntTurn === state.turn || c.cardId === 'op_snakeman' && !c.textLost) {
+  if (c.weapon?.cardId==='tg_jason' || c.ignoreTauntTurn === state.turn || c.cardId === 'op_snakeman' && !c.textLost) {
     const enemy = state.players[1 - c.controller];
     all = [enemy.hero, ...enemy.board].filter(m => !hasKeyword(m, 'Stealth') && m.health > 0 && !m.destroyed).map(m => m.uid);
   }
@@ -260,6 +263,7 @@ function playOptions(state, p, card, id, type) {
 
 function hasRoom(state, p, card) {
   const pl = state.players[p];
+  if(!tgCanPlay(state,p,card))return false;
   if (card.requiresCorpses && (pl.corpses ?? 0) < card.requiresCorpses) return false;
   // playIf: a condition that must hold to play the card (Bees: "your Hive is in play").
   if (card.playIf && !checkCondition(state, card.playIf, { controller: p })) return false;
@@ -310,7 +314,7 @@ export function getLegalActions(state) {
   }
   const p = state.activePlayer;
   const pl = state.players[p];
-  const actions = [{ type: 'endTurn', player: p }, ...onePieceLegalActions(state, p)];
+  const actions = [{ type: 'endTurn', player: p }, ...onePieceLegalActions(state, p), ...tgLegalActions(state,p,m=>canAttack(m,state))];
   for (const inst of pl.hand) {
     const card = getCard(inst.cardId);
     if (!card.reactionOnly && costOf(state, inst) <= manaFor(pl, card) && hasRoom(state, p, card)) actions.push(...playOptions(state, p, card, inst.uid, 'play'));
@@ -363,6 +367,8 @@ export function applyAction(state, action) {
   restoreCustomCards(state);
   if (!isLegal(state, action)) throw new Error(`Illegal action: ${JSON.stringify(action)}`);
   switch (action.type) {
+    case 'feed':
+    case 'kakuja':tgApplyAction(state,action);break;
     case 'gearShift':
     case 'lawSwap':
       applyOnePieceAction(state, action);
@@ -454,10 +460,12 @@ function playCard(state, { player: p, card: uid, target, target2, position }) {
     if (state.rules.summonTriggersOnPlay) steps.push({ kind: 'selfTrigger', uid: m.uid, on: 'summon', ctx });
     steps.push({ kind: 'event', event: { type: 'minionSummoned', source: m.uid, player: p } }, { kind: 'deaths' });
     state.queue.push(...steps);
+  } else if (card.type === 'weapon') {
+    tgEquip(state,p,card);state.queue.push({kind:'event',event:{type:'cardPlayed',source:inst.uid,player:p,cardId:card.id,cardType:'weapon'}});pl.graveyard.push(inst);
   } else if (card.type === 'spell') {
     // The Fourth Circle (Greed): casting a spell costs 1 Health (not a paid cost: it doesn't drive the Descent).
     if (descentDepth(state) === 4) { log(state, '💰 Greed takes its due.'); loseHealth(state, pl.hero.uid, 1, { paid: false }); }
-    const event = { type: 'cardPlayed', source: inst.uid, player: p, cardId: card.id, cardType: 'spell', target: chosen, pulled: !!inst.pulled };
+    const event = { type: 'cardPlayed', source: inst.uid, player: p, cardId: card.id, cardType: 'spell', target: chosen, target2:chosen2, pulled: !!inst.pulled };
     state.queue.push(...spellSteps(card, { self: inst.uid, controller: p, chosen, chosen2, cardId: card.id, combo }, event, p));
     pl.graveyard.push(inst);
   } else if (card.type === 'trap') {
@@ -835,7 +843,7 @@ const STEPS = {
       return;
     }
     const activeWeapon = a.kind === 'hero' ? (a.weaponUsedSlot === 2 ? a.weapon2 : a.weapon) : null;
-    const huntDmg = huntDamage(state, a, d, aDmg);
+    const huntDmg = huntDamage(state, a, d, aDmg)+tgCombatBonus(state,a,d);
     const wasPrey = d.kind === 'minion' && d.prey;
     const dealt = dealDamage(state, a.uid, d.uid, huntDmg, {combat:true});
     const executed = dealt > 0 && d.kind === 'minion' && activeWeapon?.executeFaction === getCard(d.cardId).faction;
@@ -1401,7 +1409,7 @@ export function actingPlayer(state) {
 }
 
 // Late-bound hooks keep the shared primitives independent of the faction module.
-hooks.initMinion = initOnePieceMinion;
-hooks.modifyIncomingDamage = onePieceIncomingDamage;
+hooks.initMinion = (s,m,c)=>{initOnePieceMinion(s,m,c);tgInitMinion(s,m,c);};
+hooks.modifyIncomingDamage = (s,m,n,o)=>tgIncomingDamage(s,m,onePieceIncomingDamage(s,m,n,o));
 hooks.healBlocked = onePieceHealBlocked;
 hooks.silenceRemovable = silenceRemovable;

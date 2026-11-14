@@ -22,6 +22,10 @@ export function canBeChosenBy(target, controller, bySpell = false, spec = null) 
 
 // Extra minion conditions shared by target specs and selectors.
 export function minionPasses(m, f) {
+  const species=getCard(m.cardId).species;
+  if(f.tgSpecies&&species!==f.tgSpecies)return false;
+  if(f.tgHungry&&!['Ghoul','Half-Ghoul'].includes(species))return false;
+  if(f.tgHuman&&!['Human','Half-Human'].includes(species)&&!(m.tribes??[]).some(t=>['Shinobi','Pirate'].includes(t)))return false;
   const user = !!m.devilFruitUser || !!m.devilFruit || !!getCard(m.cardId).devilFruitUser;
   if (f.nonDevilFruit && user) return false;
   if (f.devilFruitUser && !user) return false;
@@ -86,6 +90,7 @@ export function targetCandidates(state, spec, controller, excludeUid = null, byS
   const eggGuarded = (c) => bySpell && c.kind === 'minion' && c.controller !== controller && c.tribes.includes('Egg')
     && state.players[c.controller].board.some((m) => getCard(m.cardId).guardsEggsFromSpells);
   return out
+    .filter((c)=>!(spec.tgConsume&&c.cardId==='tg_civilian'&&c.controller!==controller&&c.tgEnteredTurn===state.turn))
     .filter((c) => c.uid !== excludeUid && canBeChosenBy(c, controller, bySpell, spec) && !eggGuarded(c))
     .map((c) => c.uid);
 }

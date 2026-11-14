@@ -1,3 +1,4 @@
+import {tgDeckProblem} from '../engine/tokyo-ghoul.js';
 import { hasCard, getCard } from '../engine/registry.js';
 import { FACTION_POOLS, PLAYABLE_FACTIONS, copyLimit } from './index.js';
 export function singleDeckProblem(faction, deck) {
@@ -9,12 +10,13 @@ export function singleDeckProblem(faction, deck) {
   counts[id] = (counts[id] ?? 0) + 1;
   if (counts[id] > copyLimit(id)) return `Maximum ${copyLimit(id)} ${getCard(id).name}${getCard(id).legendary ? ' (Legendary)' : ''}.`;
  }
+ const heroProblem=tgDeckProblem(faction,deck);if(heroProblem)return heroProblem;
  return deck.length === 30 ? null : `Choose exactly 30 cards (${deck.length}/30).`;
 }
 export const pairDeckProblem = () => 'Fusion decks are not available. Choose exactly one faction.';
 export const deckProblem = (factions, deck) => Array.isArray(factions) && factions.length === 1 ? singleDeckProblem(factions[0], deck) : pairDeckProblem();
-export function checkDeck({format, factions, deck} = {}) {
+export function checkDeck({format, factions, deck, hero} = {}) {
  if (format && format !== 'single') return {error: pairDeckProblem()};
- const error = deckProblem(factions, deck);
- return error ? {error} : {format:'single', factions:[...factions], deck:[...deck]};
+ const error = deckProblem(factions, deck) || tgDeckProblem(factions?.[0],deck,hero);
+ return error ? {error} : {format:'single', factions:[...factions], deck:[...deck],...(hero?{hero}:{})};
 }

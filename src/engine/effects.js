@@ -1,3 +1,4 @@
+import {tokyoGhoulEffect,tgWearWeapon} from './tokyo-ghoul.js';
 import { resolveOnePiece } from './one-piece.js';
 import { resolveNaruto } from './naruto.js';
 // Effect operations. Cards reference these by `op` name with parameters, so
@@ -836,6 +837,7 @@ function syncDualWield(hero) {
 }
 
 export const EFFECT_OPS = {
+  tokyoGhoul:tokyoGhoulEffect,
   onePiece(state, effect, ctx) { resolveOnePiece(state, effect, ctx); },
   naruto(state, effect, ctx) { resolveNaruto(state, effect, ctx); },
   // ---- Fruit Ninjas ----
@@ -2904,6 +2906,7 @@ export const EFFECT_OPS = {
   equipHeroWeapon(state, e, ctx) {
     const hero = heroOf(state, ctx.controller);
     if (e.ifNoWeapon && hero.weapon) return;
+    if(hero.weapon?.kagune)return;
     const wcard = getCard(e.cardId ?? ctx.cardId);
     const dual = hero.dualWield && !e.wand && !wcard?.wand;
     let slot = 1;
@@ -3300,6 +3303,7 @@ export const EFFECT_OPS = {
     // Eclipse: while Sun and Moon are both held, neither loses Durability.
     if (hero.eclipse) return;
     if (w.cooldown) w.cooldownUntilTurn = (state.players[ctx.controller].turnsTaken ?? 0) + w.cooldown + 1;
+    if(slot===1&&tgWearWeapon(state,hero))return;
     w.durability -= 1;
     // Witches: Ward of Binding (a Trap) saves a Wand that would break.
     if (w.durability <= 0 && w.wand) {
@@ -3411,6 +3415,7 @@ function writeSpellbook(state, p, n) {
 }
 
 export function resolveEffect(state, effect, ctx) {
+  if(state.tgCounteredSpells?.includes(ctx.self))return;
   // perTurnLimit: this effect happens at most N times per turn for its card (Ash Collector).
   if (effect.perTurnLimit) {
     const self = findCharacter(state, ctx.self);
@@ -3434,6 +3439,7 @@ export { dropMinionRelic };
 export function dropHeroWeapon(state, hero, how = 'breaks') {
   const w = hero.weapon;
   if (!w) return;
+  if(w.kagune){w.durability=0;if(!w.exhausted)hero.attack=Math.max(0,hero.attack-w.attack);w.exhausted=true;return;}
   hero.attack = Math.max(0, (hero.attack ?? 0) - w.attack);
   hero.grantedTriggers = (hero.grantedTriggers ?? []).filter((t) => !t.weapon);
   // Witches (Spellbound): a half-written Spellbook keeps the Wand's enchantments for the next Wand;
