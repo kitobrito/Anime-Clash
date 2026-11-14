@@ -31,7 +31,7 @@ test('deck rules reject wrong sizes, duplicate legends, tokens, hero spells, unk
  const s=game();assert.equal(s.players[0].fusion,undefined);assert.equal(s.players[0].heroSpells.length,1);
 });
 test('ordinary duplicates are legal and persist in the single faction lineup',()=>{
- const d=[...base];d[d.indexOf('kakashi_hatake')]='naruto_uzumaki';assert.equal(singleDeckProblem(LEAF,d),null);assert.equal(copyLimit('naruto_uzumaki'),2);assert.equal(copyLimit('minato_namikaze'),1);
+ const d=[...base];d[d.indexOf('kakashi_hatake')]='neji_hyuga';assert.equal(singleDeckProblem(LEAF,d),null);assert.equal(copyLimit('naruto_uzumaki'),2);assert.equal(copyLimit('minato_namikaze'),1);
 });
 test('Team 7 bonuses, healing, Kakashi buffs, and Naruto makes exactly one end-turn copy',()=>{
  const s=game();put(s,0,'sasuke_uchiha');const sak=put(s,0,'sakura_haruno');sak.health=1;const naruto=play(s,'naruto_uzumaki');assert.equal(naruto.attack,6);assert.equal(naruto.health,6);
@@ -236,4 +236,23 @@ test('Palm Rotation deflects targeted enemy spell damage, but not unrelated late
 test('Palm Rotation is in all three legal 30-card Naruto presets and has supplied artwork',()=>{
  for(const deck of Object.values(ANIME_PRESETS[LEAF])){assert.equal(deck.length,30);assert.ok(deck.includes('eight_trigrams_palm_rotation'));assert.equal(singleDeckProblem(LEAF,deck),null);}
  assert.ok(fs.existsSync(new URL('../'+getCard('eight_trigrams_palm_rotation').image,import.meta.url)));
+});
+
+test('tuned team pieces are playable at 3 Mana and keep their original stats and abilities',()=>{
+ const expected={naruto_uzumaki:[3,3],sasuke_uchiha:[4,3],ino_yamanaka:[2,3],neji_hyuga:[4,4],shino_aburame:[3,5]};
+ for(const [id,stats] of Object.entries(expected)){
+  const s=game();s.players[0].mana.current=3;put(s,1,'shadow_clone');const inst=addToHand(s,0,id);
+  const action=getLegalActions(s).find(a=>a.type==='play'&&a.card===inst.uid);assert.ok(action,`${id} is legal at 3 Mana`);applyAction(s,action);assert.equal(s.players[0].mana.current,0);
+  const m=s.players[0].board.find(m=>m.cardId===id);assert.deepEqual([m.attack,m.maxHealth],stats);assert.ok(getCard(id).text.length>0);
+ }
+});
+test('tuned Team 7 default and preset share a lineup with duplicate teammates and useful Jutsu',()=>{
+ const team=ANIME_PRESETS[LEAF]['Team 7 Combo'];assert.deepEqual(base,team);
+ for(const id of ['naruto_uzumaki','sasuke_uchiha','sakura_haruno','chidori','shadow_possession_jutsu','eight_trigrams_sixty_four_palms','eight_trigrams_palm_rotation'])assert.equal(team.filter(x=>x===id).length,2,id);
+});
+test('tuned control starter contains both full trios, their mentors and protection; all nine presets remain legal',()=>{
+ const d=ANIME_PRESETS[LEAF]['Ino–Shika–Cho Control'];
+ for(const id of ['shikamaru_nara','ino_yamanaka','choji_akimichi','neji_hyuga','rock_lee','tenten'])assert.equal(d.filter(x=>x===id).length,2,id);
+ for(const id of ['asuma_sarutobi','might_guy'])assert.ok(d.includes(id));
+ for(const [f,presets] of Object.entries(ANIME_PRESETS))for(const deck of Object.values(presets))assert.equal(singleDeckProblem(f,deck),null);
 });

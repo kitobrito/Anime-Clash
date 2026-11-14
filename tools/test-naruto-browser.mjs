@@ -14,8 +14,9 @@ try {
   await p.locator('[data-zoom="eight_trigrams_palm_rotation"]').click();await p.evaluate(()=>document.fonts.ready);await p.waitForTimeout(350);
   assert.match(await p.locator('.framed-inspect').getAttribute('aria-label'),/Palm Rotation/);
   await p.screenshot({path:new URL(mobile?'palm-rotation-mobile.png':'palm-rotation-desktop.png',out).pathname});await p.locator('.modal-close').click();
+  for(const id of ['naruto_uzumaki','sasuke_uchiha','ino_yamanaka','neji_hyuga','shino_aburame'])assert.equal(await p.locator(`[data-zoom="${id}"]`).locator('xpath=..').locator('.mana-orb').textContent(),'3');
   await p.locator('a[href="#decks"]').click();
-  for(const name of ['Team 7 Combo','Ino–Shika–Cho Control','Will of Fire']){await p.locator('#preset').selectOption(name);assert.match(await p.locator('.deck-list').textContent(),/Palm Rotation/);}
+  for(const name of ['Team 7 Combo','Ino–Shika–Cho Control','Will of Fire']){await p.locator('#preset').selectOption(name);assert.match(await p.locator('.deck-list').textContent(),/Palm Rotation/);const chosen=await p.evaluate(()=>JSON.parse(localStorage.getItem('anime-clash-v1-decks')).Naruto);assert.equal(chosen.length,30);if(name==='Team 7 Combo')for(const id of ['naruto_uzumaki','sasuke_uchiha','sakura_haruno'])assert.equal(chosen.filter(x=>x===id).length,2);}
   await p.evaluate(async()=>{
    const {createGame,applyAction}=await import('/src/engine/engine.js');const {summonMinion,addToHand}=await import('/src/engine/core.js');const {FACTION_LISTS}=await import('/src/cards/index.js');
    const s=createGame({players:[{factions:['Naruto'],deck:FACTION_LISTS.Naruto},{factions:['Naruto'],deck:FACTION_LISTS.Naruto}],seed:27,rules:{mulligan:false,secondPlayerPotions:false,openingHandHelp:false}});

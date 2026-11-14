@@ -1,9 +1,6 @@
+import { NARUTO_STARTERS } from './naruto-starters.js';
 import { LEAF, STRAW_HATS, TOKYO_GHOUL, FACTION_LISTS } from './index.js';
-const LEAF_PRESETS = {
- 'Team 7 Combo': [...FACTION_LISTS[LEAF]],
- 'Ino–Shika–Cho Control': ['konohamaru','rock_lee','hinata_hyuga','shikamaru_nara','choji_akimichi','ino_yamanaka','kiba_inuzuka','shino_aburame','tenten','kakashi_hatake','tsunade','hiruzen_sarutobi','asuma_sarutobi','kurenai_yuhi','iruka_umino','sai','neji_hyuga','shikamaru_nara','choji_akimichi','asuma_sarutobi','shadow_possession_jutsu','shadow_strangle_jutsu','expansion_jutsu','gentle_fist','byakugan','eight_trigrams_sixty_four_palms','substitution_jutsu','eight_trigrams_palm_rotation','chidori','rasengan'],
- 'Will of Fire': ['konohamaru','rock_lee','hinata_hyuga','shikamaru_nara','choji_akimichi','kiba_inuzuka','iruka_umino','iruka_umino','sakura_haruno','sakura_haruno','kurenai_yuhi','yamato','yamato','sai','kakashi_hatake','jiraiya','tsunade','hiruzen_sarutobi','minato_namikaze','tobirama_senju','hashirama_senju','rasengan','chidori','shadow_possession_jutsu','shadow_strangle_jutsu','substitution_jutsu','eight_trigrams_palm_rotation','eight_trigrams_sixty_four_palms','summoning_jutsu_gamabunta','wood_style_deep_forest_emergence'],
-};
+const LEAF_PRESETS = NARUTO_STARTERS;
 const STRAW_HAT_PRESETS = {
   "Gear Evolution": [
     "op_luffy",

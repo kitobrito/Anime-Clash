@@ -1,7 +1,15 @@
-import {parentPort} from 'node:worker_threads';
+import {parentPort,workerData} from 'node:worker_threads';
 import {createGame,applyAction,actingPlayer} from '../src/engine/engine.js';
-import {getCard} from '../src/engine/registry.js';
+import {getCard,registerCards} from '../src/engine/registry.js';
 import {chooseFor} from './balance-policy.mjs';
+
+// Analysis-only overrides live in isolated worker registries. Production card
+// definitions are never rewritten while candidates are being screened.
+for(const [id,patch] of Object.entries(workerData?.cardOverrides??{})) {
+ const card=getCard(id);
+ if(card.faction!=='Naruto'||Object.keys(patch).some(k=>!['cost','attack','health'].includes(k)))throw Error('Tuning supports Naruto stats/costs only');
+ registerCards([{...card,...patch}]);
+}
 
 export function simulate(task){
  const s=createGame({players:task.players.map(p=>({name:p.id,factions:[p.faction],deck:p.deck,...(p.hero?{hero:p.hero}:{})})),seed:task.seed});

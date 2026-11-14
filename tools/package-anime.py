@@ -11,7 +11,7 @@ for folder in ['src/anime', 'src/boards', 'src/engine', 'art/hidden-leaf', 'art/
 for name in [
     'src/ai/greedy.js', 'src/cards/index.js', 'src/cards/deck-check.js',
     'src/cards/neutral.js', 'src/cards/naruto.js', 'src/cards/one-piece.js', 'src/cards/tokyo-ghoul.js',
-    'src/cards/naruto-teams.js', 'src/cards/anime-presets.js', 'src/cards/validate.js',
+    'src/cards/naruto-starters.js', 'src/cards/naruto-teams.js', 'src/cards/anime-presets.js', 'src/cards/validate.js',
     'art/fonts/card-text.ttf', 'art/fonts/card-text-bold.ttf', 'art/fonts/cinzel.woff2',
     'art/frames/painted-minion.png', 'art/frames/painted-spell.png',
     'art/frames/painted-quickplay.png', 'art/frames/legendary-minion.png',
