@@ -1,4 +1,5 @@
 import {sunnyVariant} from './sunny-rig.js';
+import {TOKYO_BOARDS} from './tokyo-config.js';
 // Every orientation has its own traced paths, bounds, anchors and placement areas.
 // Coordinates are in a normalized 1000 x 1000 artwork space. They are never
 // stretched from the other orientation. Fill holes use the even-odd rule.
@@ -25,6 +26,7 @@ const forestLandscape=[
  ],[872,912])
 ];
 export const BOARD_THEMES={
+ ...TOKYO_BOARDS,
  forest:{faction:'Naruto',name:'Forest of Death',accent:'#a8df78',portrait:{source:'IMG_5311.JPG',size:[768,1376],props:forestPortrait,platform:'M 250 313 L 748 313 L 902 782 L 94 782 Z',play:[.255,.35,.49,.39]},landscape:{source:'IMG_5310.JPG',size:[1376,768],props:forestLandscape,platform:'M 290 434 L 701 435 L 835 844 L 168 837 Z',play:[.285,.47,.43,.29]}},
  village:{faction:'Naruto',name:'Village Overlook',accent:'#efbf78',portrait:{source:'IMG_5290.JPG',size:[768,1376],platform:'M 177 316 L 806 316 L 993 777 L 0 777 Z',play:[.23,.37,.55,.30],props:[
  prop('training','Training dummy','training','M 8 113 L 90 94 L 89 42 Q 127 24 176 41 L 185 98 L 231 96 Q 267 105 257 134 L 186 153 L 188 321 L 71 328 L 92 153 L 15 155 Z',[133,173]),
@@ -46,6 +48,15 @@ export const BOARD_THEMES={
  prop('navigator','Telephone snail and map','navigator','M 65 780 L 99 746 L 119 759 L 132 790 L 164 806 L 156 753 L 173 744 L 182 780 L 185 829 L 209 835 L 229 895 L 230 960 L 209 999 L 7 999 L 27 929 L 64 868 Z',[132,878]),
  prop('treasure','Treasure and barrels','treasure','M 856 710 L 873 712 L 889 732 L 893 762 L 931 770 L 959 789 L 991 759 L 999 773 L 999 999 L 764 999 L 756 952 L 786 897 L 813 886 L 819 824 L 841 798 L 839 744 Z',[890,884])]}}
 };
+// All shipped boards expose the same four-corner contract. Sunny's optional
+// center figurehead remains a secondary interaction.
+for(const [id,def] of Object.entries(BOARD_THEMES)){
+ def.id=id;
+ for(const orientation of ['portrait','landscape'])for(const p of def[orientation].props){
+  p.primary??=p.id!=='lion';if(p.primary)p.corner??=`${p.anchor[1]<500?'top':'bottom'}-${p.anchor[0]<500?'left':'right'}`;
+  p.sequence??=p.kind;p.duration??=p.kind==='spider'?3200:2600;p.cooldown??=500;
+ }
+}
 export const BOARD_KEYS=Object.keys(BOARD_THEMES);
 export function boardVariant(theme,orientation){const def=BOARD_THEMES[theme];if(!def||!def[orientation])throw new Error('Unknown board or orientation');return {...def[orientation],theme,orientation,name:def.name,faction:def.faction,accent:def.accent,key:`${theme}-${orientation}`};}
 export function boardOptions(faction){return BOARD_KEYS.filter(k=>BOARD_THEMES[k].faction===faction);}

@@ -19,9 +19,9 @@ for name in [
 ]:
     runtime.append(ROOT / name)
 source = runtime + [ROOT / name for name in [
-    'package.json', 'package-lock.json', 'Readme.md', 'ITCH.md',
+    'package.json', 'package-lock.json', 'Readme.md', 'ITCH.md', 'BOARD-ANIMATION.md',
     'tools/serve-anime.mjs', 'tools/package-anime.py',
-    'tools/test-naruto.mjs', 'tools/test-one-piece.mjs',
+    'tools/test-naruto.mjs', 'tools/test-one-piece.mjs', 'tools/test-boards.mjs', 'tools/test-boards-browser.mjs', 'tools/record-board-video.mjs',
 ]]
 for name, files, prefix in [
     ('Anime-Clash-itch.zip', runtime, ''),

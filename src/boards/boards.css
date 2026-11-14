@@ -74,3 +74,18 @@
 @media(prefers-reduced-motion:reduce){.sunny-part,.board-art[data-key^="sunny-"] .kind-sunlion .prop-breathe{animation:none!important}}
 
 .board-stage:has([data-theme="sunny"][data-orientation="portrait"]) .battle-opponent{top:1%;left:30%;width:40%}
+
+/* Tokyo Ghoul: fixed architecture and precise extracted pieces, no whole-board motion. */
+.board-art[data-key^="gourmet-"] .prop-breathe,.board-art[data-key^="cochlea-"] .prop-breathe{animation:none}
+.environment-piece{position:absolute;z-index:11;pointer-events:none!important;user-select:none;backface-visibility:hidden;transform-style:preserve-3d}
+.scene-prop .prop-pixels{transition:filter 140ms ease}
+.scene-prop[data-pressed=true] .prop-pixels{filter:brightness(1.18) drop-shadow(0 0 3px var(--scene-accent))}
+.board-art[data-paused=true] *{animation-play-state:paused!important}
+.board-art[data-key^="gourmet-"] .scene-status{background:#260c1ce6}
+.board-art[data-key^="cochlea-"] .scene-status{background:#081725e6;border-color:#79cbe488}
+.board-stage:has([data-theme="gourmet"]) .battle-opponent,.board-stage:has([data-theme="cochlea"]) .battle-opponent{top:1%;left:34%;width:32%}
+@media(prefers-reduced-motion:reduce){.environment-piece,.scene-prop .prop-pixels{transition:none!important}}
+
+.board-art[data-ready=true]{animation:board-reveal 220ms ease-out}
+@keyframes board-reveal{from{opacity:.8}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.board-art[data-ready=true]{animation:none}}
