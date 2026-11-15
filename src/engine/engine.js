@@ -1,4 +1,4 @@
-import {tgInitPlayer,tgInitMinion,tgCanPlay,tgLegalActions,tgApplyAction,tgEquip,tgIncomingDamage,tgCombatBonus,tgYukimuraTwinStrike,tgDualQuinques} from './tokyo-ghoul.js';
+import {tgInitPlayer,tgInitMinion,tgCanPlay,tgLegalActions,tgApplyAction,tgEquip,tgIncomingDamage,tgCombatBonus,tgYukimuraTwinStrike,tgDualQuinques,tgRestoreHeroSpells} from './tokyo-ghoul.js';
 import { activateGear, applyOnePieceAction, canGear, initOnePieceMinion, isLuffy, onePieceCanReact, onePieceHealBlocked, onePieceIncomingDamage, onePieceLegalActions, silenceRemovable } from './one-piece.js';
 import { checkRasengan, checkNarutoTeams, resolveJammedMana, narutoCanReact } from './naruto.js';
 import { checkDeck } from '../cards/deck-check.js';
@@ -308,6 +308,7 @@ export function transformCost(state, p) {
 }
 
 export function getLegalActions(state) {
+  tgRestoreHeroSpells(state);
   // Created cards (Hybrids, variants) are looked up from the global registry;
   // make sure it holds *this* game's versions (AI search branches can create
   // different cards under the same id).

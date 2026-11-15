@@ -1,3 +1,5 @@
+import {frameFor,frameVars} from '../anime/frame-assets.js';
+import {minionTypeLines} from '../anime/minion-types.js';
 import {ANIME_BACKS} from './anime-data.js';
 // Rendering helpers shared by every screen: card markup, the big card,
 // keyword glossary, art lookup and text fitting.
@@ -168,13 +170,14 @@ export function bigCardHTML(card, { attack, health, maxHealth, cost, costClass =
   // Like Hearthstone: damaged Health is red even on a buffed minion; otherwise compare with the printed stat.
   const hpClass = maxHealth != null && health < maxHealth ? 'down' : statClass(health, card.health);
   const { incomplete } = validateCard(card);
-  const label = card.fusion ? `Fusion · ${card.fusion.join(' + ')}` : card.heroSpell ? 'Hero Spell' : card.quickPlay ? 'Spell ⚡'
+  const label = card.type==='minion'?minionTypeLines(card).join(' · '):card.fusion ? `Fusion · ${card.fusion.join(' + ')}` : card.heroSpell ? 'Hero Spell' : card.quickPlay ? 'Spell ⚡'
     // Minions show their tribe and any Dark / Undead tags (Divine cards punish those).
     : card.type === 'minion' ? (card.typeLine ?? [...(card.tribes ?? []), ...(card.tags ?? FACTION_TAGS[card.faction] ?? [])].join(' · ')) : card.type === 'trap' ? 'Trap'
     // Hero Weapons are spells that arm your Hero: Witches' Wands say so, other weapons (Robots, the Broom) say Weapon.
     : card.wand ? 'Wand' : weaponStatsForCard(card) ? 'Weapon' : 'Spell';
   const weaponStats = weaponStatsForCard(card);
   const faction = fslug(card.faction);
+  if(card.type==='minion'&&(!card.legendary||card.faction==='Tokyo Ghoul'))return typedMinionCardHTML(card,{attack,health,cost,costClass,extra,small,hpClass,faction,incomplete,artOver});
   if (weaponStats) return weaponCardHTML(card, {weaponStats, cost, costClass, extra, small, faction, incomplete, artOver});
   if (!classicCards()) return shardCardHTML(card, { attack, health, cost, costClass, extra, small, hpClass, label, faction, incomplete, artOver });
   return `
@@ -189,6 +192,14 @@ export function bigCardHTML(card, { attack, health, maxHealth, cost, costClass =
       ${card.type === 'minion' ? `<span class="bc-gem bc-atk ${statClass(attack, card.attack)}">${attack ?? card.attack ?? '?'}</span><span class="bc-gem bc-hp ${hpClass} ${String(health ?? card.health ?? '').length > 1 ? 'two-digit' : ''}">${health ?? card.health ?? '?'}</span>` : ''}
       ${card.form === 'beast' ? '<span class="bc-token">Beast Form</span>' : card.formLabel ? `<span class="bc-token">${esc(card.formLabel)}</span>` : card.token ? '<span class="bc-token">Token</span>' : ''}
     </div>`;
+}
+
+function typedMinionCardHTML(card,{attack,health,cost,costClass,extra,small,hpClass,faction,incomplete,artOver}){
+ const frame=frameFor(card),picture=artOver??artOf(card),types=minionTypeLines(card);
+ return `<div class="big-card shard anime-minion t-minion f-${faction} ${card.legendary?'legend':''} ${incomplete.length?'is-pending':''}" style="${frameVars(frame)}" aria-label="${esc(card.name)} — ${esc(types.join(', '))}">
+ <div class="bc-art">${picture?`<img src="${picture}" alt="${esc(card.name)}"${artFocus(card)} ${small?'loading="lazy"':''} draggable="false">`:''}</div><img class="bc-frame" src="${frame.src}" alt="" draggable="false">
+ <span class="bc-gem bc-cost ${costClass}">${cost??card.cost}</span><div class="bc-banner"><span>${esc(card.name)}</span></div><div class="bc-text"><span>${richText(card.text)}${extra}</span></div>
+ <div class="bc-type lines-${types.length}" aria-label="Minion types: ${esc(types.join(', '))}">${types.map(t=>`<span>${esc(t)}</span>`).join('')}</div><span class="bc-gem bc-atk ${statClass(attack,card.attack)}">${attack??card.attack}</span><span class="bc-gem bc-hp ${hpClass}">${health??card.health}</span></div>`;
 }
 
 // Equipment spells, Wands, relics and Legendary weapons all use the same
@@ -324,7 +335,7 @@ export function fitAllText(root) {
   const fresh = [];
   for (const f of todo) {
     const size = fitCache.get(f.key);
-    if (size) f.el.style.fontSize = `${size}px`; else fresh.push(f);
+    if (size) { f.el.style.fontSize = `${size}px`; if (overflows(f)) fresh.push(f); } else fresh.push(f);
   }
   for (const f of fresh) {
     let size = f.start;

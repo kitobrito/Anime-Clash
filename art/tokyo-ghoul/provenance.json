@@ -252,7 +252,15 @@
     "colorProfile": "Display P3"
   },
   "feeding_frenzy": {
-    "generated": "exec-00ef609f-1f73-444b-bec5-a7830bfa6314.png",
+    "source": "user-supplied Tokyo Ghoul artwork collage",
+    "sourceFile": "1-Photo-1.jpg",
+    "sourceSha256": "dab8a11c22ea0bb276761e7f5c8222df1febfef88d2fa85ef84357ffae02d3e3",
+    "generated": "exec-0d71a25f-6ff8-409a-97d6-f558830a8a07.png",
+    "editing": "Image tool separation and removal of title/number labels and collage borders",
+    "size": [
+      1024,
+      1536
+    ],
     "sharedWith": null
   },
   "assassin": {
@@ -268,7 +276,15 @@
     "colorProfile": "Display P3"
   },
   "cannibalistic_feast": {
-    "generated": "exec-6f62710a-c4a8-4e84-b244-4134473db5db.png",
+    "source": "user-supplied Tokyo Ghoul artwork collage",
+    "sourceFile": "1-Photo-1.jpg",
+    "sourceSha256": "dab8a11c22ea0bb276761e7f5c8222df1febfef88d2fa85ef84357ffae02d3e3",
+    "generated": "exec-2a82008d-ff74-400d-97de-320eb5a95561.png",
+    "editing": "Image tool separation and removal of title/number labels and collage borders",
+    "size": [
+      1024,
+      1536
+    ],
     "sharedWith": null
   },
   "amon_ghoul": {
@@ -284,43 +300,122 @@
     "colorProfile": "Display P3"
   },
   "human_prey": {
-    "generated": "exec-cdc65472-9af6-4f9a-a1e8-cd89d0433522.png",
+    "source": "user-supplied Tokyo Ghoul artwork collage",
+    "sourceFile": "1-Photo-1.jpg",
+    "sourceSha256": "dab8a11c22ea0bb276761e7f5c8222df1febfef88d2fa85ef84357ffae02d3e3",
+    "generated": "exec-87d85c2a-907b-4157-8553-80e23ddbd0cb.png",
+    "editing": "Image tool separation and removal of title/number labels and collage borders",
+    "size": [
+      1024,
+      1536
+    ],
     "sharedWith": null
   },
   "kakuja_awakening": {
-    "generated": "exec-84a43859-66a5-49b1-a048-70c104d50d53.png",
+    "source": "user-supplied Tokyo Ghoul artwork collage",
+    "sourceFile": "1-Photo-1.jpg",
+    "sourceSha256": "dab8a11c22ea0bb276761e7f5c8222df1febfef88d2fa85ef84357ffae02d3e3",
+    "generated": "exec-a16470eb-1752-4652-bef9-963bfc0b5f20.png",
+    "editing": "Image tool separation and removal of title/number labels and collage borders",
+    "size": [
+      1024,
+      1536
+    ],
     "sharedWith": null
   },
   "uncontrollable_hunger": {
-    "generated": "exec-388b1435-0f85-4960-bc36-26ed90327fdd.png",
+    "source": "user-supplied Tokyo Ghoul artwork collage",
+    "sourceFile": "1-Photo-1.jpg",
+    "sourceSha256": "dab8a11c22ea0bb276761e7f5c8222df1febfef88d2fa85ef84357ffae02d3e3",
+    "generated": "exec-02b4de17-8089-47b5-aa3c-03615e592505.png",
+    "editing": "Image tool separation and removal of title/number labels and collage borders",
+    "size": [
+      1024,
+      1536
+    ],
     "sharedWith": null
   },
   "rc_regeneration": {
-    "generated": "exec-1ee608a2-4ede-4578-ab84-339b9adc6b89.png",
+    "source": "user-supplied Tokyo Ghoul artwork collage",
+    "sourceFile": "1-Photo-1.jpg",
+    "sourceSha256": "dab8a11c22ea0bb276761e7f5c8222df1febfef88d2fa85ef84357ffae02d3e3",
+    "generated": "exec-f3314b5f-b4c7-42ac-bf16-65c119242060.png",
+    "editing": "Image tool separation and removal of title/number labels and collage borders; non-graphic healing variant with intact skin and red RC energy",
+    "size": [
+      1024,
+      1536
+    ],
     "sharedWith": null
   },
   "predators_ambush": {
-    "generated": "exec-29e02ccc-4d69-42fa-bb87-39bca67c9ae5.png",
+    "source": "user-supplied Tokyo Ghoul artwork collage",
+    "sourceFile": "2-Photo-2.jpg",
+    "sourceSha256": "25c2d3d2a3625a55df8a535c46133bf204055f2453bc7f0b5ce1435626ad01ec",
+    "generated": "exec-450b7b74-474d-4b29-a92f-a6d4d2d95bcc.png",
+    "editing": "Image tool separation and removal of title/number labels and collage borders",
+    "size": [
+      1024,
+      1536
+    ],
     "sharedWith": null
   },
   "ccg_reinforcements": {
-    "generated": "exec-1458a174-71b0-410e-b02f-58e6f0c0ee71.png",
+    "source": "user-supplied Tokyo Ghoul artwork collage",
+    "sourceFile": "1-Photo-1.jpg",
+    "sourceSha256": "dab8a11c22ea0bb276761e7f5c8222df1febfef88d2fa85ef84357ffae02d3e3",
+    "generated": "exec-4b757d1f-5584-40c6-b8d6-65e59f94e97b.png",
+    "editing": "Image tool separation and removal of title/number labels and collage borders",
+    "size": [
+      1024,
+      1536
+    ],
     "sharedWith": null
   },
   "kagune_manifestation": {
-    "generated": "exec-12bb0bd7-0af0-40d2-aa77-876e9e344b4a.png",
+    "source": "user-supplied Tokyo Ghoul artwork collage",
+    "sourceFile": "1-Photo-1.jpg",
+    "sourceSha256": "dab8a11c22ea0bb276761e7f5c8222df1febfef88d2fa85ef84357ffae02d3e3",
+    "generated": "exec-5df68867-12b0-4a4f-aade-cf78657159b1.png",
+    "editing": "Image tool separation and removal of title/number labels and collage borders",
+    "size": [
+      1024,
+      1536
+    ],
     "sharedWith": null
   },
   "desperate_regeneration": {
-    "generated": "exec-ff70eba1-2ee3-42b5-ac23-82cd6cb422a0.png",
+    "source": "user-supplied Tokyo Ghoul artwork collage",
+    "sourceFile": "2-Photo-2.jpg",
+    "sourceSha256": "25c2d3d2a3625a55df8a535c46133bf204055f2453bc7f0b5ce1435626ad01ec",
+    "generated": "exec-0b9e0fe9-90bb-4808-bdac-b8b01ba4cfc3.png",
+    "editing": "Image tool separation and removal of title/number labels and collage borders",
+    "size": [
+      1024,
+      1536
+    ],
     "sharedWith": null
   },
   "hidden_plain_sight": {
-    "generated": "exec-0d2595a7-b521-4b4a-beb3-be46537906bb.png",
+    "source": "user-supplied individual trap artwork",
+    "sourceFile": "1-Photo-1.jpg",
+    "sourceSha256": "499d4307a1e4a9eec79e02caf42e30708fb9492b1ff176182ba82c2e8e594f7b",
+    "sourceSize": [
+      1254,
+      1254
+    ],
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
     "sharedWith": null
   },
   "quinque_maintenance": {
-    "generated": "exec-85b73e41-42de-427f-ab24-037aa3dd7f7f.png",
+    "source": "user-supplied Tokyo Ghoul artwork collage",
+    "sourceFile": "1-Photo-1.jpg",
+    "sourceSha256": "dab8a11c22ea0bb276761e7f5c8222df1febfef88d2fa85ef84357ffae02d3e3",
+    "generated": "exec-997c9a2b-cdc5-4d4a-b0ef-6fd9ff98ad59.png",
+    "editing": "Image tool separation and removal of title/number labels and collage borders",
+    "size": [
+      1024,
+      1536
+    ],
     "sharedWith": null
   },
   "ixa": {
@@ -336,7 +431,14 @@
     "colorProfile": "Display P3"
   },
   "surprise_raid": {
-    "generated": "exec-2ab366cb-b832-456e-a54d-ffbe3856ea6c.png",
+    "source": "user-supplied individual trap artwork",
+    "sourceFile": "2-Photo-2.jpg",
+    "sourceSha256": "bb2b83e6b74d107d3b353225828e048d46f77229cf2968a93883369d50298214",
+    "sourceSize": [
+      941,
+      941
+    ],
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
     "sharedWith": null
   },
   "jason": {
@@ -352,12 +454,29 @@
     "colorProfile": "Display P3"
   },
   "extermination": {
-    "generated": "exec-ea219cba-308b-4dd9-8d84-5d9c5f642b92.png",
+    "source": "user-supplied Tokyo Ghoul artwork collage",
+    "sourceFile": "1-Photo-1.jpg",
+    "sourceSha256": "dab8a11c22ea0bb276761e7f5c8222df1febfef88d2fa85ef84357ffae02d3e3",
+    "generated": "exec-d37b6008-c3ce-486c-b4e0-9f8822cd5179.png",
+    "editing": "Image tool separation and removal of title/number labels and collage borders",
+    "size": [
+      1024,
+      1536
+    ],
     "sharedWith": null
   },
   "counterattack": {
-    "generated": "exec-769eaa36-2ddf-416b-8047-6734a7d50522.png",
-    "sharedWith": null
+    "source": "user-supplied Tokyo Ghoul artwork collage",
+    "sourceFile": "2-Photo-2.jpg",
+    "sourceSha256": "25c2d3d2a3625a55df8a535c46133bf204055f2453bc7f0b5ce1435626ad01ec",
+    "generated": "exec-a01961d6-b078-4f82-90ca-26608508c5ca.png",
+    "editing": "Image tool separation and removal of title/number labels and collage borders",
+    "size": [
+      1024,
+      1536
+    ],
+    "sharedWith": null,
+    "panel": "Bottom-left investigator with a Quinque blade; assigned here after the user supplied dedicated CCG Surprise Raid art."
   },
   "doujima": {
     "source": "user-supplied anime screenshot",
@@ -436,7 +555,14 @@
     "sharedWith": null
   },
   "bikaku": {
-    "generated": "exec-aa33922b-bacb-4510-999c-374f24c60f44.png",
+    "source": "user-supplied Kagune artwork",
+    "sourceFile": "2-Photo-2.jpg",
+    "sourceSha256": "3318a3a79c69cec3ec0d0ab6188d8f386a2ce6ac6a528fe0e5e690d5de79b0fb",
+    "sourceSize": [
+      1254,
+      1254
+    ],
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
     "sharedWith": null
   },
   "hybrid_kakuja": {
@@ -444,24 +570,64 @@
     "sharedWith": null
   },
   "rinkaku": {
-    "generated": "exec-e2b1a213-f7c4-47b8-b780-f3d867e47c8e.png",
+    "source": "user-supplied Kagune artwork",
+    "sourceFile": "3-Photo-3.jpg",
+    "sourceSha256": "03737a31c01467ed9cf48421598ecb7fb0fc4c56657c1ac0b798ce5877fc1ca8",
+    "sourceSize": [
+      1254,
+      1254
+    ],
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
     "sharedWith": null
   },
   "koukaku": {
-    "generated": "exec-b889d3c6-eb13-467d-a30f-e7525a62a15b.png",
+    "source": "user-supplied Kagune artwork",
+    "sourceFile": "4-Photo-4.jpg",
+    "sourceSha256": "6332e5fa0c3122fd746e1b792943b1d3a402ee3b247c01e5521b28759dae4002",
+    "sourceSize": [
+      1254,
+      1254
+    ],
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
     "sharedWith": null
   },
   "ukaku": {
-    "generated": "exec-e4cd8817-d133-46f0-bad1-dad6bc030035.png",
+    "source": "user-supplied Kagune artwork",
+    "sourceFile": "1-Photo-1.jpg",
+    "sourceSha256": "ec940377ca8ea9351b3e7586eccf9e5b16ecca1d54de8561176beace299c48ee",
+    "sourceSize": [
+      1254,
+      1254
+    ],
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
     "sharedWith": null
   },
   "predatory_instinct": {
-    "source": "1-Photo-1.jpg",
-    "editing": "format conversion only"
+    "source": "user-supplied Tokyo Ghoul artwork collage",
+    "sourceFile": "2-Photo-2.jpg",
+    "sourceSha256": "25c2d3d2a3625a55df8a535c46133bf204055f2453bc7f0b5ce1435626ad01ec",
+    "generated": "exec-8facbd42-f50d-48f1-89d0-b1a519740631.png",
+    "editing": "Image tool separation and removal of title/number labels and collage borders",
+    "size": [
+      1024,
+      1536
+    ],
+    "sharedWith": null
   },
   "quinque_arsenal": {
-    "source": "2-Photo-2.jpg",
-    "editing": "format conversion only"
+    "source": "user-supplied Quinque Arsenal artwork",
+    "sourceFile": "1-Photo-1.jpg",
+    "sourceSha256": "377237bf9b269c86ad4e7ed5571cb1fdb88c934f409f80c4ef93e5f00638ece8",
+    "sourceSize": [
+      1254,
+      1254
+    ],
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": [
+      "perfect_quinque",
+      "ccg_armory",
+      "quinque_analysis"
+    ]
   },
   "mado": {
     "source": "user-supplied anime screenshot",

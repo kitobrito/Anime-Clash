@@ -62,5 +62,21 @@
     "kind": "frame",
     "key": "one-piece-weapon",
     "path": "/workspace/generated_images/exec-21e9b4a5-542f-4c53-a724-41efe0d310df.png"
+  },
+  {
+    "kind": "frame",
+    "key": "minion-types",
+    "source": "1-Photo-1.jpg",
+    "sourceSha256": "7b6d364bc41e027562ff76f4ec6335d7584c2c721e51e32906efddd2ded0bc8c",
+    "path": "/workspace/generated_images/exec-6302535b-abf5-463f-8223-cb2b83b67862.png",
+    "editing": "Image tool background removal: transparent outside and art window; supplied frame and three-line type plaque retained."
+  },
+  {
+    "kind": "frame",
+    "key": "tokyo-ghoul-legendary-minion-types",
+    "source": "2-Photo-2.jpg",
+    "sourceSha256": "abe68e4e96b2d2135b5767d9659ebdf023ff5e9a127b7ae6c9991b14ed43df9e",
+    "path": "/workspace/generated_images/exec-95030a7e-df6a-40c0-a803-c7d81ea93e24.png",
+    "editing": "Image tool background removal: transparent outside and art window; supplied frame and three-line type plaque retained."
   }
 ]

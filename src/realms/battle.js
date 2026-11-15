@@ -11,7 +11,7 @@ import {getCard} from '../engine/registry.js';
 import {cardKeywords} from '../anime/card-glossary.js';
 import {TG_HEROES} from '../cards/tokyo-ghoul.js';
 let api=null,initialized=false,busy=false,logOpen=false,concedeAsk=false,abilitiesOpen=false,undo=[];
-let previewTimer=null,arenaObserver=null,resizeTimer=null;
+let previewTimer=null,arenaObserver=null,resizeTimer=null,measureFrame=null;
 // WebKit can crash when a hovered card changes position as its dock opens.
 // Realms already has touch-safe visuals: use those while keeping its input and fan layout.
 const webkitHoverSafe=/AppleWebKit/i.test(navigator.userAgent)&&!/(Chrome|Chromium|CriOS|Edg|OPR|Android)/i.test(navigator.userAgent);
@@ -56,7 +56,7 @@ export function renderRealmsBattle(options){
  const refresh=()=>{if(!arena.isConnected||root().querySelector('.arena')!==arena)return;layoutPortraitBoard(root());setHandDocks(true);layoutHands(root());api.fit(root());fitAllText(root());drag.refresh();};
  // The menu and battle stylesheets are isolated. Re-measure when WebKit applies
  // the battle sheet after the first frame, and when its fonts finish loading.
- arenaObserver?.disconnect();arenaObserver=new ResizeObserver(refresh);arenaObserver.observe(arena);
+ arenaObserver?.disconnect();arenaObserver=new ResizeObserver(()=>{cancelAnimationFrame(measureFrame);measureFrame=requestAnimationFrame(refresh);});arenaObserver.observe(arena);
  const sheet=document.getElementById('realms-battle-css');sheet.onload=()=>{refresh();document.fonts?.ready.then(refresh);};
  refresh();requestAnimationFrame(refresh);document.fonts?.ready.then(refresh);
  root().onclick=e=>{
@@ -114,4 +114,4 @@ export function afterBattleAction(before,s,a){
  };
 }
 
-export function stopRealmsBattle(){arenaObserver?.disconnect();drag.cancel();closeBattlePreview();root().onclick=null;root().ondblclick=null;}
+export function stopRealmsBattle(){arenaObserver?.disconnect();cancelAnimationFrame(measureFrame);drag.cancel();closeBattlePreview();root().onclick=null;root().ondblclick=null;}

@@ -131,9 +131,9 @@ test('save/load remains deterministic and Ghoul and Investigator AI matches adva
  for(const hero of ['kaneki','arima','investigator']){let s=game(hero,'touka');for(let i=0;i<100&&!s.gameOver;i++){const a=chooseAction(s);assert.ok(a);const clone=JSON.parse(JSON.stringify(s));applyAction(s,a);applyAction(clone,a);assert.deepEqual(clone,s);}assert.ok(s.turn>3||s.gameOver);}
 });
 
-test('Ghoul Hero species participates in hunting bonuses and Predatory Instinct rewards Kagune damage',()=>{
+test('Ghoul Hero species participates in hunting bonuses and Ravenous Regeneration rewards Kagune damage',()=>{
  const s=game('amon');play(s,'yukimura');attack(s,s.players[0].hero,s.players[1].hero);assert.equal(s.players[1].hero.health,27);
- const g=game();g.players[0].hero.health=20;attack(g,g.players[0].hero,g.players[1].hero);assert.equal(g.players[0].hero.health,23);power(g);assert.equal(g.players[0].hero.health,26);
+ const g=game();g.players[0].hero.health=20;attack(g,g.players[0].hero,g.players[1].hero);assert.equal(g.players[0].hero.health,23);power(g);assert.equal(g.players[0].hero.health,27);
 });
 
 test('Yukimura alone lets the armed Hero attack Stealth; minions and targeted spells cannot',()=>{
@@ -233,4 +233,31 @@ test('Amatsu keeps Whip form for other Heroes and wears only its own slot under 
 test('Amatsu uses both supplied images; Piercing is an alternate form outside decks and the Discover pool',()=>{
  const c=getCard('tg_amatsu'),form=getCard('tg_amatsu_piercing');assert.ok(FACTION_POOLS[F].includes(c.id));assert.ok(!FACTION_POOLS[F].includes(form.id));assert.deepEqual(c.formCards,[c.id,form.id]);assert.ok(form.token);assert.notEqual(c.image,form.image);assert.ok(fs.existsSync(new URL('../'+form.image,import.meta.url)));
  const d=[...deck('akira')];d[0]=form.id;assert.ok(singleDeckProblem(F,d));assert.ok(ANIME_PRESETS[F]['CCG Quinque Hunter'].includes(c.id));
+});
+
+test('each Ghoul has a distinct 2-Mana Hero Spell outside the deck, usable once per own turn',()=>{
+ const ids=[];for(const key of ['kaneki','touka','tsukiyama','nishiki']){const s=game(key),p=s.players[0],hs=p.heroSpells[0],c=getCard(hs.cardId);ids.push(c.id);assert.equal(c.cost,2);assert.ok(c.heroSpell);assert.ok(!FACTION_POOLS[F].includes(c.id));p.hero.health=10;const mana=p.mana.current;power(s);assert.equal(p.mana.current,mana-2);assert.equal(hs.uses,1);assert.ok(!getLegalActions(s).some(a=>a.type==='heroSpell'));round(s);assert.ok(getLegalActions(s).some(a=>a.type==='heroSpell'));}assert.equal(new Set(ids).size,4);
+});
+test('Kaneki heals 3 normally, 4 after successful Kagune damage, and loses the bonus next turn',()=>{
+ const s=game('kaneki'),h=s.players[0].hero;h.health=10;power(s);assert.equal(h.health,13);round(s);attack(s,h,s.players[1].hero);const before=h.health;power(s);assert.equal(h.health,before+4);round(s);h.health=10;power(s);assert.equal(h.health,13);
+ const blocked=game('kaneki'),k=blocked.players[0].hero,t=put(blocked,1,'juuzou');k.health=10;t.attack=0;attack(blocked,k,t);power(blocked);assert.equal(k.health,13);assert.notEqual(k.tgKaguneDamagedTurn,blocked.turn);
+});
+test('Touka heals 2 and earns one Evade only after successful Kagune damage during the current turn',()=>{
+ const s=game('touka'),h=s.players[0].hero;h.health=10;hit(s,h,1);assert.ok(!hasKeyword(h,'Evade'));power(s);assert.equal(h.health,12);assert.ok(!hasKeyword(h,'Evade'));round(s);const t=put(s,1,'civilian');t.health=t.maxHealth=20;attack(s,h,t);power(s);assert.equal(h.health,14);assert.ok(hasKeyword(h,'Evade'));hit(s,h,5);assert.equal(h.health,14);assert.ok(!hasKeyword(h,'Evade'));round(s);power(s);assert.ok(!hasKeyword(h,'Evade'));
+});
+test('Gourmet’s Instinct rewards friendly consumption of Humans and Half-Humans, including after save/load',()=>{
+ for(const human of ['civilian','hirako']){let s=game('tsukiyama');const h=s.players[0].hero,m=put(s,0,'nishiki'),t=put(s,human==='civilian'?0:1,human);if(human==='hirako')t.health=2;h.health=10;feed(s,m,t);assert.equal(s.players[0].tokyo.humanConsumedTurn,s.turn);s=JSON.parse(JSON.stringify(s));power(s);assert.equal(s.players[0].hero.health,12);assert.equal(s.players[0].hero.armor,4);round(s);power(s);assert.equal(s.players[0].hero.armor,4);}
+});
+test('Gourmet’s Instinct does not reward Ghoul consumption, ordinary kills or the opposing player’s consumption',()=>{
+ const g=game('tsukiyama'),m=put(g,0,'nishiki'),t=put(g,1,'aogiri');t.health=2;feed(g,m,t);power(g);assert.equal(g.players[0].hero.armor,2);
+ const killed=game('tsukiyama'),h=killed.players[0].hero,c=put(killed,1,'civilian');attack(killed,h,c);power(killed);assert.equal(h.armor,2);
+ const s=game('tsukiyama','tsukiyama'),n=put(s,1,'nishiki'),v=put(s,1,'civilian');end(s);feed(s,n,v);end(s);power(s);assert.equal(s.players[0].hero.armor,2);
+});
+test('Survival Instinct heals and revives an exhausted Kagune, caps repair and preserves Kakuja equipment',()=>{
+ const s=game('nishiki'),h=s.players[0].hero;h.health=10;h.weapon.durability=1;tgWearWeapon(s,h);assert.equal(effectiveAttack(h),0);power(s);assert.equal(h.health,12);assert.equal(h.weapon.durability,1);assert.ok(!h.weapon.exhausted);assert.equal(effectiveAttack(h),3);assert.ok(getLegalActions(s).some(a=>a.type==='attack'&&a.attacker===h.uid));round(s);h.weapon.durability=h.weapon.maxDurability;power(s);assert.equal(h.weapon.durability,4);
+ const k=game('nishiki');k.players[0].tokyo.stacks=4;applyAction(k,getLegalActions(k).find(a=>a.type==='kakuja'));applyAction(k,{type:'choose',player:0,index:0});const w=k.players[0].hero.weapon,types=[...w.types],atk=w.attack;w.durability=1;power(k);assert.equal(w.durability,2);assert.deepEqual(w.types,types);assert.equal(w.attack,atk);assert.equal(w.maxDurability,7);
+});
+test('legacy shared Ghoul powers migrate to the selected Hero without restoring uses or cooldowns',()=>{
+ for(const hero of ['kaneki','touka','tsukiyama','nishiki']){const s=game(hero);s.players[0].heroSpells=[{cardId:'tg_predatory_instinct',uses:1,cooldown:2}];const restored=JSON.parse(JSON.stringify(s));getLegalActions(restored);assert.deepEqual(restored.players[0].heroSpells,[{cardId:TG_HEROES[hero].spell,uses:1,cooldown:2}]);assert.ok(!getLegalActions(restored).some(a=>a.type==='heroSpell'));assert.equal(restored.players[0].hero.weapon.cardId,TG_HEROES[hero].kagune?'tg_'+TG_HEROES[hero].kagune:null);}
+ const s=game('arima'),before=JSON.stringify(s.players[0].heroSpells);getLegalActions(s);assert.equal(JSON.stringify(s.players[0].heroSpells),before);
 });

@@ -17,7 +17,7 @@ Three separate factions with three editable 30-card starter decks each (Naruto: 
 | --- | --- | --- | --- | --- |
 | Naruto | 27 | 18 | 7 | Shadow Clone Technique |
 | One Piece | 22 | 23 | 11 | Nakama! |
-| Tokyo Ghoul | 21 | 10 | 10 | Predatory Instinct / Investigator variants |
+| Tokyo Ghoul | 21 | 10 | 10 | Four Ghoul powers / Investigator variants |
 
 Tokyo Ghoul also includes 5 traps and 8 Quinque weapons, for 44 playable collectibles. All eight Heroes are selected separately from the deck. Legacy Hero card definitions remain only for migrating older saves.
 
@@ -102,7 +102,7 @@ The replacement Thousand Sunny boards use the supplied 1280×720 and 720×1280 p
 - Kagunes persist at zero Durability, exhausted and unable to attack until repaired. They cannot be replaced with Quinques. Investigator Quinques use ordinary breakage; Jason’s kill repair resolves before its final attack would break it. Hero spells are once per own turn and discover only Quinques remaining in the deck, removing the chosen card. With no available Quinque and no equipped weapon, the fallback grants 2 Armor. Durability increases from Hero powers can exceed the printed maximum; Maintenance caps at the current maximum.
 - Card text saying **Ghoul** uses the Ghoul species; text saying **Ghoul or Half-Ghoul** uses both. The Hero’s Ghoul path includes either. Yoshimura suppresses Hunger gain for Ghouls while remaining Half-Ghouls still gain Hunger. Named Humans/Half-Humans and ordinary living Naruto/One Piece humans are classified for consume/target effects; wooden bodies, drawn beasts and illusion tokens are excluded.
 - Traps are automatic and use the existing three-trap limit. Hidden in Plain Sight can invalidate either target of a two-target spell. All 45 cards and eight Hero paths have executable effects; the UI provides Feed targeting, two-step spell targeting, Kakuja choices, equipment durability/attack controls, Armor, Hunger and Cannibalism status.
-- Artwork: supplied collages were separated with AI cleanup, and borders/labels removed. Aogiri Ghoul shares the hooded Masked Ghoul image because a separate source was not identified. The Investigator power variants share the supplied Quinque Arsenal image; Predatory Instinct uses its supplied image. Source mapping is in `art/tokyo-ghoul/provenance.json`. Tokyo Ghoul uses the supplied animated Gourmet/Cochlea boards; see `BOARD-ANIMATION.md` for sound hooks and optional missing environment layers.
+- Artwork: supplied collages were separated with AI cleanup, and borders/labels removed. Aogiri Ghoul shares the hooded Masked Ghoul image because a separate source was not identified. The Investigator power variants share the supplied Quinque Arsenal image; Kaneki’s Ravenous Regeneration uses the supplied Predatory Instinct image; the other Ghoul powers use their Hero’s existing art. Source mapping is in `art/tokyo-ghoul/provenance.json`. Tokyo Ghoul uses the supplied animated Gourmet/Cochlea boards; see `BOARD-ANIMATION.md` for sound hooks and optional missing environment layers.
 - Verification: 45 Tokyo Ghoul engine tests cover all collectibles, traps, Hero selection, Hunger, consuming, hybrid choices, durability, deterministic saves and AI progression. `tools/test-tokyo-ghoul-browser.mjs` exercises desktop/mobile collection filters, saved Hero choices, deck export, both Hero paths and complete Feed/spell/evolution/weapon interactions. Browser tests use optional Playwright and do not add a runtime dependency.
 
 ### Naruto team and Hyuga update
@@ -174,3 +174,26 @@ Amon equips **Doujima 1/2** as a 4-Attack, 4-Durability weapon (+1/+1). Its atta
 Both supplied pictures are preserved in lossless WebP with their original dimensions, pixels and color profiles. The equipped medallion and card reader display the current form; the reader’s form buttons preview either picture and effect. Piercing is an alternate form outside the 30-card deck and collection pool. The CCG starter includes Amatsu; custom decks are unchanged.
 
 Verification: `npm test` and `tools/test-signature-quinques-browser.mjs` cover Amon’s bonuses, Akira’s discounted equip, both attack effects, form art/browsing, durability/buff preservation, save/restore, repairs, breaking/replacing, and Mado’s second slot.
+
+### Distinct Ghoul Hero Spells
+
+All four Ghoul powers cost 2 Mana, can be used once per own turn, and remain outside the 30-card deck. Hero selection shows the exact power and rules:
+
+- **Ken Kaneki — Ravenous Regeneration:** Restore 3 Hero Health, or 4 if his Kagune damaged an enemy during the current turn.
+- **Touka Kirishima — Rabbit’s Instinct:** Restore 2 Hero Health; also gain Evade if her Kagune damaged an enemy during the current turn. Evade prevents the next damage and does not stack.
+- **Shuu Tsukiyama — Gourmet’s Instinct:** Restore 2 Hero Health; also gain 2 Armor if a friendly Ghoul or Half-Ghoul consumed a Human or Half-Human during the current turn. Ordinary kills and the opponent’s consumption do not qualify.
+- **Nishiki Nishio — Survival Instinct:** Restore 2 Hero Health and 1 Kagune Durability up to its maximum. It can revive an exhausted Kagune and preserves Kakuja upgrades.
+
+Bonuses must be earned before using the power. Their conditions expire when the turn changes. Older saved Ghoul matches receive the selected Hero’s new power while preserving spent uses, cooldowns, equipment, Health and decks. Investigator powers remain as before. Existing Hero art illustrates the new power variants; no new collectible cards are added.
+
+### Minion type plaques and Kagune artwork
+
+Standard minions across all three factions use the supplied silver frame with a three-line type plaque. Legendary Tokyo Ghoul minions use the supplied mask, skyline and spider-lily frame with the same plaque. Naruto and One Piece retain their existing Legendary frames and now show their official types in a footer label. Collection, deck building, enlarged cards and both battle card appearance settings use the same species/tribe data, including Ghoul, Half-Ghoul, Human, Half-Human, Shinobi, Straw Hat, Pirate and Fish-Man. Fruit Users also show that identity. Type names are searchable. Board pieces keep the Realms placement geometry. The frame preparation removes the checkerboard/white backgrounds and art windows with the image tool.
+
+The four user-supplied Kagune pictures replace Ukaku, Bikaku, Rinkaku and Koukaku in that order. Original dimensions, pixels and color profiles are preserved in lossless WebP; equipped medallions and full weapon cards share these assets.
+
+Verification: `tools/test-minion-types.mjs`, `tools/test-minion-frames-browser.mjs` and `tools/test-ghoul-powers-browser.mjs` cover official types, plaque alignment, supplied frames, both battle appearance settings, actual Hero power use and saved-match compatibility. Safari board and hand re-measurements are deferred outside ResizeObserver callbacks to avoid repeated resize notifications while changing screens.
+
+### Updated Tokyo Ghoul spell and trap illustrations
+
+The labeled sheet is separated into the ten matching spell assets, with title/number labels and collage borders removed using the image tool. The unlabeled sheet provides Predator’s Ambush (alley shadows), Desperate Regeneration (wounded recovery), Kaneki’s Ravenous Regeneration artwork (feral instinct), and Quinque Counterattack (the investigator with a blade). The user’s later individual Hidden in Plain Sight and CCG Surprise Raid pictures take precedence over collage alternatives. The last armory picture replaces Quinque Arsenal and the shared Investigator power art. Card costs, effects and targets are unchanged by artwork replacement. RC Cell Regeneration uses a non-graphic healing variant with intact skin and red energy after the image service rejected the initial extraction. Source mapping and preparation notes are recorded in `art/tokyo-ghoul/provenance.json`.
