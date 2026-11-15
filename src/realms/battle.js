@@ -96,10 +96,10 @@ export function afterBattleAction(before,s,a){
  for(const pl of before.players)for(const c of characters(pl)){
   const el=root().querySelector(`[data-char="${c.uid}"]`);if(!el)continue;
   const rect=el.getBoundingClientRect();oldRects.set(c.uid,rect);
-  if(c.kind==='minion'&&!s.players.some(p=>p.board.some(m=>m.uid===c.uid))&&s.players[c.controller].graveyard.some(g=>g.uid===c.uid))departed.push({clone:fx.ghost(el,rect),rect});
+  if(c.kind==='minion'&&!s.players.some(p=>p.board.some(m=>m.uid===c.uid))&&s.players[c.controller].graveyard.some(g=>g.uid===c.uid))departed.push({clone:el.cloneNode(true),rect});
  }
  return ()=>{
-  if(!api?.active()){departed.forEach(d=>d.clone.remove());return;}
+  if(!api?.active())return;
   for(const pl of s.players)for(const c of characters(pl)){
    const old=before.players.flatMap(characters).find(m=>m.uid===c.uid),el=root().querySelector(`[data-char="${c.uid}"]`);if(!el)continue;const rect=el.getBoundingClientRect();
    if(!old&&c.kind==='minion'){fx.burst(rect,'summon');continue;}
@@ -108,6 +108,8 @@ export function afterBattleAction(before,s,a){
    if(damage>0){fx.floater(rect,`−${damage}`,'damage');fx.hitFx(rect,pl.factions[0],damage,oldRects.get(a.attacker));}
    else if(c.health>old.health)fx.floater(rect,`+${c.health-old.health}`,'heal');
   }
+  // A detached copy of the fallen minion shatters away (Shattered Realms does the same; an on-screen
+  // copy was never removed and left the dead minion frozen on the board).
   for(const d of departed)fx.shatterCard(d.clone,d.rect,null,'away');
  };
 }
