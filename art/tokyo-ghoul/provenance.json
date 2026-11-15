@@ -508,5 +508,16 @@
     ],
     "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
     "sharedWith": null
+  },
+  "kaneki-hero": {
+    "source": "user-supplied Ken Kaneki Hero portrait",
+    "sourceFile": "1-Photo-1.jpg",
+    "sourceSha256": "7b1389a48a756a93adedb4793ad1f6330547adf7e8fe5b4adc273ce3dbd7e5dc",
+    "sourceSize": [
+      1024,
+      1024
+    ],
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null
   }
 }

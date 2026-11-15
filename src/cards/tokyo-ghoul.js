@@ -26,7 +26,7 @@ const M=[
  minion('ui','Koori Ui',4,3,5,'Half-Human','Whenever your Hero attacks with a Quinque, deal 1 damage to a random enemy minion.'),
 ];
 export const TG_HEROES={
- kaneki:{name:'Ken Kaneki',path:'ghoul',kagune:'rinkaku',armor:0,spell:'tg_predatory_instinct',image:art('kaneki')},
+ kaneki:{name:'Ken Kaneki',path:'ghoul',kagune:'rinkaku',armor:0,spell:'tg_predatory_instinct',image:art('kaneki-hero')},
  touka:{name:'Touka Kirishima',path:'ghoul',kagune:'ukaku',armor:0,spell:'tg_predatory_instinct',image:art('touka')},
  tsukiyama:{name:'Shuu Tsukiyama',path:'ghoul',kagune:'koukaku',armor:0,spell:'tg_predatory_instinct',image:art('tsukiyama')},
  nishiki:{name:'Nishiki Nishio',path:'ghoul',kagune:'bikaku',armor:0,spell:'tg_predatory_instinct',image:art('nishiki')},

@@ -51,7 +51,7 @@ function fillHeroSlot(){
 }
 
 const FACTION_META={
- [TOKYO_GHOUL]:{badge:'◈',short:'Tokyo Ghoul',title:'Hunger in the Shadows',headline:'Embrace your <em>Hunger.</em>',anime:'TOKYO GHOUL',ink:'喰種',description:'Choose a Ghoul or Investigator Hero. Master your Kagune, or hunt with the CCG.',portrait:'art/tokyo-ghoul/kaneki.webp',rival:'art/tokyo-ghoul/arima.webp',back:'art/tokyo-ghoul/masked.webp',hero:'tg_predatory_instinct',troop:'Minions',spell:'Spells',exp:'03'},
+ [TOKYO_GHOUL]:{badge:'◈',short:'Tokyo Ghoul',title:'Hunger in the Shadows',headline:'Embrace your <em>Hunger.</em>',anime:'TOKYO GHOUL',ink:'喰種',description:'Choose a Ghoul or Investigator Hero. Master your Kagune, or hunt with the CCG.',portrait:'art/tokyo-ghoul/kaneki-hero.webp',rival:'art/tokyo-ghoul/arima.webp',back:'art/tokyo-ghoul/masked.webp',hero:'tg_predatory_instinct',troop:'Minions',spell:'Spells',exp:'03'},
  [LEAF]:{badge:'🍃',short:'Naruto',title:'The Will of Fire',headline:'The Will of <em>Fire.</em>',anime:'NARUTO',ink:'木ノ葉',description:'Build your team. Master your Jutsu. Write your own shinobi story.',portrait:'art/identity/naruto-hero.jpg',rival:'art/identity/naruto-hero.jpg',back:'art/identity/naruto-back.jpg',hero:'shadow_clone_technique',troop:'Shinobi',spell:'Jutsu',exp:'01'},
  [STRAW_HATS]:{badge:'☠',short:'One Piece',title:'Set Sail for Adventure',headline:'Set sail for <em>Adventure.</em>',anime:'ONE PIECE',ink:'海賊王',description:'Gather your Nakama. Awaken your powers. Chase the freedom of the open sea.',portrait:'art/identity/one-piece-hero.jpg',rival:'art/identity/one-piece-hero.jpg',back:'art/identity/one-piece-back.jpg',hero:'op_nakama',troop:'Pirates',spell:'Spells',exp:'02'},
 };

@@ -1,6 +1,6 @@
 // Data adapters for the unmodified Shattered Realms battle presentation.
 export const ART={},CLICKER_ART={},FUSION_HERO_ART={},RAGE_RUNNER_ART={};
-export const HERO_ART={Naruto:'art/identity/naruto-hero.jpg','One Piece':'art/identity/one-piece-hero.jpg','Tokyo Ghoul':'art/tokyo-ghoul/kaneki.webp'};
+export const HERO_ART={Naruto:'art/identity/naruto-hero.jpg','One Piece':'art/identity/one-piece-hero.jpg','Tokyo Ghoul':'art/tokyo-ghoul/kaneki-hero.webp'};
 export const ANIME_BACKS={Naruto:'art/identity/naruto-back.jpg','One Piece':'art/identity/one-piece-back.jpg','Tokyo Ghoul':'art/tokyo-ghoul/masked.webp'};
 export const BOARD_CUTS={},ALT_BOARDS={},CIRCLE_BOARDS={land:{},portrait:{}};
 export const LANDSCAPE_SIZE=[1024,572],PORTRAIT_SIZE=[459,1024];
