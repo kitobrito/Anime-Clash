@@ -1,4 +1,4 @@
-import {tgInitPlayer,tgInitMinion,tgCanPlay,tgLegalActions,tgApplyAction,tgEquip,tgIncomingDamage,tgCombatBonus,tgYukimuraTwinStrike} from './tokyo-ghoul.js';
+import {tgInitPlayer,tgInitMinion,tgCanPlay,tgLegalActions,tgApplyAction,tgEquip,tgIncomingDamage,tgCombatBonus,tgYukimuraTwinStrike,tgDualQuinques} from './tokyo-ghoul.js';
 import { activateGear, applyOnePieceAction, canGear, initOnePieceMinion, isLuffy, onePieceCanReact, onePieceHealBlocked, onePieceIncomingDamage, onePieceLegalActions, silenceRemovable } from './one-piece.js';
 import { checkRasengan, checkNarutoTeams, resolveJammedMana, narutoCanReact } from './naruto.js';
 import { checkDeck } from '../cards/deck-check.js';
@@ -211,7 +211,7 @@ export function attackTargets(state, p) {
 // Rush: on the turn it arrives, a minion may attack only minions.
 function defendersFor(state, c) {
   let all = attackTargets(state, c.controller);
-  if (c.weapon?.cardId==='tg_jason' || c.ignoreTauntTurn === state.turn || c.cardId === 'op_snakeman' && !c.textLost) {
+  if ((c.kind==='hero'&&c.weapon2&&c.attacksThisTurn%2===1?c.weapon2:c.weapon)?.cardId==='tg_jason' || c.ignoreTauntTurn === state.turn || c.cardId === 'op_snakeman' && !c.textLost) {
     const enemy = state.players[1 - c.controller];
     all = [enemy.hero, ...enemy.board].filter(m => !hasKeyword(m, 'Stealth') && m.health > 0 && !m.destroyed).map(m => m.uid);
   }
@@ -710,7 +710,7 @@ function applyAuras(state) {
     // different weapons) is kept here too, or this recompute would wipe it.
     const dualTwin = pl.hero.dualWield && pl.hero.weapon && pl.hero.weapon2 && pl.hero.weapon.cardId !== pl.hero.weapon2.cardId;
     const wk = [...(pl.hero.weapon?.keywords ?? []), ...(pl.hero.weapon?.runes?.some((r) => r.id === 'twinBolt') ? ['Twin Strike'] : []), ...(darkArts ? ['Lifesteal'] : []),
-      ...(dualTwin || tgYukimuraTwinStrike(state,pl.index) ? ['Twin Strike'] : []), ...(pl.hero.eclipse ? ['Lifesteal'] : [])];
+      ...(dualTwin || tgDualQuinques(state,pl.index) || tgYukimuraTwinStrike(state,pl.index) ? ['Twin Strike'] : []), ...(pl.hero.eclipse ? ['Lifesteal'] : [])];
     if (wk.length) pl.hero.auraKeywords = [...new Set(wk)];
     else if (pl.hero.auraKeywords) delete pl.hero.auraKeywords;
   }

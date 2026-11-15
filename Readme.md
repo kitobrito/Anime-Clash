@@ -11,15 +11,15 @@ A separate anime card game derived from [Shattered Realms TCG](https://github.co
 
 ## Included
 
-Three separate factions with three editable 30-card starter decks each (Naruto: 46 collectibles; One Piece and Tokyo Ghoul: 45 each):
+Three separate factions with three editable 30-card starter decks each (Naruto: 46 playable collectibles; One Piece: 45; Tokyo Ghoul: 43):
 
 | Faction | Minions | Spells | Legendary cards | Hero Spell |
 | --- | --- | --- | --- | --- |
 | Naruto | 27 | 18 | 7 | Shadow Clone Technique |
 | One Piece | 22 | 23 | 11 | Nakama! |
-| Tokyo Ghoul | 21 | 10 | 13 | Predatory Instinct / Investigator variants |
+| Tokyo Ghoul | 21 | 10 | 10 | Predatory Instinct / Investigator variants |
 
-Tokyo Ghoul also includes 3 Investigator Hero cards, 5 traps and 6 Quinque weapons, for 45 total collectibles.
+Tokyo Ghoul also includes 5 traps and 7 Quinque weapons, for 43 playable collectibles. All eight Heroes are selected separately from the deck. Legacy Hero card definitions remain only for migrating older saves.
 
 A deck contains exactly 30 cards from one faction, at most two of an ordinary card and one of each Legendary. Tokens, Gear forms, generated neutral potions, and Hero Spells cannot be added to decks. Fusion cards, charging, and fusion actions are absent from the active engine.
 
@@ -69,7 +69,7 @@ Both uploads are preserved separately in `/workspace/anime-tcg-prep/art-original
 The One Piece upload has 50 source images. Chopper has no separate portrait, so his card crops him from the supplied crew image. Tokens reuse related artwork; no external art was downloaded.
 
 - `src/cards/naruto.js`, `src/cards/one-piece.js`: definitions, tags, and artwork references.
-- `src/cards/anime-presets.js`: six valid starter decks.
+- `src/cards/anime-presets.js`: nine valid starter decks.
 - `src/cards/deck-check.js`: one-faction and copy-limit validation.
 - `src/engine/naruto.js`, `src/engine/one-piece.js`: faction abilities, timers, and transformations.
 - `src/anime/main.js`: interface and touch handling.
@@ -77,7 +77,7 @@ The One Piece upload has 50 source images. Chopper has no separate portrait, so 
 
 ## Verification
 
-64 automated engine scenarios (28 Naruto and 36 One Piece) cover every collectible, deck legality, permanent Fruit layers and drawbacks, Gear timing and branches, damage/attack preservation, reactions, body restoration, fresh copies, six preset decks, serialized replay parity, and complete AI matches both within and across factions.
+153 automated checks cover Naruto, One Piece, Tokyo Ghoul, deck legality, Hero selection, mana rules, reactions, deterministic saves and AI progression, board data, weapon frames, named-deck snapshots, keyword descriptions and reuse of the original Realms battle controller/CSS/FX. Browser flows additionally exercise the real hand, targeting, insertion, saved decks and responsive layouts.
 
 Chromium browser checks cover both collections, all 11 One Piece Legendaries, form/token inspection, per-faction saved decks, export, mulligans, practice matches, native mobile vertical swipes, native horizontal hand swipes, accidental-tap prevention, Gear 4 choices, and Law's activation. No page errors or failed asset requests were observed in the completed run.
 
@@ -95,7 +95,7 @@ The replacement Thousand Sunny boards use the supplied 1280×720 and 720×1280 p
 
 ## Tokyo Ghoul rules and implementation
 
-- Choose one of four Ghoul Heroes (Kaneki/Rinkaku, Touka/Ukaku, Tsukiyama/Koukaku, Nishiki/Bikaku) or a generic Investigator. Include at most one named Investigator Hero card (Arima, Amon or Akira) to replace that choice. Its card counts toward the 30-card deck and starts outside the draw pile, leaving 29 drawable cards. Named Heroes cannot be cast or summoned. Hero selection survives deck export/import.
+- Choose one of four Ghoul Heroes (Kaneki, Touka, Tsukiyama, Nishiki) or four Investigators (Kureo Mado, Arima, Amon, Akira) separately from your deck. Every match begins with 30 playable cards. Hero selection is saved with each named deck and survives export/import. Heroes are never drawn, played or summoned.
 - Ghouls and Half-Ghouls gain Hunger at their controller’s turn end unless they consumed that turn. At Hunger 3 or more, starvation deals 1 damage. Feed costs 1 Mana and the minion’s remaining attacks, once per turn, requiring that it can attack. It can consume an allied Human token or a damaged enemy minion with at most 2 current Health; Heroes and itself are never targets. Silence removes printed abilities, while species and Hunger remain.
 - Consuming a Human or Half-Human heals the consumer for 3; a Half-Ghoul heals for 3 and grants +0/+1; a Ghoul grants +1/+2 without a separate heal. Stat buffs increase current Health with maximum Health as usual. Feed and consume spells reset Hunger; spell consumption does not spend the consumer’s attack. Enemy Human Civilians cannot be consumed during their summon turn.
 - A Ghoul Hero receives a Cannibalism stack when an ally consumes a Ghoul/Half-Ghoul, capped at four. Once per game, spend four stacks and 4 Mana to choose a distinct second Kagune type. The original Hero and equipment identity persist; the hybrid gains 6 Armor, +2 weapon Attack, +3 maximum Durability, a full repair and Lifesteal. A newly added Ukaku grants Evade; a newly added Koukaku grants 2 Armor. Kakuja Awakening can evolve for its printed spell cost and adds temporary Attack, otherwise it summons a Ravenous Ghoul and draws.
@@ -103,7 +103,7 @@ The replacement Thousand Sunny boards use the supplied 1280×720 and 720×1280 p
 - Card text saying **Ghoul** uses the Ghoul species; text saying **Ghoul or Half-Ghoul** uses both. The Hero’s Ghoul path includes either. Yoshimura suppresses Hunger gain for Ghouls while remaining Half-Ghouls still gain Hunger. Named Humans/Half-Humans and ordinary living Naruto/One Piece humans are classified for consume/target effects; wooden bodies, drawn beasts and illusion tokens are excluded.
 - Traps are automatic and use the existing three-trap limit. Hidden in Plain Sight can invalidate either target of a two-target spell. All 45 cards and eight Hero paths have executable effects; the UI provides Feed targeting, two-step spell targeting, Kakuja choices, equipment durability/attack controls, Armor, Hunger and Cannibalism status.
 - Artwork: supplied collages were separated with AI cleanup, and borders/labels removed. Aogiri Ghoul shares the hooded Masked Ghoul image because a separate source was not identified. The Investigator power variants share the supplied Quinque Arsenal image; Predatory Instinct uses its supplied image. Source mapping is in `art/tokyo-ghoul/provenance.json`. Tokyo Ghoul uses the supplied animated Gourmet/Cochlea boards; see `BOARD-ANIMATION.md` for sound hooks and optional missing environment layers.
-- Verification: 34 Tokyo Ghoul engine tests cover all collectibles, traps, Hero selection, Hunger, consuming, hybrid choices, durability, deterministic saves and AI progression. `tools/test-tokyo-ghoul-browser.mjs` exercises desktop/mobile collection filters, saved Hero choices, deck export, both Hero paths and complete Feed/spell/evolution/weapon interactions. Browser tests use optional Playwright and do not add a runtime dependency.
+- Verification: 45 Tokyo Ghoul engine tests cover all collectibles, traps, Hero selection, Hunger, consuming, hybrid choices, durability, deterministic saves and AI progression. `tools/test-tokyo-ghoul-browser.mjs` exercises desktop/mobile collection filters, saved Hero choices, deck export, both Hero paths and complete Feed/spell/evolution/weapon interactions. Browser tests use optional Playwright and do not add a runtime dependency.
 
 ### Naruto team and Hyuga update
 
@@ -135,9 +135,9 @@ Candidate screening compares costs only, decks only, and their combination throu
 The deck builder and battle setup have a full-width **Choose your Hero** panel: first choose **Ghoul** or **Investigator**, then select a named Hero. Each option shows its starting Armor, Kagune, passive, Hero Spell and deck requirement. The selected Hero is saved and repeated beside the match start button. Your Hero is your player character; a minion with the same name is a separate card.
 
 - Ghouls: Ken Kaneki (Rinkaku/Lifesteal), Touka Kirishima (Ukaku/Evade), Shuu Tsukiyama (Koukaku/2 Armor), and Nishiki Nishio (Bikaku/first-attack damage).
-- Investigators: CCG Investigator (5 Armor), Kishou Arima (8 Armor/first-attack Evade), Koutarou Amon (6 Armor/damage against Ghouls), and Akira Mado (5 Armor/first Quinque discount).
+- Investigators: Kureo Mado (5 Armor/two Quinques), Kishou Arima (8 Armor/first-attack Evade), Koutarou Amon (6 Armor/damage against Ghouls), and Akira Mado (5 Armor/first Quinque discount).
 
-Named Investigators occupy one of the 30 deck slots and start outside the 29-card draw pile. Choosing one in a full deck asks which card to replace. Switching back asks which card fills the freed slot. Switching between named Investigators swaps their Hero cards. Cancel keeps the current deck and Hero. Other Heroes require no Hero card.
+All Heroes are now separate choices. Switching Heroes never replaces a playable card. Older saved or imported decks containing an Investigator Hero card retain that Hero as metadata and keep all 29 playable cards; an explicit picker lets the player choose the 30th card. Existing matches are preserved.
 
 Yukimura explicitly lets the equipped Hero attack Stealth minions; spells and other attackers keep their normal targeting restrictions, and visible Taunt still applies. The first Hero attack each turn gains +2 Attack against Stealth or Evade. While Arima is your Hero and Yukimura remains equipped, it grants Twin Strike (two attacks per turn). Replacing or breaking Yukimura removes that grant.
 
@@ -146,3 +146,21 @@ Verification: `npm test`; `tools/test-hero-picker-browser.mjs` checks desktop an
 ### Shared weapon frame
 
 Every weapon uses the supplied green frame with a blue Mana orb, including Legendary weapons. Art, names, rules, Attack and Durability align with its built-in windows. The same asset is used in Shattered Realms. Renderer tests: `tools/test-weapon-frames.mjs`; desktop/mobile browser checks: `tools/test-weapon-frame-browser.mjs`.
+
+### Reused Shattered Realms battle and deck tools
+
+The battle now uses Shattered Realms’ actual `board.js`, `drag.js`, `style.css`, card/hero/minion presentation, targeting arrows, hand fan, tap/hold reading, pointer play, insertion gaps, and shared FX/sound code under `src/realms/`. `upstream.json` records the source repository, commit and original hashes. `tools/test-realms-ui.mjs` verifies the retained hand/placement controller, CSS and FX against those hashes. Anime art, Hero portraits, card definitions and special abilities connect through adapters; anime boards keep their existing animation scenes. The separate battle renderer is retired.
+
+Named decks are saved in this browser, with independent faction, Hero and card snapshots. Use **Save deck** to update one or **Save as new** to keep another version. Choose a saved deck in the battle setup screen before starting; **Menu** returns from a match to that setup without changing the running match. Draft decks may be saved but require 30 legal playable cards to start. Collection building supports desktop dragging and a hold-then-drag drop target on phones, with the same copy and 30-card limits as the buttons.
+
+Enlarged cards show complete keyword descriptions beside the card on desktop, with a readable stacked layout on phones. Browse the current filtered list using Previous/Next, arrow keys, or horizontal swipes. The original hand reading gesture also shows keyword descriptions.
+
+**Kureo Mado** replaces the generic Investigator while preserving its saved selection identifier. He starts with 5 Armor and can hold two Quinques, attacking once with each per turn. Each weapon has separate damage, effects and Durability. When both slots are full, equipping another asks which to replace. Fueguchi One and Fueguchi Two each gain +1 Attack and +1 Durability when Mado equips them. Fueguchi Two costs 4 Mana and is a 3/3 weapon; after its Hero attacks a minion, gain 2 Armor. Mado’s Arsenal discovers while a slot is empty and repairs both weapons by 1 when full. Maintenance repairs each equipped Quinque up to its maximum.
+
+The CCG starter remains 30 playable cards and includes both Fueguchi weapons. Uploaded Mado and Fueguchi Two images retain their original pixels, dimensions and embedded color profiles in lossless WebP. Custom saved decks are preserved.
+
+Verification: `npm test`; `PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs node tools/test-anime-ui-browser.mjs` against port 4174. This exercises saved decks/Heroes, full 30-card matches, collection dragging, keyword browsing/swipes, actual Realms hand gestures and minion insertion, both Mado weapons, attacks and replacement choices. `UI_MODE=desktop` or `mobile` selects one viewport; `MENU_BROWSER=webkit` uses Safari’s engine. `tools/test-weapon-frame-browser.mjs` checks all seven Quinque frames and text alignment.
+
+Safari uses the original Realms touch-safe card visuals to avoid a WebKit hover/lift feedback crash while a docked hand opens. Fan layout, docking, reading, drag-to-play, targeting and insertion use the original controller unchanged. The uploaded artwork retains its original pixels and color profiles; no lower-quality battle copies are needed.
+
+Starter decks load cards separately from Hero selection. When a starter expects the other Hero path, its picker asks the player to finish choosing that path instead of silently replacing their Hero. Saved named decks restore both their cards and their exact Hero choice.

@@ -13,7 +13,7 @@ import {EFFECT_OPS,addKeyword} from '../src/engine/effects.js';
 import {tgWearWeapon,tgIncomingDamage} from '../src/engine/tokyo-ghoul.js';
 import {chooseAction} from '../src/ai/greedy.js';
 const id=n=>'tg_'+n;
-function deck(hero){return TG_HEROES[hero]?.card?ANIME_PRESETS[F]['CCG Quinque Hunter'].map(c=>c==='tg_arima'?TG_HEROES[hero].card:c):FACTION_LISTS[F];}
+function deck(hero){return TG_HEROES[hero]?.path==='investigator'?ANIME_PRESETS[F]['CCG Quinque Hunter']:FACTION_LISTS[F];}
 function game(hero='kaneki',other='kaneki'){const s=createGame({players:[{factions:[F],deck:deck(hero),hero},{factions:[F],deck:deck(other),hero:other}],seed:35,rules:{mulligan:false,secondPlayerPotions:false,openingHandHelp:false}});for(const p of s.players){p.board=[];p.hand=[];p.mana={current:10,max:10,bonusNextTurn:0};}return s;}
 function put(s,p,name){const m=summonMinion(s,p,name.startsWith('tg_')?name:id(name),{silent:true});assert.ok(m);m.sick=false;m.enteredOnTurn=-1;return m;}
 function flush(s){s.queue.push(...s.buffer,{kind:'deaths'});s.buffer=[];run(s);}
@@ -26,15 +26,18 @@ function feed(s,a,d){const action=getLegalActions(s).find(x=>x.type==='feed'&&x.
 function hit(s,m,n){dealDamage(s,null,m.uid,n);flush(s);}
 function power(s){const a=getLegalActions(s).find(x=>x.type==='heroSpell');assert.ok(a);applyAction(s,a);}
 
-test('Tokyo Ghoul has 45 collectibles, correct types, 13 Legendaries, complete rules and artwork',()=>{
- const cards=FACTION_POOLS[F].map(getCard);assert.equal(cards.length,45);assert.deepEqual(['minion','hero','spell','trap','weapon'].map(t=>cards.filter(c=>c.type===t).length),[21,3,10,5,6]);assert.equal(cards.filter(c=>c.legendary).length,13);assert.deepEqual(validateAllCards().filter(c=>c.errors.length||c.incomplete.length),[]);for(const c of cards)assert.ok(fs.existsSync(new URL('../'+c.image,import.meta.url)),c.name);for(const d of Object.values(ANIME_PRESETS[F]))assert.equal(singleDeckProblem(F,d),null);
+test('Tokyo Ghoul has 43 playable collectibles, separate Heroes and 10 Legendaries, complete rules and artwork',()=>{
+ const cards=FACTION_POOLS[F].map(getCard);assert.equal(cards.length,43);assert.deepEqual(['minion','hero','spell','trap','weapon'].map(t=>cards.filter(c=>c.type===t).length),[21,0,10,5,7]);assert.equal(cards.filter(c=>c.legendary).length,10);assert.deepEqual(validateAllCards().filter(c=>c.errors.length||c.incomplete.length),[]);for(const c of cards)assert.ok(fs.existsSync(new URL('../'+c.image,import.meta.url)),c.name);for(const d of Object.values(ANIME_PRESETS[F]))assert.equal(singleDeckProblem(F,d),null);
 });
 test('all eight Hero selections initialize their armor, equipment and Hero Spell',()=>{
  for(const [key,v] of Object.entries(TG_HEROES)){const s=game(key),p=s.players[0];assert.equal(p.hero.health,30);assert.equal(p.hero.armor,v.armor+(v.kagune==='koukaku'?2:0));assert.equal(p.heroSpells[0].cardId,v.spell);assert.equal(p.tokyo.path,v.path);if(v.kagune){assert.equal(p.hero.weapon.cardId,id(v.kagune));assert.equal(p.hero.weapon.durability,TG_KAGUNES[v.kagune].durability);}else assert.ok(!p.hero.weapon);}
 });
-test('Investigator Hero card counts toward 30 but is excluded from the draw pile and cannot be summoned or played',()=>{
- const cfg={factions:[F],deck:deck('arima'),hero:'arima'};const s=createGame({players:[cfg,cfg],rules:{mulligan:false,secondPlayerPotions:false,coinCardId:null,openingHandHelp:false}});for(const p of s.players){assert.equal(p.deck.length+p.hand.length,29);assert.ok(![...p.deck,...p.hand].some(c=>c.cardId==='tg_arima'));}assert.equal(summonMinion(s,0,'tg_arima'),null);
- const d=[...deck('arima')];d[1]='tg_amon';assert.ok(singleDeckProblem(F,d));assert.ok(checkDeck({...cfg,hero:'kaneki'}).error);assert.ok(checkDeck({factions:[F],deck:deck('kaneki'),hero:'arima'}).error);
+test('every Hero is separate from a full 30-card draw pool; legacy Hero cards cannot be played',()=>{
+ for(const hero of Object.keys(TG_HEROES)){
+  const cfg={factions:[F],deck:deck(hero),hero};assert.ok(!checkDeck(cfg).error);const s=createGame({players:[cfg,cfg],rules:{mulligan:false,secondPlayerPotions:false,coinCardId:null,openingHandHelp:false}});
+  for(const p of s.players){assert.equal(p.deck.length+p.hand.length,30);assert.ok(![...p.deck,...p.hand].some(c=>getCard(c.cardId).investigatorHero));}
+ }
+ const d=[...deck('arima')];d[0]='tg_arima';assert.ok(singleDeckProblem(F,d));assert.equal(summonMinion(game(),0,'tg_arima'),null);assert.ok(checkDeck({factions:[F],deck:deck('kaneki'),hero:'unknown'}).error);
 });
 test('Hunger increments at own end, starves at three, and Starving Ghoul begins at two',()=>{
  const s=game(),m=put(s,0,'nishiki'),n=put(s,0,'starving');assert.equal(n.hunger,2);end(s);assert.equal(m.hunger,1);assert.equal(n.hunger,3);assert.equal(n.health,1);end(s);round(s);round(s);assert.equal(m.hunger,3);assert.equal(m.health,2);
@@ -76,7 +79,7 @@ test('Hero powers select only remaining deck Quinques, remove the chosen card, a
  const s=game('arima');s.players[0].deck=[];for(const name of ['ixa','jason','yukimura']){const inst=addToHand(s,0,id(name));s.players[0].deck.push(s.players[0].hand.pop());assert.ok(inst);}power(s);assert.equal(s.pending.options.length,3);const chosen=s.pending.options[0].uid;applyAction(s,{type:'choose',player:0,index:0});assert.ok(s.players[0].hand.some(c=>c.uid===chosen));assert.ok(!s.players[0].deck.some(c=>c.uid===chosen));assert.ok(!getLegalActions(s).some(a=>a.type==='heroSpell'));
 });
 test('Investigator Hero Spell variants repair, buff, add Armor or draw while a Quinque is equipped',()=>{
- for(const hero of ['investigator','arima','amon','akira']){const s=game(hero);play(s,'doujima');const p=s.players[0],armor=p.hero.armor,hand=p.hand.length;power(s);if(hero==='amon')assert.equal(p.hero.armor,armor+2);else if(hero==='akira')assert.equal(p.hand.length,hand+1);else assert.equal(p.hero.weapon.durability,4);if(hero==='arima')assert.equal(p.hero.tempAttack,1);}
+ for(const hero of ['arima','amon','akira']){const s=game(hero);play(s,'doujima');const p=s.players[0],armor=p.hero.armor,hand=p.hand.length;power(s);if(hero==='amon')assert.equal(p.hero.armor,armor+2);else if(hero==='akira')assert.equal(p.hand.length,hand+1);else assert.equal(p.hero.weapon.durability,4);if(hero==='arima')assert.equal(p.hero.tempAttack,1);}
 });
 test('Akira discounts only the first Quinque equip, Juuzou gains temporary Attack, and IXA adds armor',()=>{
  const s=game('akira'),m=put(s,0,'juuzou');play(s,'ixa');assert.equal(s.players[0].mana.current,7);assert.equal(s.players[0].hero.armor,9);assert.equal(effectiveAttack(m),6);play(s,'doujima');assert.equal(s.players[0].mana.current,7);
@@ -125,7 +128,7 @@ test('every collectible resolves without errors in a target-rich valid scenario'
  for(const cid of FACTION_POOLS[F]){const c=getCard(cid);if(c.type==='hero')continue;const s=game(c.heroPath==='investigator'?'investigator':'kaneki');for(const [p,ids] of [[0,['nishiki','amon_ghoul','civilian','hirako']],[1,['nishiki','yomo','civilian']]])for(const n of ids){const m=put(s,p,n);if(m.health>2)m.health=2;}const inst=addToHand(s,0,cid),a=getLegalActions(s).find(a=>a.type==='play'&&a.card===inst.uid);assert.ok(a,cid);applyAction(s,a);while(s.pending?.type==='choice')applyAction(s,{type:'choose',player:s.pending.player,index:0});}
 });
 test('save/load remains deterministic and Ghoul and Investigator AI matches advance legally',()=>{
- for(const hero of ['kaneki','arima']){let s=game(hero,'touka');for(let i=0;i<100&&!s.gameOver;i++){const a=chooseAction(s);assert.ok(a);const clone=JSON.parse(JSON.stringify(s));applyAction(s,a);applyAction(clone,a);assert.deepEqual(clone,s);}assert.ok(s.turn>3||s.gameOver);}
+ for(const hero of ['kaneki','arima','investigator']){let s=game(hero,'touka');for(let i=0;i<100&&!s.gameOver;i++){const a=chooseAction(s);assert.ok(a);const clone=JSON.parse(JSON.stringify(s));applyAction(s,a);applyAction(clone,a);assert.deepEqual(clone,s);}assert.ok(s.turn>3||s.gameOver);}
 });
 
 test('Ghoul Hero species participates in hunting bonuses and Predatory Instinct rewards Kagune damage',()=>{
@@ -140,7 +143,7 @@ test('Yukimura alone lets the armed Hero attack Stealth; minions and targeted sp
  attack(s,h,hidden);assert.equal(hidden.health,6);assert.ok(hasKeyword(hidden,'Stealth'));assert.equal(h.weapon.durability,2);
 });
 test('Yukimura respects visible Taunt, frozen chambers, normal weapons, and its active weapon slot',()=>{
- const s=game('investigator');const hidden=put(s,1,'assassin'),taunt=put(s,1,'hinami');play(s,'yukimura');const h=s.players[0].hero;
+ const s=game('amon');const hidden=put(s,1,'assassin'),taunt=put(s,1,'hinami');play(s,'yukimura');const h=s.players[0].hero;
  const mayHit=()=>getLegalActions(s).some(a=>a.type==='attack'&&a.attacker===h.uid&&a.defender===hidden.uid);
  assert.equal(mayHit(),false);taunt.keywords=[];assert.equal(mayHit(),true);hidden.encased=1;assert.equal(mayHit(),false);hidden.encased=0;
  h.weapon.exhausted=true;assert.equal(mayHit(),false);h.weapon.exhausted=false;const yuki={...h.weapon};play(s,'doujima');assert.equal(mayHit(),false);
@@ -157,4 +160,43 @@ test('Yukimura Twin Strike disappears on replacement or break, and survives savi
   if(!breakIt)play(s,'doujima');h.tempAttack=2;assert.equal(hasKeyword(h,'Twin Strike'),false);assert.ok(!getLegalActions(s).some(a=>a.type==='attack'&&a.attacker===h.uid));
  }
  const s=game('arima');play(s,'yukimura');const saved=JSON.parse(JSON.stringify(s));assert.ok(hasKeyword(saved.players[0].hero,'Twin Strike'));const hidden=put(saved,1,'assassin');assert.ok(getLegalActions(saved).some(a=>a.type==='attack'&&a.defender===hidden.uid));
+});
+
+test('Mado equips two independent Quinques, enhances Fueguchi One and Two, and attacks with each',()=>{
+ const s=game('investigator');play(s,'fueguchi');play(s,'fueguchi_two');const h=s.players[0].hero;
+ assert.equal(TG_HEROES.investigator.name,'Kureo Mado');assert.equal(h.dualWield,undefined);assert.equal(h.weapon.attack,3);assert.equal(h.weapon.durability,5);assert.equal(h.weapon2.attack,4);assert.equal(h.weapon2.durability,4);assert.ok(hasKeyword(h,'Twin Strike'));
+ attack(s,h,s.players[1].hero);assert.equal(s.players[1].hero.health,27);assert.equal(h.weapon.durability,4);assert.equal(h.weapon2.durability,4);
+ attack(s,h,s.players[1].hero);assert.equal(s.players[1].hero.health,23);assert.equal(h.weapon.durability,4);assert.equal(h.weapon2.durability,3);assert.ok(!getLegalActions(s).some(a=>a.type==='attack'&&a.attacker===h.uid));
+ const other=game('arima');play(other,'fueguchi');play(other,'fueguchi_two');assert.equal(other.players[0].hero.weapon.attack,3);assert.equal(other.players[0].hero.weapon.durability,3);assert.ok(!other.players[0].hero.weapon2);
+});
+test('Fueguchi Two grants Armor only after its own attack on a minion, even if it kills',()=>{
+ for(const last of [false,true]){
+  const s=game('investigator');play(s,'fueguchi');play(s,'fueguchi_two');const h=s.players[0].hero,enemy=put(s,1,'juuzou');enemy.keywords=[];enemy.attack=0;enemy.health=3;
+  const armor=h.armor;attack(s,h,s.players[1].hero);assert.equal(h.armor,armor);if(last)h.weapon2.durability=1;attack(s,h,enemy);assert.equal(h.armor,armor+2);assert.equal(s.players[1].board.length,0);if(last)assert.equal(h.weapon2,null);
+ }
+});
+test('Mado chooses which full Quinque slot to replace, with a serializable choice',()=>{
+ const s=game('investigator');play(s,'fueguchi');play(s,'fueguchi_two');play(s,'ixa');assert.equal(s.pending.prompt,'Choose a Quinque to replace');assert.equal(s.players[0].hero.weapon.cardId,'tg_fueguchi');assert.equal(s.players[0].hero.weapon2.cardId,'tg_fueguchi_two');
+ const copy=JSON.parse(JSON.stringify(s));for(const x of [s,copy])applyAction(x,{type:'choose',player:0,index:1});assert.deepEqual(copy,s);assert.equal(s.players[0].hero.weapon2.cardId,'tg_ixa');assert.equal(s.players[0].tokyo.quinquesEquipped,3);
+});
+test('Mado can equip identical Quinques and a breaking first weapon promotes the second without bonus growth',()=>{
+ const s=game('investigator');play(s,'fueguchi_two');play(s,'fueguchi_two');const h=s.players[0].hero;assert.ok(hasKeyword(h,'Twin Strike'));h.weapon.durability=1;const enemy=put(s,1,'nishiki');enemy.attack=0;enemy.health=1;
+ attack(s,h,enemy);assert.equal(h.weapon2,null);assert.equal(h.weapon.attack,4);assert.equal(h.weapon.durability,4);assert.equal(h.attack,4);attack(s,h,s.players[1].hero);assert.equal(h.weapon.durability,3);assert.ok(!getLegalActions(s).some(a=>a.type==='attack'&&a.attacker===h.uid));
+ round(s);assert.equal(hasKeyword(h,'Twin Strike'),false);attack(s,h,s.players[1].hero);assert.ok(!getLegalActions(s).some(a=>a.type==='attack'&&a.attacker===h.uid));
+});
+test('secondary Quinques use their own targeting, damage triggers, passive reduction and last-hit repair',()=>{
+ const s=game('investigator');play(s,'doujima');play(s,'yukimura');const h=s.players[0].hero,hidden=put(s,1,'assassin');hidden.health=12;
+ assert.ok(!getLegalActions(s).some(a=>a.type==='attack'&&a.defender===hidden.uid));attack(s,h,s.players[1].hero);assert.ok(getLegalActions(s).some(a=>a.type==='attack'&&a.defender===hidden.uid));attack(s,h,hidden);assert.equal(hidden.health,10);
+ const n=game('investigator');play(n,'doujima');play(n,'narukami');const min=put(n,1,'yomo');attack(n,n.players[0].hero,n.players[1].hero);assert.equal(min.health,5);attack(n,n.players[0].hero,n.players[1].hero);assert.equal(min.health,2);
+ const i=game('investigator');play(i,'doujima');play(i,'ixa');i.players[0].hero.armor=0;hit(i,i.players[0].hero,5);assert.equal(i.players[0].hero.health,27);
+ const j=game('investigator');play(j,'doujima');play(j,'jason');const target=put(j,1,'nishiki');target.attack=0;j.players[0].hero.weapon2.durability=1;attack(j,j.players[0].hero,j.players[1].hero);attack(j,j.players[0].hero,target);assert.equal(j.players[0].hero.weapon2.durability,1);
+});
+test('Mado Arsenal discovers into an empty slot, repairs both when full, and Maintenance caps each weapon',()=>{
+ const s=game('investigator');play(s,'fueguchi');s.players[0].deck=s.players[0].deck.filter(c=>c.cardId==='tg_fueguchi_two');power(s);assert.equal(s.pending.options[0].cardId,'tg_fueguchi_two');applyAction(s,{type:'choose',player:0,index:0});
+ const inst=s.players[0].hand.find(c=>c.cardId==='tg_fueguchi_two');applyAction(s,getLegalActions(s).find(a=>a.type==='play'&&a.card===inst.uid));const h=s.players[0].hero;round(s);power(s);assert.equal(h.weapon.durability,6);assert.equal(h.weapon2.durability,5);
+ play(s,'quinque_maintenance');assert.equal(h.weapon.durability,6);assert.equal(h.weapon2.durability,5);h.weapon.durability=1;h.weapon2.durability=2;play(s,'quinque_maintenance');assert.equal(h.weapon.durability,4);assert.equal(h.weapon2.durability,4);
+});
+
+test('Mado ignores Taunt only when the next attacking Quinque is Jason',()=>{
+ for(const first of [true,false]){const s=game('investigator');play(s,first?'jason':'doujima');play(s,first?'doujima':'jason');const h=s.players[0].hero,t=put(s,1,'hinami');t.attack=0;t.health=t.maxHealth=20;const mayHitHero=()=>getLegalActions(s).some(a=>a.type==='attack'&&a.attacker===h.uid&&a.defender===s.players[1].hero.uid);assert.equal(mayHitHero(),first);attack(s,h,first?s.players[1].hero:t);assert.equal(mayHitHero(),!first);}
 });

@@ -3303,7 +3303,7 @@ export const EFFECT_OPS = {
     // Eclipse: while Sun and Moon are both held, neither loses Durability.
     if (hero.eclipse) return;
     if (w.cooldown) w.cooldownUntilTurn = (state.players[ctx.controller].turnsTaken ?? 0) + w.cooldown + 1;
-    if(slot===1&&tgWearWeapon(state,hero))return;
+    if(tgWearWeapon(state,hero,slot))return;
     w.durability -= 1;
     // Witches: Ward of Binding (a Trap) saves a Wand that would break.
     if (w.durability <= 0 && w.wand) {

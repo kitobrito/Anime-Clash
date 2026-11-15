@@ -11,7 +11,7 @@ export const STRAW_HATS = 'One Piece';
 export const TOKYO_GHOUL = 'Tokyo Ghoul';
 export const LEGENDARY = new Set(allCards().filter(c => c.legendary).map(c => c.id));
 export const copyLimit = id => getCard(id).legendary ? 1 : 2;
-const collectible = c => !c.token && !c.heroSpell;
+const collectible = c => !c.token && !c.heroSpell && !c.investigatorHero;
 export const FACTION_POOLS = { [LEAF]: NARUTO_CARDS.filter(collectible).map(c => c.id), [STRAW_HATS]: ONE_PIECE_CARDS.filter(collectible).map(c => c.id) };
 export const FACTION_LISTS = { [LEAF]: [...NARUTO_STARTERS['Team 7 Combo']], [STRAW_HATS]: ONE_PIECE_CARDS.filter(collectible).slice(0,30).map(c => c.id) };
 FACTION_POOLS[TOKYO_GHOUL]=TOKYO_GHOUL_CARDS.filter(collectible).map(c=>c.id);

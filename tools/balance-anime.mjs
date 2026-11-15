@@ -12,8 +12,7 @@ const seedOffset=Number(flags['seed-offset']??0);
 const out=path.resolve(flags.out??'dist/balance-2026-11-14');fs.mkdirSync(out,{recursive:true});
 const profiles=Object.entries(ANIME_PRESETS).flatMap(([faction,decks])=>Object.entries(decks).map(([name,deck],i)=>({id:`${faction}:${i}`,name,faction,deck:[...deck],hero:faction==='Tokyo Ghoul'?(i===2?'arima':'kaneki'):null})));
 const extra=[];for(const p of profiles.filter(p=>p.faction==='Tokyo Ghoul'))for(const hero of p.hero==='arima'?['amon','akira','investigator']:['touka','tsukiyama','nishiki']){
- const deck=p.deck.map(c=>c==='tg_arima'&&hero!=='investigator'?'tg_'+hero:c);
- if(hero==='investigator')deck[deck.indexOf('tg_arima')]='tg_fueguchi';
+ const deck=[...p.deck];
  extra.push({...p,id:p.id+':'+hero,name:p.name+' / '+hero,hero,deck});
 }
 function seedOf(n){let x=(0xA11CE+n*0x9e3779b9)|0;x=Math.imul(x^(x>>>16),0x85ebca6b);return (x^(x>>>13))|0;}

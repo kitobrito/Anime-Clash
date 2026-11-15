@@ -462,5 +462,29 @@
   "quinque_arsenal": {
     "source": "2-Photo-2.jpg",
     "editing": "format conversion only"
+  },
+  "mado": {
+    "source": "user-supplied anime screenshot",
+    "sourceFile": "1-Photo-1.jpg",
+    "sourceSha256": "8f99cc30f26dcc87ff64b40e82b1ce0ddc160a490e70ed2c5f0476a0bbf9f68a",
+    "sourceSize": [
+      360,
+      360
+    ],
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": "Display P3"
+  },
+  "fueguchi_two": {
+    "source": "user-supplied anime screenshot",
+    "sourceFile": "2-Photo-2.jpg",
+    "sourceSha256": "291bea418eefa88646b26e9be077f69b5bb5e1b9679ad797827dcbd59d56d665",
+    "sourceSize": [
+      638,
+      638
+    ],
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null,
+    "colorProfile": "Display P3"
   }
 }
