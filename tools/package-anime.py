@@ -21,7 +21,7 @@ for name in [
 source = runtime + [ROOT / name for name in [
     'package.json', 'package-lock.json', 'Readme.md', 'ITCH.md', 'BOARD-ANIMATION.md',
     'tools/serve-anime.mjs', 'tools/package-anime.py',
-    'tools/test-anime-abilities-browser.mjs', 'tools/test-deck-migration-browser.mjs', 'tools/test-anime-ui-browser.mjs', 'tools/test-library-and-glossary.mjs', 'tools/test-realms-ui.mjs', 'tools/test-hero-picker.mjs', 'tools/test-hero-picker-browser.mjs', 'tools/test-weapon-frame-browser.mjs', 'tools/test-weapon-frames.mjs', 'tools/test-naruto.mjs', 'tools/test-naruto-browser.mjs', 'tools/test-one-piece.mjs', 'tools/test-boards.mjs', 'tools/test-tokyo-ghoul.mjs', 'tools/test-tokyo-ghoul-browser.mjs', 'tools/test-boards-browser.mjs', 'tools/record-board-video.mjs',
+    'tools/test-signature-quinques-browser.mjs', 'tools/test-anime-abilities-browser.mjs', 'tools/test-deck-migration-browser.mjs', 'tools/test-anime-ui-browser.mjs', 'tools/test-library-and-glossary.mjs', 'tools/test-realms-ui.mjs', 'tools/test-hero-picker.mjs', 'tools/test-hero-picker-browser.mjs', 'tools/test-weapon-frame-browser.mjs', 'tools/test-weapon-frames.mjs', 'tools/test-naruto.mjs', 'tools/test-naruto-browser.mjs', 'tools/test-one-piece.mjs', 'tools/test-boards.mjs', 'tools/test-tokyo-ghoul.mjs', 'tools/test-tokyo-ghoul-browser.mjs', 'tools/test-boards-browser.mjs', 'tools/record-board-video.mjs',
 ]]
 for name, files, prefix in [
     ('Anime-Clash-itch.zip', runtime, ''),

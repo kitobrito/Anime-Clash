@@ -20,6 +20,7 @@ export const ANIME_TERMS={...KEYWORD_TEXT,
  Kakuja:'A once-per-match Ghoul Hero evolution. Spend 4 Cannibalism stacks and 4 Mana, choose a second Kagune type, gain 6 Armor, improve the Kagune by +2 Attack and +3 maximum Durability, refill it, and give it Lifesteal.',
  Kagune:'A Ghoul Hero’s starting weapon. Each Hero attack uses 1 Durability. At zero Durability it remains equipped but is exhausted; repair it to attack again. Ghouls cannot replace a Kagune with a Quinque.',
  Quinque:'An Investigator Hero weapon. Each attack uses 1 Durability; it breaks at zero. Kureo Mado can hold two and attack once with each per turn. Other Investigators hold one.',
+ 'Chimera Quinque':'Amatsu combines two forms. It starts in Whip form, granting 2 Armor after each Hero attack. When Akira is your selected Hero, each attack switches it to the other form. Piercing attacks deal +2 damage to minions and grant no Armor. Other Investigators stay in Whip form. Switching is free, does not grant an extra attack, and preserves Attack bonuses and remaining/maximum Durability; the attack still uses 1 Durability.',
  Durability:'The number of attacks a weapon can make before breaking or becoming exhausted. Only the weapon used for an attack loses 1 Durability. Repair and other effects can change this value.',
  Armor:'Absorbs damage before your Hero loses Health. Armor stays until damage or another effect removes it.',
  'Devil Fruit User':'A character with a permanent Devil Fruit power and drawback. Each character can have only one Devil Fruit; transformations preserve that identity.',
@@ -33,7 +34,7 @@ export const ANIME_TERMS={...KEYWORD_TEXT,
 export function cardKeywords(card,liveKeywords=[]){
  const terms=new Set([...(card.keywords??[]),...liveKeywords]);
  if(card.quickPlay)terms.add('Quick Play');if(card.heroSpell)terms.add('Hero Spell');if(card.type==='trap')terms.add('Trap');
- if(['Ghoul','Half-Ghoul'].includes(card.species)){terms.add('Hunger');terms.add('Feed');}if(card.jutsu)terms.add('Jutsu');if(card.weather)terms.add('Weather');if(card.quinque)terms.add('Quinque');if(card.kagune)terms.add('Kagune');if(card.type==='weapon')terms.add('Durability');
+ if(['Ghoul','Half-Ghoul'].includes(card.species)){terms.add('Hunger');terms.add('Feed');}if(card.jutsu)terms.add('Jutsu');if(card.weather)terms.add('Weather');if(card.quinque)terms.add('Quinque');if(card.chimera)terms.add('Chimera Quinque');if(card.kagune)terms.add('Kagune');if(card.type==='weapon')terms.add('Durability');
  for(const term of Object.keys(ANIME_TERMS)){
   const escaped=term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');const label=['Arrival','Exit','Summon'].includes(term);
   if(new RegExp(label?`\\b${escaped}:`:`(?<![\\p{L}])${escaped}s?(?![\\p{L}])`,'iu').test(card.text??''))terms.add(term);

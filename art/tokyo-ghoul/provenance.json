@@ -486,5 +486,27 @@
     "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
     "sharedWith": null,
     "colorProfile": "Display P3"
+  },
+  "amatsu": {
+    "source": "user-supplied Amatsu artwork",
+    "sourceFile": "2-Photo-2.jpg",
+    "sourceSha256": "1c7319dc9f287848af4959ae12ebc8570fdfbbf628e42c57c6484685d6d3e1e4",
+    "sourceSize": [
+      1280,
+      1024
+    ],
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null
+  },
+  "amatsu_piercing": {
+    "source": "user-supplied Amatsu artwork",
+    "sourceFile": "3-Photo-3.jpg",
+    "sourceSha256": "5253de3808a428403afadebe4ebe8c103b65304bb94e4e136f4cae64df050b82",
+    "sourceSize": [
+      1164,
+      1280
+    ],
+    "conversion": "lossless WebP; original dimensions, pixels and embedded color profile preserved",
+    "sharedWith": null
   }
 }

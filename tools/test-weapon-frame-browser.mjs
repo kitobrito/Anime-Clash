@@ -9,8 +9,8 @@ try{
  for(const mobile of [false,true]){
   const context=await browser.newContext({viewport:mobile?{width:390,height:844}:{width:1440,height:1000},hasTouch:mobile,isMobile:mobile});const p=await context.newPage();const errors=[];p.on('pageerror',e=>errors.push(e.message));
   if(mode==='anime'){
-   await p.goto(base+'/#collection');await p.locator('[data-faction="Tokyo Ghoul"]').click();await p.locator('[data-filter="weapon"]').click();await p.waitForFunction(()=>document.querySelectorAll('.card-grid .card').length===7);assert.equal(await p.locator('.card-grid .card').count(),7);
-   for(const id of ['tg_narukami','tg_ixa','tg_jason','tg_doujima','tg_fueguchi','tg_fueguchi_two','tg_yukimura']){
+   await p.goto(base+'/#collection');await p.locator('[data-faction="Tokyo Ghoul"]').click();await p.locator('[data-filter="weapon"]').click();await p.waitForFunction(()=>document.querySelectorAll('.card-grid .card').length===8);assert.equal(await p.locator('.card-grid .card').count(),8);
+   for(const id of ['tg_narukami','tg_ixa','tg_jason','tg_doujima','tg_fueguchi','tg_fueguchi_two','tg_yukimura','tg_amatsu']){
     await p.locator(`[data-zoom="${id}"]`).click();await p.waitForTimeout(200);const frame=p.locator('.framed-inspect .realm-frame');assert.match(await frame.getAttribute('src'),/weapon-universal.webp$/);
     const layout=await p.locator('.framed-inspect .realm-card').evaluate(e=>{const box=e.getBoundingClientRect(),rel=s=>{const r=e.querySelector(s).getBoundingClientRect();return{x:(r.x+r.width/2-box.x)/box.width,y:(r.y+r.height/2-box.y)/box.height};};const text=e.querySelector('.rules-parchment p'),name=e.querySelector('h3 .card-name-text');return{cost:rel('.mana-orb'),attack:rel('.card-atk'),durability:rel('.card-hp'),rulesFit:text.scrollHeight<=text.parentElement.clientHeight+2,nameFit:name.scrollWidth<=name.parentElement.clientWidth+2};});
     assert.ok(Math.abs(layout.cost.x-.148)<.01&&Math.abs(layout.cost.y-.1005)<.01);assert.ok(layout.attack.y>.88&&layout.durability.y>.88);assert.ok(layout.rulesFit);assert.ok(layout.nameFit);

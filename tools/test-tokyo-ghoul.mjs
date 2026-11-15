@@ -26,8 +26,8 @@ function feed(s,a,d){const action=getLegalActions(s).find(x=>x.type==='feed'&&x.
 function hit(s,m,n){dealDamage(s,null,m.uid,n);flush(s);}
 function power(s){const a=getLegalActions(s).find(x=>x.type==='heroSpell');assert.ok(a);applyAction(s,a);}
 
-test('Tokyo Ghoul has 43 playable collectibles, separate Heroes and 10 Legendaries, complete rules and artwork',()=>{
- const cards=FACTION_POOLS[F].map(getCard);assert.equal(cards.length,43);assert.deepEqual(['minion','hero','spell','trap','weapon'].map(t=>cards.filter(c=>c.type===t).length),[21,0,10,5,7]);assert.equal(cards.filter(c=>c.legendary).length,10);assert.deepEqual(validateAllCards().filter(c=>c.errors.length||c.incomplete.length),[]);for(const c of cards)assert.ok(fs.existsSync(new URL('../'+c.image,import.meta.url)),c.name);for(const d of Object.values(ANIME_PRESETS[F]))assert.equal(singleDeckProblem(F,d),null);
+test('Tokyo Ghoul has 44 playable collectibles, separate Heroes and 10 Legendaries, complete rules and artwork',()=>{
+ const cards=FACTION_POOLS[F].map(getCard);assert.equal(cards.length,44);assert.deepEqual(['minion','hero','spell','trap','weapon'].map(t=>cards.filter(c=>c.type===t).length),[21,0,10,5,8]);assert.equal(cards.filter(c=>c.legendary).length,10);assert.deepEqual(validateAllCards().filter(c=>c.errors.length||c.incomplete.length),[]);for(const c of cards)assert.ok(fs.existsSync(new URL('../'+c.image,import.meta.url)),c.name);for(const d of Object.values(ANIME_PRESETS[F]))assert.equal(singleDeckProblem(F,d),null);
 });
 test('all eight Hero selections initialize their armor, equipment and Hero Spell',()=>{
  for(const [key,v] of Object.entries(TG_HEROES)){const s=game(key),p=s.players[0];assert.equal(p.hero.health,30);assert.equal(p.hero.armor,v.armor+(v.kagune==='koukaku'?2:0));assert.equal(p.heroSpells[0].cardId,v.spell);assert.equal(p.tokyo.path,v.path);if(v.kagune){assert.equal(p.hero.weapon.cardId,id(v.kagune));assert.equal(p.hero.weapon.durability,TG_KAGUNES[v.kagune].durability);}else assert.ok(!p.hero.weapon);}
@@ -199,4 +199,38 @@ test('Mado Arsenal discovers into an empty slot, repairs both when full, and Mai
 
 test('Mado ignores Taunt only when the next attacking Quinque is Jason',()=>{
  for(const first of [true,false]){const s=game('investigator');play(s,first?'jason':'doujima');play(s,first?'doujima':'jason');const h=s.players[0].hero,t=put(s,1,'hinami');t.attack=0;t.health=t.maxHealth=20;const mayHitHero=()=>getLegalActions(s).some(a=>a.type==='attack'&&a.attacker===h.uid&&a.defender===s.players[1].hero.uid);assert.equal(mayHitHero(),first);attack(s,h,first?s.players[1].hero:t);assert.equal(mayHitHero(),!first);}
+});
+
+test('Amon equips a 4/4 Doujima, gains 3 Armor against both Ghoul species, and stacks his Ghoul Hunter damage',()=>{
+ for(const name of ['yomo','amon_ghoul']){
+  const s=game('amon');play(s,'doujima');const h=s.players[0].hero,t=put(s,1,name);t.attack=0;t.health=t.maxHealth=20;
+  assert.deepEqual([h.weapon.attack,h.weapon.durability,h.weapon.maxDurability],[4,4,4]);const armor=h.armor;attack(s,h,t);assert.equal(t.health,15);assert.equal(h.armor,armor+3);assert.equal(h.weapon.durability,3);
+ }
+ const s=game('amon','akira');s.players[1].hero.armor=0;play(s,'doujima');const h=s.players[0].hero,armor=h.armor;attack(s,h,s.players[1].hero);assert.equal(s.players[1].hero.health,26);assert.equal(h.armor,armor);
+});
+test('Doujima specialist bonuses belong only to Amon; other Investigators keep 3/3 and the original 2 Armor',()=>{
+ for(const hero of ['arima','akira','investigator']){
+  const s=game(hero);play(s,'doujima');const h=s.players[0].hero,t=put(s,1,'yomo');t.attack=0;const armor=h.armor;assert.deepEqual([h.weapon.attack,h.weapon.maxDurability],[3,3]);attack(s,h,t);assert.equal(t.health,2);assert.equal(h.armor,armor+2);
+ }
+});
+test('Akira discounts Amatsu once, alternates Whip and Piercing attacks, and preserves wear, buffs and equip count',()=>{
+ const s=game('akira');play(s,'amatsu');const p=s.players[0],h=p.hero;assert.equal(p.mana.current,8);assert.equal(p.tokyo.quinquesEquipped,1);const w=h.weapon;w.attack++;h.attack++;const armor=h.armor;
+ attack(s,h,s.players[1].hero);assert.equal(s.players[1].hero.health,26);assert.equal(h.armor,armor+2);assert.equal(w.cardId,'tg_amatsu_piercing');assert.equal(w.name,'Amatsu — Piercing');assert.deepEqual([w.attack,w.durability,w.maxDurability],[4,3,4]);assert.ok(!getLegalActions(s).some(a=>a.type==='attack'&&a.attacker===h.uid));
+ round(s);const t=put(s,1,'yomo');t.attack=0;t.health=t.maxHealth=20;attack(s,h,t);assert.equal(t.health,14);assert.equal(h.armor,armor+2);assert.equal(w.cardId,'tg_amatsu');assert.equal(w.durability,2);assert.equal(p.tokyo.quinquesEquipped,1);
+ round(s);attack(s,h,s.players[1].hero);assert.equal(h.armor,armor+4);assert.equal(w.cardId,'tg_amatsu_piercing');assert.equal(w.durability,1);
+ round(s);attack(s,h,s.players[1].hero);assert.equal(s.players[1].hero.health,18);assert.equal(h.weapon,null);assert.equal(h.attack,0);assert.equal(h.armor,armor+4);
+ play(s,'amatsu');assert.equal(p.mana.current,6);assert.equal(h.weapon.cardId,'tg_amatsu');assert.deepEqual([h.weapon.attack,h.weapon.durability],[3,4]);
+});
+test('Amatsu form, Durability and effects survive a saved match and repair without resetting or re-equipping',()=>{
+ let s=game('akira');play(s,'amatsu');attack(s,s.players[0].hero,s.players[1].hero);s=JSON.parse(JSON.stringify(s));let h=s.players[0].hero;assert.equal(h.weapon.cardId,'tg_amatsu_piercing');play(s,'quinque_maintenance');assert.equal(h.weapon.durability,4);assert.equal(h.weapon.cardId,'tg_amatsu_piercing');round(s);const t=put(s,1,'civilian');t.health=t.maxHealth=10;attack(s,h,t);assert.equal(t.health,5);assert.equal(h.weapon.cardId,'tg_amatsu');assert.equal(h.weapon.durability,3);
+});
+test('Amatsu keeps Whip form for other Heroes and wears only its own slot under Kureo Mado',()=>{
+ for(const hero of ['amon','arima','investigator']){
+  const s=game(hero,'akira');s.players[1].hero.armor=0;if(hero==='investigator')play(s,'doujima');play(s,'amatsu');const h=s.players[0].hero,w=hero==='investigator'?h.weapon2:h.weapon,armor=h.armor;
+  if(hero==='investigator')attack(s,h,s.players[1].hero);attack(s,h,s.players[1].hero);assert.equal(w.cardId,'tg_amatsu');assert.equal(w.durability,3);assert.equal(h.armor,armor+2);if(hero==='investigator')assert.equal(h.weapon.durability,2);
+ }
+});
+test('Amatsu uses both supplied images; Piercing is an alternate form outside decks and the Discover pool',()=>{
+ const c=getCard('tg_amatsu'),form=getCard('tg_amatsu_piercing');assert.ok(FACTION_POOLS[F].includes(c.id));assert.ok(!FACTION_POOLS[F].includes(form.id));assert.deepEqual(c.formCards,[c.id,form.id]);assert.ok(form.token);assert.notEqual(c.image,form.image);assert.ok(fs.existsSync(new URL('../'+form.image,import.meta.url)));
+ const d=[...deck('akira')];d[0]=form.id;assert.ok(singleDeckProblem(F,d));assert.ok(ANIME_PRESETS[F]['CCG Quinque Hunter'].includes(c.id));
 });

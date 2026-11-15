@@ -11,7 +11,7 @@ A separate anime card game derived from [Shattered Realms TCG](https://github.co
 
 ## Included
 
-Three separate factions with three editable 30-card starter decks each (Naruto: 46 playable collectibles; One Piece: 45; Tokyo Ghoul: 43):
+Three separate factions with three editable 30-card starter decks each (Naruto: 46 playable collectibles; One Piece: 45; Tokyo Ghoul: 44):
 
 | Faction | Minions | Spells | Legendary cards | Hero Spell |
 | --- | --- | --- | --- | --- |
@@ -19,7 +19,7 @@ Three separate factions with three editable 30-card starter decks each (Naruto: 
 | One Piece | 22 | 23 | 11 | Nakama! |
 | Tokyo Ghoul | 21 | 10 | 10 | Predatory Instinct / Investigator variants |
 
-Tokyo Ghoul also includes 5 traps and 7 Quinque weapons, for 43 playable collectibles. All eight Heroes are selected separately from the deck. Legacy Hero card definitions remain only for migrating older saves.
+Tokyo Ghoul also includes 5 traps and 8 Quinque weapons, for 44 playable collectibles. All eight Heroes are selected separately from the deck. Legacy Hero card definitions remain only for migrating older saves.
 
 A deck contains exactly 30 cards from one faction, at most two of an ordinary card and one of each Legendary. Tokens, Gear forms, generated neutral potions, and Hero Spells cannot be added to decks. Fusion cards, charging, and fusion actions are absent from the active engine.
 
@@ -159,8 +159,18 @@ Enlarged cards show complete keyword descriptions beside the card on desktop, wi
 
 The CCG starter remains 30 playable cards and includes both Fueguchi weapons. Uploaded Mado and Fueguchi Two images retain their original pixels, dimensions and embedded color profiles in lossless WebP. Custom saved decks are preserved.
 
-Verification: `npm test`; `PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs node tools/test-anime-ui-browser.mjs` against port 4174. This exercises saved decks/Heroes, full 30-card matches, collection dragging, keyword browsing/swipes, actual Realms hand gestures and minion insertion, both Mado weapons, attacks and replacement choices. `UI_MODE=desktop` or `mobile` selects one viewport; `MENU_BROWSER=webkit` uses Safari’s engine. `tools/test-weapon-frame-browser.mjs` checks all seven Quinque frames and text alignment.
+Verification: `npm test`; `PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs node tools/test-anime-ui-browser.mjs` against port 4174. This exercises saved decks/Heroes, full 30-card matches, collection dragging, keyword browsing/swipes, actual Realms hand gestures and minion insertion, both Mado weapons, attacks and replacement choices. `UI_MODE=desktop` or `mobile` selects one viewport; `MENU_BROWSER=webkit` uses Safari’s engine. `tools/test-weapon-frame-browser.mjs` checks all eight collectible Quinque frames and text alignment.
 
 Safari uses the original Realms touch-safe card visuals to avoid a WebKit hover/lift feedback crash while a docked hand opens. Fan layout, docking, reading, drag-to-play, targeting and insertion use the original controller unchanged. The uploaded artwork retains its original pixels and color profiles; no lower-quality battle copies are needed.
 
 Starter decks load cards separately from Hero selection. When a starter expects the other Hero path, its picker asks the player to finish choosing that path instead of silently replacing their Hero. Saved named decks restore both their cards and their exact Hero choice.
+
+### Amon and Akira signature Quinques
+
+Amon equips **Doujima 1/2** as a 4-Attack, 4-Durability weapon (+1/+1). Its attacks against Ghouls or Half-Ghouls grant 3 Armor instead of 2, and his existing Ghoul Hunter damage bonus still applies. Other Investigators retain Doujima’s 3/3 stats and 2-Armor effect. The Hero picker and weapon rules explain these bonuses.
+
+**Amatsu** is Akira’s Chimera Quinque: 4 Mana, 3 Attack, 4 Durability. It begins in **Whip** form, gaining 2 Armor after each Hero attack. Only Akira switches it after every attack: **Piercing** deals +2 damage against minions, grants no Armor, then switches back to Whip. Other Investigators keep Whip form. The same equipped weapon preserves buffs and remaining/maximum Durability, pays its normal 1 Durability per attack, and gains no extra attack from switching. A new copy starts in Whip form. Akira’s existing first-Quinque discount applies.
+
+Both supplied pictures are preserved in lossless WebP with their original dimensions, pixels and color profiles. The equipped medallion and card reader display the current form; the reader’s form buttons preview either picture and effect. Piercing is an alternate form outside the 30-card deck and collection pool. The CCG starter includes Amatsu; custom decks are unchanged.
+
+Verification: `npm test` and `tools/test-signature-quinques-browser.mjs` cover Amon’s bonuses, Akira’s discounted equip, both attack effects, form art/browsing, durability/buff preservation, save/restore, repairs, breaking/replacing, and Mado’s second slot.

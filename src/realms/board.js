@@ -311,7 +311,7 @@ function weaponHTML(pl) {
     const slot = i + 1;
     const atk = slot === 2 ? Math.max(0, base - (h.weapon?.attack ?? 0) + w.attack) : base;
     const art = artOf(getCard(w.cardId));
-    const tip = `${dual ? `Weapon ${slot === 1 ? 'I' : 'II'}: ` : ''}${w.name}. Hits for ${atk}, ${w.durability} Durability left (each attack uses 1).${dual && h.weapon2 ? ` Your next attack uses Weapon ${nextSlot === 1 ? 'I' : 'II'}.` : ''}`;
+    const tip = `${dual ? `Weapon ${slot === 1 ? 'I' : 'II'}: ` : ''}${w.name}. Hits for ${atk}${w.cardId==='tg_amatsu_piercing'?' (+2 against minions)':''}, ${w.durability} Durability left (each attack uses 1).${dual && h.weapon2 ? ` Your next attack uses Weapon ${nextSlot === 1 ? 'I' : 'II'}.` : ''}`;
     return `<div class="weapon-medal slot-${slot} ${h.weapon2 && nextSlot === slot ? 'next' : ''}" data-preview="${w.cardId}" title="${esc(tip)}">
       ${art ? `<i class="wm-art" style="background-image:url('${art}')"></i>` : '<i class="wm-art wm-none">⚔️</i>'}
       <img class="wm-frame" src="art/ui/weapon-medallion.png" alt="" draggable="false">
