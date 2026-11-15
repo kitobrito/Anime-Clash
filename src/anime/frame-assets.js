@@ -463,8 +463,8 @@ export const WEAPON_FRAME = {
 };
 CARD_FRAMES.weapon=WEAPON_FRAME;
 for(const key of ['basic-weapon','naruto-weapon','one-piece-weapon'])CARD_FRAMES[key]=WEAPON_FRAME;
-export const MINION_FRAME={src:'art/frames-anime/minion-types.webp',art:[17.0,9.2,66.4,44.8],name:[20,56.1,61,4.8],rules:[18.5,66.7,63,18.5],mana:[6,4.8,20.8,14.6],attack:[6,83.9,20,12.6],health:[78.5,84,17.9,12.2],type:[34,88,33,7.4]};
-export const TG_LEGENDARY_MINION_FRAME={src:'art/frames-anime/tokyo-ghoul-legendary-minion-types.webp',art:[16.4,9.5,66.9,42.8],name:[20,54.7,62,4.8],rules:[21,68,59,15],mana:[4.8,3.5,20,14],attack:[7.2,82.8,20,13],health:[78.5,82.8,18,13],type:[33.5,86.3,34,7.8]};
+export const MINION_FRAME={src:'art/frames-anime/minion-types.webp',art:[17.0,9.2,66.4,44.8],name:[20,56.1,61,4.8],rules:[18.5,66.7,63,18.5],mana:[6,4.8,20.8,14.6],attack:[6,83.9,20,12.6],health:[78.5,84,17.9,12.2],type:[32.5,87.925,36,6.852]};
+export const TG_LEGENDARY_MINION_FRAME={src:'art/frames-anime/tokyo-ghoul-legendary-minion-types.webp',art:[16.4,9.5,66.9,42.8],name:[20,54.7,62,4.8],rules:[21,68,59,15],mana:[4.8,3.5,20,14],attack:[7.2,82.8,20,13],health:[78.5,82.8,18,13],type:[32.5,86.292,36,6.855]};
 CARD_FRAMES['basic-minion']=MINION_FRAME;
 CARD_FRAMES['tokyo-ghoul-minion']=TG_LEGENDARY_MINION_FRAME;
 export function frameFor(card){if(card.type==='minion'){if(!card.legendary)return MINION_FRAME;if(card.faction==='Tokyo Ghoul')return TG_LEGENDARY_MINION_FRAME;}if(card.type==='weapon'||card.weapon||card.wand)return WEAPON_FRAME;const type=card.frameType??(card.type==='trap'?'trap':card.type==='weapon'||card.weapon||card.wand?'weapon':card.type==='minion'?'minion':'spell');if(type==='weapon')return WEAPON_FRAME;const prefix=card.legendary?(card.faction==='One Piece'?'one-piece':card.faction==='Naruto'?'naruto':'basic'):'basic';return CARD_FRAMES[`${prefix}-${type}`];}
