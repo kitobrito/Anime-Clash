@@ -7,6 +7,7 @@ import {bigCardHTML,fitAllText,esc} from './shared.js';
 import {configureBoard} from './anime-data.js';
 import {actingPlayer} from '../engine/engine.js';
 import {findCharacter,allKeywords,effectiveAttack} from '../engine/core.js';
+import {capturePlacement,landPiece,settleCard,directStrike} from './card-motion.js';
 import {getCard} from '../engine/registry.js';
 import {cardKeywords} from '../anime/card-glossary.js';
 import {TG_HEROES} from '../cards/tokyo-ghoul.js';
@@ -35,7 +36,7 @@ function abilities(){
 }
 function initialize(){
  if(initialized)return;initialized=true;if(webkitHoverSafe||matchMedia('(hover:none)').matches)document.body.classList.add('touch-ui');
- drag.init({root,legal,canAct,canPlan:()=>!!api?.active()&&busy,act:a=>api.act(a),inspect:preview,deny:(_,reason)=>api.toast(reason==='turn'?'It is the rival’s turn.':'That action is unavailable. Check Mana, targets and board space.'),notMyTurn:()=>!!api?.active()&&actingPlayer(api.state())!==0});
+ drag.init({root,legal,canAct,canPlan:()=>!!api?.active()&&busy,act:(a,meta)=>api.act(a,meta),inspect:preview,deny:(_,reason)=>api.toast(reason==='turn'?'It is the rival’s turn.':'That action is unavailable. Check Mana, targets and board space.'),notMyTurn:()=>!!api?.active()&&actingPlayer(api.state())!==0});
  document.addEventListener('pointerdown',e=>{if(api?.active())document.body.classList.toggle('touch-ui',e.pointerType==='touch'||webkitHoverSafe);},true);
  document.addEventListener('pointerover',e=>{if(!api?.active()||e.pointerType==='touch'||drag.busy())return;const target=e.target.closest('[data-preview]');if(target&&!target.closest('.my-hand,.overlay,.reaction')){clearTimeout(previewTimer);previewTimer=setTimeout(()=>preview(target),280);}});
  document.addEventListener('pointerout',e=>{if(!api?.active()||e.pointerType==='touch')return;const target=e.target.closest('[data-preview]');if(target&&!target.contains(e.relatedTarget)&&!e.relatedTarget?.closest?.('#preview')&&!drag.busy())closeBattlePreview();});
@@ -82,12 +83,28 @@ export function renderRealmsBattle(options){
  };
  root().ondblclick=e=>{if(drag.recentlyAimed())return;const target=e.target.closest('[data-preview]');if(target)api.inspect(target.dataset.preview,Number(target.dataset.char)||null);};
 }
-export async function beforeBattleAction(s,a){
+export async function beforeBattleAction(s,a,meta={}){
+ if(a.type==='play')meta.placement??=capturePlacement(meta.from??root().querySelector(`[data-hand="${a.card}"]`));
  if(a.type==='endTurn'||a.type==='mulligan')undo=[];else if(a.player===0&&!s.pending)undo.push(JSON.stringify(s));
- drag.cancel();setHandOpen(false,root(),{force:true});closeBattlePreview();if(a.type!=='attack')return;busy=true;
- try{const from=root().querySelector(`[data-char="${a.attacker}"]`),to=root().querySelector(`[data-char="${a.defender}"]`),power=effectiveAttack(findCharacter(s,a.attacker)),offset=await fx.lunge(from,to,{power,table:root().querySelector('.arena')});if(from&&offset)await fx.returnFromLunge(from,offset);}finally{busy=false;}
+ drag.cancel();setHandOpen(false,root(),{force:true});closeBattlePreview();
+ if(a.type==='play'&&meta.placement){
+  const inst=s.players[a.player].hand.find(c=>c.uid===a.card);
+  if(inst&&getCard(inst.cardId).type!=='minion'){
+   busy=true;
+   try{await settleCard(meta.placement);}catch(error){console.warn('Card animation skipped.',error);}finally{busy=false;}
+  }
+ }
+ if(a.type!=='attack')return;
+ busy=true;sound.play('attack');
+ try{
+  const from=root().querySelector(`[data-char="${a.attacker}"]`),to=root().querySelector(`[data-char="${a.defender}"]`),power=effectiveAttack(findCharacter(s,a.attacker));
+  if(meta.directAttack){await directStrike(from,to,meta.attackDrag,{weight:power,table:root().querySelector('.arena')});return;}
+  const offset=await fx.lunge(from,to,{power,table:root().querySelector('.arena')});
+  if(from&&offset)await fx.returnFromLunge(from,offset);
+ }catch(error){console.warn('Attack animation skipped.',error);}finally{busy=false;}
+
 }
-export function afterBattleAction(before,s,a){
+export function afterBattleAction(before,s,a,meta={}){
  const stats=s.uiStats??={heroDamage:[0,0],kills:[0,0],cardsPlayed:[0,0],healing:[0,0]};
  for(let p=0;p<2;p++){const old=before.players[p],now=s.players[p],lost=old.hero.health+old.hero.armor-now.hero.health-now.hero.armor;stats.heroDamage[1-p]+=Math.max(0,lost);stats.healing[p]+=Math.max(0,now.hero.health-old.hero.health);stats.kills[1-p]+=old.board.filter(m=>!now.board.some(n=>n.uid===m.uid)).length;}
  if(a.type==='play'){stats.cardsPlayed[a.player]++;const inst=before.players[a.player].hand.find(c=>c.uid===a.card);if(inst)(s.uiHistory??=[]).push({mine:a.player===0,cardId:inst.cardId,text:getCard(inst.cardId).name});}
@@ -98,11 +115,11 @@ export function afterBattleAction(before,s,a){
   const rect=el.getBoundingClientRect();oldRects.set(c.uid,rect);
   if(c.kind==='minion'&&!s.players.some(p=>p.board.some(m=>m.uid===c.uid))&&s.players[c.controller].graveyard.some(g=>g.uid===c.uid))departed.push({clone:el.cloneNode(true),rect});
  }
- return ()=>{
-  if(!api?.active())return;
+ return async()=>{
+  if(!api?.active())return;busy=true;const jobs=[];let placed=false;try{
   for(const pl of s.players)for(const c of characters(pl)){
    const old=before.players.flatMap(characters).find(m=>m.uid===c.uid),el=root().querySelector(`[data-char="${c.uid}"]`);if(!el)continue;const rect=el.getBoundingClientRect();
-   if(!old&&c.kind==='minion'){fx.burst(rect,'summon');continue;}
+   if(!old&&c.kind==='minion'){const inst=a.type==='play'&&before.players[a.player].hand.find(x=>x.uid===a.card),placement=!placed&&inst?.cardId===c.cardId&&c.controller===a.player?meta.placement:null;if(placement)placed=true;jobs.push(landPiece(el,placement,{weight:getCard(c.cardId).cost,color:fx.factionColor(pl.factions[0]),table:root().querySelector('.arena'),onImpact:()=>sound.play('minionLand')}));continue;}
    if(!old)continue;
    const damage=old.health+(old.armor??0)-c.health-(c.armor??0);
    if(damage>0){fx.floater(rect,`−${damage}`,'damage');fx.hitFx(rect,pl.factions[0],damage,oldRects.get(a.attacker));}
@@ -111,6 +128,8 @@ export function afterBattleAction(before,s,a){
   // A detached copy of the fallen minion shatters away (Shattered Realms does the same; an on-screen
   // copy was never removed and left the dead minion frozen on the board).
   for(const d of departed)fx.shatterCard(d.clone,d.rect,null,'away');
+  await Promise.all(jobs);
+  }catch(error){console.warn('Battle animation skipped.',error);}finally{busy=false;}
  };
 }
 

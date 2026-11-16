@@ -3,14 +3,16 @@
   "commit": "87d6779470cc085be5f946fdb324e374586901ba",
   "files": {
     "board.js": "530f20dad84100acf1be86d7ef821a6610cd6dd8c7dbff87d1eec9c043f2508b",
-    "drag.js": "06829fc110f86c39131c509ec5809c9abd319f74922d5db531b52ff491e2cdd1",
+    "drag.js": "6db50bf4b32084c98d0aa3b269b27e91b4dcb32abac71899af6735531ee5062d",
     "fx.js": "63fa35986cf1032d5b2c57c9d9d843db64c06bb8572af7bfc1ef31b674f5734d",
     "shared.js": "7870e1171d503eba0cc463691a48eb415a79d0b31f511227b0b3eaf5e62a9cef",
     "sound.js": "547163185a6cec9bbb970a5d3d4f3aeac1e8db82cd7b3203807134e993081495",
     "frame-windows.js": "e0d86e055d8464bc7e3dd1ec28e8fc43c2583f1bd10245cd24d003bf9a94ccfe",
     "art-packs.js": "58eaa1697e9e2dd5ffbc65fc26b45e7229aeeb51b4bf1efb8d943785d6470df5",
     "art-packs-index.js": "1a4a1c57e0bc868f738553a12eba119e6ccf45af7ff5a41b0cb9d9f1714383e2",
-    "style.css": "c957d5c0bdfe64c2a799d900fabd6f6e98c203f3f50db69af65f34df979d2a1f"
+    "style.css": "c957d5c0bdfe64c2a799d900fabd6f6e98c203f3f50db69af65f34df979d2a1f",
+    "card-motion.js": "a6d83a4d8ca4dea9157375bb80d0314880a44b64ce1bc00d90ef87fb304d2897"
   },
-  "note": "drag.js includes the Shattered Realms two-row hand pick-up and close-preview-on-drag fix"
+  "note": "Shared direct-character attack dragging, accurate fast-release targeting and tactile card placement; Anime-only ability targeting is appended to drag.js.",
+  "interactionCommit": "99235d5e456ac112d1cb692bf9772f2d8acf2c7a"
 }
